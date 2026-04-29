@@ -34,12 +34,13 @@ export default function PlayerModal() {
   const progress = duration > 0 ? (currentPosition / duration) * 100 : 0;
 
   useEffect(() => {
+    progressAnim.stopAnimation();
     Animated.timing(progressAnim, {
       toValue: progress,
-      duration: 200,
+      duration: 250,
       useNativeDriver: false,
     }).start();
-  }, [progress]);
+  }, [progress, progressAnim]);
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
