@@ -1,20 +1,25 @@
 // Home screen - Challenge list (Expo Router)
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { ChallengeCard } from '../../components/challenge/ChallengeCard';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
-import { useMusicStore, selectChallenges, selectCurrentTrack, selectIsPlaying } from '../../stores/musicStore';
+import { useMusicStore } from '../../stores/musicStore';
+import { useShallow } from 'zustand/react/shallow';
 import { THEME } from '../../constants/theme';
 import type { MusicChallenge } from '../../types';
 
 export default function HomeScreen() {
-  const challenges = useMusicStore(selectChallenges);
-  const currentTrack = useMusicStore(selectCurrentTrack);
-  const isPlaying = useMusicStore(selectIsPlaying);
+  const { challenges, currentTrack, isPlaying } = useMusicStore(
+    useShallow((s) => ({
+      challenges: s.challenges,
+      currentTrack: s.currentTrack,
+      isPlaying: s.isPlaying,
+    }))
+  );
   const { play } = useMusicPlayer();
 
-  const handlePlayChallenge = async (challenge: MusicChallenge) => {
+  const handlePlayChallenge = useCallback(async (challenge: MusicChallenge) => {
     try {
       await play(challenge);
       // Navigate to player modal after starting playback
@@ -24,16 +29,16 @@ export default function HomeScreen() {
       const message = error instanceof Error ? error.message : 'Failed to start playback';
       Alert.alert('Playback Error', message);
     }
-  };
+  }, [play]);
 
-  const renderChallenge = ({ item }: { item: MusicChallenge }) => (
+  const renderChallenge = useCallback(({ item }: { item: MusicChallenge }) => (
     <ChallengeCard
       challenge={item}
       onPlay={handlePlayChallenge}
       isCurrentTrack={currentTrack?.id === item.id}
       isPlaying={isPlaying}
     />
-  );
+  ), [handlePlayChallenge, currentTrack?.id, isPlaying]);
 
   return (
     <View style={styles.container}>
