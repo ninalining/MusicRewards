@@ -13,6 +13,7 @@ export const THEME = {
       tertiary: 'rgba(255, 255, 255, 0.5)',
     },
     border: 'rgba(255, 255, 255, 0.2)',
+    error: '#FF6B6B',
   },
   fonts: {
     regular: 'System',

@@ -1,6 +1,6 @@
 // Tab layout for main navigation
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import { THEME } from '../../constants/theme';
 
 export default function TabLayout() {
@@ -23,16 +23,22 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Challenges',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🎵</Text>,
+          tabBarIcon: ({ color }) => <Text style={[tabStyles.icon, { color }]}>🎵</Text>,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>👤</Text>,
+          tabBarIcon: ({ color }) => <Text style={[tabStyles.icon, { color }]}>👤</Text>,
         }}
       />
     </Tabs>
   );
 }
+
+const tabStyles = StyleSheet.create({
+  icon: {
+    fontSize: THEME.fonts.sizes.lg,
+  },
+});

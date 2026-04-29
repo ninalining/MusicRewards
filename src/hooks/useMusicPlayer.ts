@@ -7,6 +7,7 @@ import TrackPlayer, {
   Event,
   useTrackPlayerEvents,
 } from 'react-native-track-player';
+import { setupTrackPlayer } from '../services/audioService';
 import { useMusicStore, selectCurrentTrack, selectIsPlaying } from '../stores/musicStore';
 import { useUserStore } from '../stores/userStore';
 import type { MusicChallenge, UseMusicPlayerReturn } from '../types';
@@ -14,7 +15,7 @@ import type { MusicChallenge, UseMusicPlayerReturn } from '../types';
 export const useMusicPlayer = (): UseMusicPlayerReturn => {
   // TrackPlayer hooks
   const playbackState = usePlaybackState();
-  const progress = useProgress();
+  const progress = useProgress(250);
   
   // Local state
   const [loading, setLoading] = useState(false);
@@ -98,6 +99,9 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
       setLoading(true);
       setError(null);
       
+      // Ensure player is initialized before use
+      await setupTrackPlayer();
+
       // Reset and add new track
       await TrackPlayer.reset();
       await TrackPlayer.add({
@@ -115,6 +119,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
       const errorMessage = err instanceof Error ? err.message : 'Playback failed';
       setError(errorMessage);
       console.error('TrackPlayer error:', err);
+      throw err;
     } finally {
       setLoading(false);
     }
