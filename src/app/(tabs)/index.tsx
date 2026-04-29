@@ -1,6 +1,6 @@
 // Home screen - Challenge list (Expo Router)
 import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { ChallengeCard } from '../../components/challenge/ChallengeCard';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
@@ -21,6 +21,8 @@ export default function HomeScreen() {
       router.push('/(modals)/player');
     } catch (error) {
       console.error('Failed to play challenge:', error);
+      const message = error instanceof Error ? error.message : 'Failed to start playback';
+      Alert.alert('Playback Error', message);
     }
   };
 

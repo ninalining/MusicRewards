@@ -1,12 +1,11 @@
 // Player modal - Full-screen audio player (Expo Router modal)
-import React from 'react';
+import React, { useRef } from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
   TouchableOpacity,
   SafeAreaView,
-  Alert
 } from 'react-native';
 import { GlassCard, GlassButton } from '../../components/ui/GlassCard';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
@@ -25,6 +24,10 @@ export default function PlayerModal() {
     loading,
     error 
   } = useMusicPlayer();
+
+  // Captures the rendered pixel width of the progress bar container via onLayout.
+  // Cannot use nativeEvent.width from a press event — that field doesn't exist on TouchableOpacity.
+  const progressBarWidth = useRef<number>(0);
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -53,10 +56,6 @@ export default function PlayerModal() {
       }
     }
   };
-
-  if (error) {
-    Alert.alert('Playback Error', error);
-  }
 
   if (!currentTrack) {
     return (
@@ -93,9 +92,12 @@ export default function PlayerModal() {
           {/* Progress Bar */}
           <TouchableOpacity 
             style={styles.progressTrack}
+            onLayout={(e) => {
+              progressBarWidth.current = e.nativeEvent.layout.width;
+            }}
             onPress={(event) => {
-              const { locationX, width } = event.nativeEvent as any;
-              const percentage = (locationX / width) * 100;
+              if (progressBarWidth.current === 0) return;
+              const percentage = (event.nativeEvent.locationX / progressBarWidth.current) * 100;
               handleSeek(percentage);
             }}
           >
