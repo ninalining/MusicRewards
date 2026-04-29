@@ -1,5 +1,5 @@
 // useMusicPlayer hook - Integrates react-native-track-player with Zustand
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import TrackPlayer, {
   State,
   usePlaybackState,
@@ -19,6 +19,11 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
   // Local state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Tracks which challenge IDs have had completion fired in this session.
+  // useRef (not useState) so updates don't trigger re-renders and are
+  // immune to stale Zustand closures between render cycles.
+  const completedInSession = useRef<Set<string>>(new Set());
   
   // Zustand store selectors
   const currentTrack = useMusicStore(selectCurrentTrack);
@@ -33,12 +38,13 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
 
   // Track playback state changes
   useEffect(() => {
-    // Some versions of usePlaybackState may return an object, so extract value if needed
-    let stateValue: any = playbackState;
-    if (typeof playbackState === 'object' && playbackState !== null && 'state' in playbackState) {
-      stateValue = playbackState.state;
-    }
-    const isCurrentlyPlaying = stateValue === State.Playing;
+    // usePlaybackState() returns PlaybackState | { state: undefined } depending on RNTP version.
+    // Narrow without casting to any — extract .state if present, otherwise use value directly.
+    const state =
+      typeof playbackState === 'object' && playbackState !== null && 'state' in playbackState
+        ? playbackState.state
+        : playbackState;
+    const isCurrentlyPlaying = state === State.Playing;
     if (isCurrentlyPlaying !== isPlaying) {
       setIsPlaying(isCurrentlyPlaying);
     }
@@ -53,8 +59,14 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
       const progressPercentage = (progress.position / progress.duration) * 100;
       updateProgress(currentTrack.id, progressPercentage);
       
-      // Check if track is completed (90% threshold to account for small timing issues)
-      if (progressPercentage >= 90 && !currentTrack.completed) {
+      // Award points and mark complete at 90% threshold.
+      // useRef guard prevents duplicate calls when this effect fires on every progress tick
+      // and Zustand's currentTrack reference is still stale from a previous render cycle.
+      if (
+        progressPercentage >= 90 &&
+        !completedInSession.current.has(currentTrack.id)
+      ) {
+        completedInSession.current.add(currentTrack.id);
         markChallengeComplete(currentTrack.id);
         completeChallenge(currentTrack.id);
         addPoints(currentTrack.points);
@@ -70,7 +82,18 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     }
   });
 
+  // Constitution Rule #3: reset TrackPlayer on unmount to release native resources.
+  // If background playback is added later (Bonus Feature #4), revisit this cleanup.
+  useEffect(() => {
+    return () => {
+      TrackPlayer.reset().catch(() => {});
+    };
+  }, []);
+
   const play = useCallback(async (track: MusicChallenge) => {
+    // Clear the session guard for this track so the completion logic
+    // can fire once in this new play session (while guarding against duplicates).
+    completedInSession.current.delete(track.id);
     try {
       setLoading(true);
       setError(null);
@@ -121,13 +144,10 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     }
   }, []);
 
-  // Extract value for isPlaying return as well
-  let stateValue: any = playbackState;
-  if (typeof playbackState === 'object' && playbackState !== null && 'state' in playbackState) {
-    stateValue = playbackState.state;
-  }
+  // isPlaying is sourced from the Zustand selector (selectIsPlaying) which is kept
+  // in sync by the playbackState useEffect above — no need to re-derive here.
   return {
-    isPlaying: stateValue === State.Playing,
+    isPlaying,
     currentTrack,
     currentPosition: progress.position,
     duration: progress.duration,
