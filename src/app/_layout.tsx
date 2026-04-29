@@ -1,15 +1,12 @@
 // Root layout for Expo Router
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
-import TrackPlayer from 'react-native-track-player';
 import { setupTrackPlayer } from '../services/audioService';
 
 export default function RootLayout() {
   useEffect(() => {
-    // Register the playback service first
-    TrackPlayer.registerPlaybackService(() => require('../services/playbackService'));
-    
-    // Then initialize TrackPlayer when app starts
+    // setupTrackPlayer initialises the player instance.
+    // registerPlaybackService is called once at module level in index.js — never here.
     setupTrackPlayer().catch((error) => {
       console.error('Failed to setup TrackPlayer:', error);
     });

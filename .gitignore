@@ -29,3 +29,7 @@ build/
 
 # Docs
 docs/
+
+# GitHub Copilot agent system
+.github/
+.specify/
