@@ -1,13 +1,15 @@
 // Player modal - Full-screen audio player (Expo Router modal)
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
   TouchableOpacity,
-  SafeAreaView,
+  Animated,
 } from 'react-native';
-import { GlassCard, GlassButton } from '../../components/ui/GlassCard';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { GlassCard } from '../../components/ui/GlassCard';
+import { GlassButton } from '../../components/ui/GlassButton';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { THEME } from '../../constants/theme';
 
@@ -17,7 +19,6 @@ export default function PlayerModal() {
     isPlaying, 
     currentPosition, 
     duration, 
-    play, 
     pause, 
     resume, 
     seekTo,
@@ -28,6 +29,17 @@ export default function PlayerModal() {
   // Captures the rendered pixel width of the progress bar container via onLayout.
   // Cannot use nativeEvent.width from a press event — that field doesn't exist on TouchableOpacity.
   const progressBarWidth = useRef<number>(0);
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  const progress = duration > 0 ? (currentPosition / duration) * 100 : 0;
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: progress,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [progress]);
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -102,10 +114,14 @@ export default function PlayerModal() {
             }}
           >
             <View style={styles.progressBackground}>
-              <View 
+              <Animated.View 
                 style={[
                   styles.progressFill,
-                  { width: `${getProgress()}%` }
+                  { width: progressAnim.interpolate({
+                    inputRange: [0, 100],
+                    outputRange: ['0%', '100%'],
+                    extrapolate: 'clamp',
+                  }) }
                 ]} 
               />
             </View>
@@ -288,7 +304,7 @@ const styles = StyleSheet.create({
     marginHorizontal: THEME.spacing.xs,
   },
   errorText: {
-    color: '#FF6B6B',
+    color: THEME.colors.error,
     fontSize: THEME.fonts.sizes.sm,
     textAlign: 'center',
     marginTop: THEME.spacing.md,

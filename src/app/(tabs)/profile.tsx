@@ -1,10 +1,34 @@
 // Profile screen - User progress and stats
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Animated } from 'react-native';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { useMusicStore, selectChallenges } from '../../stores/musicStore';
 import { useUserStore, selectTotalPoints, selectCompletedChallenges } from '../../stores/userStore';
 import { THEME } from '../../constants/theme';
+
+const AnimatedProgressBar = React.memo<{ progress: number }>(({ progress }) => {
+  const anim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(anim, {
+      toValue: progress,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [progress, anim]);
+
+  return (
+    <View style={styles.progressBar}>
+      <Animated.View
+        style={[
+          styles.progressFill,
+          { width: anim.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'], extrapolate: 'clamp' }) },
+        ]}
+      />
+    </View>
+  );
+});
+
+AnimatedProgressBar.displayName = 'AnimatedProgressBar';
 
 export default function ProfileScreen() {
   const challenges = useMusicStore(selectChallenges);
@@ -52,14 +76,7 @@ export default function ProfileScreen() {
                   {isCompleted ? '✅' : '⏳'}
                 </Text>
               </View>
-              <View style={styles.progressBar}>
-                <View 
-                  style={[
-                    styles.progressFill,
-                    { width: `${challenge.progress}%` }
-                  ]} 
-                />
-              </View>
+              <AnimatedProgressBar progress={challenge.progress} />
               <Text style={styles.progressText}>
                 {Math.round(challenge.progress)}% • {challenge.points} points
               </Text>

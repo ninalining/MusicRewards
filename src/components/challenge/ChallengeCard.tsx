@@ -1,9 +1,19 @@
 // ChallengeCard component - Individual challenge display
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { GlassCard, GlassButton } from '../ui/GlassCard';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import { GlassCard } from '../ui/GlassCard';
+import { GlassButton } from '../ui/GlassButton';
 import { THEME } from '../../constants/theme';
 import type { MusicChallenge } from '../../types';
+
+const getDifficultyColor = (difficulty: string): string => {
+  switch (difficulty) {
+    case 'easy': return THEME.colors.secondary;
+    case 'medium': return THEME.colors.accent;
+    case 'hard': return THEME.colors.primary;
+    default: return THEME.colors.text.secondary;
+  }
+};
 
 interface ChallengeCardProps {
   challenge: MusicChallenge;
@@ -12,25 +22,26 @@ interface ChallengeCardProps {
   isPlaying?: boolean;
 }
 
-export const ChallengeCard: React.FC<ChallengeCardProps> = ({
+export const ChallengeCard = React.memo<ChallengeCardProps>(({
   challenge,
   onPlay,
   isCurrentTrack = false,
   isPlaying = false,
 }) => {
+  const progressAnim = useRef(new Animated.Value(challenge.progress)).current;
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: challenge.progress,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [challenge.progress, progressAnim]);
+
   const formatDuration = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'easy': return THEME.colors.secondary;
-      case 'medium': return THEME.colors.accent;
-      case 'hard': return THEME.colors.primary;
-      default: return THEME.colors.text.secondary;
-    }
   };
 
   const getButtonTitle = () => {
@@ -91,11 +102,15 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
       {challenge.progress > 0 && (
         <View style={styles.progressContainer}>
           <View style={styles.progressTrack}>
-            <View
-              style={StyleSheet.flatten([
+            <Animated.View
+              style={[
                 styles.progressFill,
-                { width: `${challenge.progress}%` }
-              ])}
+                { width: progressAnim.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ['0%', '100%'],
+                  extrapolate: 'clamp',
+                }) },
+              ]}
             />
           </View>
         </View>
@@ -110,7 +125,9 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
       />
     </GlassCard>
   );
-};
+});
+
+ChallengeCard.displayName = 'ChallengeCard';
 
 const styles = StyleSheet.create({
   card: {
