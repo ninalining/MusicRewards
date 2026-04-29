@@ -6,7 +6,10 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "start": "expo start",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
   },
   "react-native-track-player": {
     "playback-service": "src/services/playbackService.ts"
@@ -27,10 +30,22 @@
   "overrides": {
     "react": "19.1.0"
   },
+  "jest": {
+    "preset": "jest-expo",
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|react-native-track-player|zustand|@react-native-async-storage/async-storage)"
+    ]
+  },
   "devDependencies": {
     "@babel/core": "^7.25.7",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.10",
     "babel-preset-expo": "^54.0.3",
+    "eslint": "^8.57.1",
+    "eslint-config-expo": "^55.0.0",
+    "jest": "^29.7.0",
+    "jest-expo": "^55.0.16",
     "typescript": "~5.9.2"
   }
 }

@@ -30,6 +30,12 @@ build/
 # Docs
 docs/
 
-# GitHub Copilot agent system
-.github/
+# GitHub (keep workflows for CI, ignore Copilot agent files)
+.github/agents/
+.github/chatmodes/
+.github/instructions/
+.github/prompts/
+.github/skills/
+.github/copilot-instructions.md
 .specify/
+specs/
