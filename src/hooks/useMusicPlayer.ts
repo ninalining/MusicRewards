@@ -119,6 +119,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
       const errorMessage = err instanceof Error ? err.message : 'Playback failed';
       setError(errorMessage);
       console.error('TrackPlayer error:', err);
+      throw err;
     } finally {
       setLoading(false);
     }
