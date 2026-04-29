@@ -3,16 +3,16 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface UserStore {
-  // State
+type UserState = {
   totalPoints: number;
   completedChallenges: string[];
-  
-  // Actions
+};
+
+type UserStore = UserState & {
   addPoints: (points: number) => void;
   completeChallenge: (challengeId: string) => void;
   resetProgress: () => void;
-}
+};
 
 export const useUserStore = create<UserStore>()(
   persist(
@@ -51,5 +51,5 @@ export const useUserStore = create<UserStore>()(
 );
 
 // Selector functions
-export const selectTotalPoints = (state: UserStore) => state.totalPoints;
-export const selectCompletedChallenges = (state: UserStore) => state.completedChallenges;
+export const selectTotalPoints = (state: UserState) => state.totalPoints;
+export const selectCompletedChallenges = (state: UserState) => state.completedChallenges;

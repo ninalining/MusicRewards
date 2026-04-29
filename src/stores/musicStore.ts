@@ -5,21 +5,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MusicChallenge } from '../types';
 import { SAMPLE_CHALLENGES } from '../constants/theme';
 
-interface MusicStore {
-  // State
+type MusicState = {
   challenges: MusicChallenge[];
   currentTrack: MusicChallenge | null;
   isPlaying: boolean;
   currentPosition: number;
-  
-  // Actions
+};
+
+type MusicStore = MusicState & {
   loadChallenges: () => void;
   setCurrentTrack: (track: MusicChallenge) => void;
   updateProgress: (challengeId: string, progress: number) => void;
   markChallengeComplete: (challengeId: string) => void;
   setIsPlaying: (playing: boolean) => void;
   setCurrentPosition: (position: number) => void;
-}
+};
 
 export const useMusicStore = create<MusicStore>()(
   persist(
@@ -84,6 +84,6 @@ export const useMusicStore = create<MusicStore>()(
 );
 
 // Selector functions for performance
-export const selectCurrentTrack = (state: MusicStore) => state.currentTrack;
-export const selectIsPlaying = (state: MusicStore) => state.isPlaying;
-export const selectChallenges = (state: MusicStore) => state.challenges;
+export const selectCurrentTrack = (state: MusicState) => state.currentTrack;
+export const selectIsPlaying = (state: MusicState) => state.isPlaying;
+export const selectChallenges = (state: MusicState) => state.challenges;
