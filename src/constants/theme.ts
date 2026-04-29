@@ -51,6 +51,9 @@ export const THEME = {
   }
 };
 
+// Audio playback constants
+export const PROGRESS_POLL_INTERVAL_MS = 250;
+
 // Sample challenge data with actual Belong tracks
 export const SAMPLE_CHALLENGES = [
   {
