@@ -24,12 +24,17 @@ const defaultProps = {
 };
 
 describe('PlayerProgress', () => {
+  const originalConsoleError = console.error;
+
   beforeEach(() => {
     jest.clearAllMocks();
     // Suppress Animated.timing act() warnings — these fire from RN's internal
     // animation loop and cannot be wrapped in act() from test code.
-    jest.spyOn(console, 'error').mockImplementation((msg: string) => {
+    // Non-matching messages are forwarded to the original console.error.
+    jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+      const [msg] = args;
       if (typeof msg === 'string' && msg.includes('not wrapped in act')) return;
+      originalConsoleError(...args);
     });
   });
 

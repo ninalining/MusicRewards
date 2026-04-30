@@ -50,6 +50,11 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     setIsActive(false);
   }, []);
 
+  // Resume without resetting progress/points — used when resuming the same track after pause.
+  const resumeCounting = useCallback((): void => {
+    setIsActive(true);
+  }, []);
+
   const resetProgress = useCallback((): void => {
     setPointsEarned(0);
     setProgress(0);
@@ -79,6 +84,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     isActive,
     startCounting,
     stopCounting,
+    resumeCounting,
     resetProgress,
   };
 };

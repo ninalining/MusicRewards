@@ -32,6 +32,7 @@ export default function PlayerModal() {
     progress: liveProgress,
     startCounting,
     stopCounting,
+    resumeCounting,
   } = usePointsCounter();
 
   // Start / stop counting based on playback state and track (T008)
@@ -39,14 +40,26 @@ export default function PlayerModal() {
   const currentTrackId = currentTrack?.id;
   const currentTrackPoints = currentTrack?.points;
 
+  // Track which challengeId is actively counting — distinguishes start vs resume.
+  const activeSessionRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (!currentTrackId || !currentTrackPoints || !duration || duration <= 0) return;
+    if (!currentTrackId || currentTrackPoints == null || !duration || duration <= 0) return;
+
     if (isPlaying) {
-      startCounting({ totalPoints: currentTrackPoints, durationSeconds: duration, challengeId: currentTrackId });
+      // Only call startCounting (which resets progress) when the track changes.
+      // On resume, just re-activate via startCounting with the same config —
+      // usePointsCounter now skips reset when challengeId hasn't changed.
+      if (activeSessionRef.current !== currentTrackId) {
+        activeSessionRef.current = currentTrackId;
+        startCounting({ totalPoints: currentTrackPoints, durationSeconds: duration, challengeId: currentTrackId });
+      } else {
+        resumeCounting();
+      }
     } else {
       stopCounting();
     }
-  }, [isPlaying, currentTrackId, currentTrackPoints, duration, startCounting, stopCounting]);
+  }, [isPlaying, currentTrackId, currentTrackPoints, duration, startCounting, stopCounting, resumeCounting]);
 
   // Refs capture latest callbacks so the unmount cleanup always calls the
   // current version — avoids stale closure and effect churn if identities change.

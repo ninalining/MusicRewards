@@ -41,6 +41,7 @@ export interface UsePointsCounterReturn {
   isActive: boolean;
   startCounting: (config: PointsCounterConfig) => void;
   stopCounting: () => void;
+  resumeCounting: () => void;
   resetProgress: () => void;
 }
 

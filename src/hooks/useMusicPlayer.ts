@@ -59,11 +59,11 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
 
   // Update position and calculate progress/points
   useEffect(() => {
-    if (trackId && progress.position > 0) {
+    if (trackId && progress.position > 0 && Number.isFinite(progress.duration) && progress.duration > 0) {
       setCurrentPosition(progress.position);
       
-      // Calculate progress percentage
-      const progressPercentage = (progress.position / progress.duration) * 100;
+      // Calculate progress percentage — duration guard above prevents Infinity/NaN
+      const progressPercentage = Math.min((progress.position / progress.duration) * 100, 100);
       updateProgress(trackId, progressPercentage);
       
       // Mark challenge complete at 90% threshold.

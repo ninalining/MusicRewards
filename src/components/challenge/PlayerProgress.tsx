@@ -44,7 +44,8 @@ export const PlayerProgress = React.memo<PlayerProgressProps>(({
 
   const handleProgressBarPress = useCallback((event: { nativeEvent: { locationX: number } }): void => {
     if (progressBarWidth.current === 0) return;
-    const percentage = (event.nativeEvent.locationX / progressBarWidth.current) * 100;
+    const rawPercentage = (event.nativeEvent.locationX / progressBarWidth.current) * 100;
+    const percentage = Math.max(0, Math.min(100, rawPercentage));
     onSeek(percentage);
   }, [onSeek]);
 

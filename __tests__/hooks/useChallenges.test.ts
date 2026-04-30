@@ -72,8 +72,10 @@ describe('useChallenges', () => {
   });
 
   it('sets error when refreshChallenges throws', async () => {
-    // spyOn works because Zustand's getState() returns a stable reference —
-    // the same object is reused across calls, so the spy persists until mockRestore.
+    // spyOn targets the state object returned by getState() at this moment.
+    // This works here because no store updates occur between the spy and the
+    // refreshChallenges call — if the store were updated, getState() would
+    // return a new object and the spy would no longer intercept the call.
     const spy = jest.spyOn(useMusicStore.getState(), 'loadChallenges')
       .mockImplementation(() => { throw new Error('Network error'); });
 
