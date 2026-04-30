@@ -22,6 +22,10 @@ export default function HomeScreen() {
 
   const currentTrackId = currentTrack?.id;
 
+  const handlePressChallenge = useCallback((challenge: MusicChallenge): void => {
+    router.push(`/(modals)/challenge-detail?challengeId=${challenge.id}`);
+  }, []);
+
   const handlePlayChallenge = useCallback(async (challenge: MusicChallenge) => {
     try {
       if (currentTrackId === challenge.id) {
@@ -46,6 +50,7 @@ export default function HomeScreen() {
         challenges={challenges}
         loading={loading}
         onPlay={handlePlayChallenge}
+        onPressChallenge={handlePressChallenge}
         currentTrackId={currentTrack?.id}
         isPlaying={isPlaying}
       />
