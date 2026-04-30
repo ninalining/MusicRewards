@@ -20,6 +20,8 @@ interface ChallengeListProps {
   loading?: boolean;
   /** Invoked with the full challenge when play is tapped. */
   onPlay: (challenge: MusicChallenge) => void;
+  /** Invoked with the full challenge when the card body is tapped. */
+  onPressChallenge?: (challenge: MusicChallenge) => void;
   /** ID of the currently active track — used for ChallengeCard visual state. */
   currentTrackId?: string;
   /** Whether the active track is currently playing. */
@@ -32,6 +34,7 @@ export const ChallengeList = React.memo<ChallengeListProps>(({
   challenges,
   loading = false,
   onPlay,
+  onPressChallenge,
   currentTrackId,
   isPlaying = false,
 }): React.ReactElement => {
@@ -40,11 +43,12 @@ export const ChallengeList = React.memo<ChallengeListProps>(({
       <ChallengeCard
         challenge={item}
         onPlay={onPlay}
+        onPress={onPressChallenge}
         isCurrentTrack={currentTrackId === item.id}
         isPlaying={isPlaying}
       />
     ),
-    [onPlay, currentTrackId, isPlaying],
+    [onPlay, onPressChallenge, currentTrackId, isPlaying],
   );
 
   if (loading) {
