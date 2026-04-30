@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Animated } from 'react-native';
 import { GlassCard } from '../../components/ui/GlassCard';
-import { useMusicStore, selectChallenges } from '../../stores/musicStore';
+import { useMusicStore, selectChallenges, selectTotalAvailablePoints } from '../../stores/musicStore';
 import { useUserStore, selectTotalPoints, selectCompletedChallenges } from '../../stores/userStore';
 import { THEME } from '../../constants/theme';
 
@@ -32,6 +32,7 @@ AnimatedProgressBar.displayName = 'AnimatedProgressBar';
 
 export default function ProfileScreen() {
   const challenges = useMusicStore(selectChallenges);
+  const totalAvailablePoints = useMusicStore(selectTotalAvailablePoints);
   const totalPoints = useUserStore(selectTotalPoints);
   const completedChallenges = useUserStore(selectCompletedChallenges);
 
@@ -45,15 +46,16 @@ export default function ProfileScreen() {
       {/* Stats Overview */}
       <GlassCard style={styles.statsCard}>
         <View style={styles.statsGrid}>
-          <View style={styles.statItem}>
+          <View style={styles.statItem} accessible accessibilityRole="text" accessibilityLabel={`${totalPoints} out of ${totalAvailablePoints} total points`}>
             <Text style={styles.statValue}>{totalPoints}</Text>
+            <Text style={styles.statSubvalue}>/ {totalAvailablePoints}</Text>
             <Text style={styles.statLabel}>Total Points</Text>
           </View>
-          <View style={styles.statItem}>
+          <View style={styles.statItem} accessible accessibilityRole="text" accessibilityLabel={`${completedChallenges.length} challenges completed`}>
             <Text style={styles.statValue}>{completedChallenges.length}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
-          <View style={styles.statItem}>
+          <View style={styles.statItem} accessible accessibilityRole="text" accessibilityLabel={`${Math.round(completionRate)} percent success rate`}>
             <Text style={styles.statValue}>{Math.round(completionRate)}%</Text>
             <Text style={styles.statLabel}>Success Rate</Text>
           </View>
@@ -69,10 +71,7 @@ export default function ProfileScreen() {
             <View key={challenge.id} style={styles.challengeItem}>
               <View style={styles.challengeHeader}>
                 <Text style={styles.challengeTitle}>{challenge.title}</Text>
-                <Text style={[
-                  styles.challengeStatus,
-                  { color: isCompleted ? THEME.colors.secondary : THEME.colors.text.secondary }
-                ]}>
+                <Text style={isCompleted ? styles.challengeStatusCompleted : styles.challengeStatusPending}>
                   {isCompleted ? '✅' : '⏳'}
                 </Text>
               </View>
@@ -153,6 +152,11 @@ const styles = StyleSheet.create({
     fontSize: THEME.fonts.sizes.sm,
     color: THEME.colors.text.secondary,
   },
+  statSubvalue: {
+    fontSize: THEME.fonts.sizes.sm,
+    color: THEME.colors.text.secondary,
+    marginBottom: THEME.spacing.xs,
+  },
   progressCard: {
     marginBottom: THEME.spacing.md,
   },
@@ -178,17 +182,25 @@ const styles = StyleSheet.create({
   challengeStatus: {
     fontSize: THEME.fonts.sizes.lg,
   },
+  challengeStatusCompleted: {
+    fontSize: THEME.fonts.sizes.lg,
+    color: THEME.colors.secondary,
+  },
+  challengeStatusPending: {
+    fontSize: THEME.fonts.sizes.lg,
+    color: THEME.colors.text.secondary,
+  },
   progressBar: {
-    height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 3,
+    height: THEME.spacing.xs,
+    backgroundColor: THEME.colors.glass,
+    borderRadius: THEME.spacing.xs,
     overflow: 'hidden',
     marginBottom: THEME.spacing.xs,
   },
   progressFill: {
     height: '100%',
     backgroundColor: THEME.colors.accent,
-    borderRadius: 3,
+    borderRadius: THEME.spacing.xs,
   },
   progressText: {
     fontSize: THEME.fonts.sizes.sm,
