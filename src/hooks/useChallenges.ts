@@ -16,13 +16,6 @@ export const useChallenges = (): UseChallengesReturn => {
   const completeInUserStore = useUserStore((s) => s.completeChallenge);
   const loadChallenges = useMusicStore((s) => s.loadChallenges);
 
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
   const refreshChallenges = useCallback(async (): Promise<void> => {
     setLoading(true);
     setError(null);
@@ -42,6 +35,14 @@ export const useChallenges = (): UseChallengesReturn => {
       }
     }
   }, [loadChallenges]);
+
+  useEffect(() => {
+    isMounted.current = true;
+    refreshChallenges();
+    return () => {
+      isMounted.current = false;
+    };
+  }, [refreshChallenges]);
 
   const completeChallenge = useCallback(async (challengeId: string): Promise<void> => {
     // Atomic: both store actions called together
