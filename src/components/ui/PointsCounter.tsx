@@ -98,7 +98,7 @@ export const PointsCounter = React.memo<PointsCounterProps>(({
         {displayValue}
       </Text>
       {label !== undefined && label !== '' ? (
-        <Text style={styles.label} importantForAccessibility="no">
+        <Text style={styles.label} importantForAccessibility="no" accessible={false}>
           {label}
         </Text>
       ) : null}
