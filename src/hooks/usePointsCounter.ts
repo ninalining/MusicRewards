@@ -28,7 +28,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     if (!isActive || !configRef.current) return;
 
     const { totalPoints, durationSeconds } = configRef.current;
-    if (!durationSeconds || durationSeconds === 0) return;
+    if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) return;
 
     const position = trackProgress.position;
     const newEarned = Math.floor((position / durationSeconds) * totalPoints);
@@ -50,19 +50,20 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     setIsActive(false);
   }, []);
 
-  const startCounting = useCallback((config: PointsCounterConfig): void => {
-    // Stop any existing session first
-    stopCounting();
-    configRef.current = config;
-    prevAwardedRef.current = 0;
-    setIsActive(true);
-  }, [stopCounting]);
-
   const resetProgress = useCallback((): void => {
     setPointsEarned(0);
     setProgress(0);
     prevAwardedRef.current = 0;
   }, []);
+
+  const startCounting = useCallback((config: PointsCounterConfig): void => {
+    // Stop any existing session and reset local state before starting new session.
+    // resetProgress must be called so Math.max on setProgress doesn't carry over stale values.
+    stopCounting();
+    configRef.current = config;
+    resetProgress();
+    setIsActive(true);
+  }, [stopCounting, resetProgress]);
 
   // Cleanup on unmount
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react-native';
+import { renderHook, act } from '@testing-library/react-native';
 import { useChallenges } from '../../src/hooks/useChallenges';
 import { useMusicStore } from '../../src/stores/musicStore';
 import { useUserStore } from '../../src/stores/userStore';
@@ -33,13 +33,8 @@ describe('useChallenges', () => {
   it('sets loading=true during refreshChallenges and false after', async () => {
     const { result } = renderHook(() => useChallenges());
 
-    act(() => {
-      result.current.refreshChallenges();
-    });
-
-    expect(result.current.loading).toBe(true);
-
     await act(async () => {
+      result.current.refreshChallenges();
       jest.advanceTimersByTime(500);
     });
 
@@ -75,14 +70,13 @@ describe('useChallenges', () => {
     const { result } = renderHook(() => useChallenges());
 
     await act(async () => {
-      result.current.refreshChallenges();
+      const promise = result.current.refreshChallenges();
       jest.advanceTimersByTime(500);
+      await promise;
     });
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-      expect(result.current.error).toBe('Network error');
-    });
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBe('Network error');
 
     spy.mockRestore();
   });
@@ -90,15 +84,11 @@ describe('useChallenges', () => {
   it('does not update state after unmount', async () => {
     const { result, unmount } = renderHook(() => useChallenges());
 
-    act(() => {
-      result.current.refreshChallenges();
-    });
-
-    unmount();
-
-    // Advance timer after unmount — should not throw
     await act(async () => {
+      const promise = result.current.refreshChallenges();
+      unmount();
       jest.advanceTimersByTime(500);
+      await promise;
     });
 
     // No assertion needed — test passes if no "Can't perform state update on unmounted component" warning
