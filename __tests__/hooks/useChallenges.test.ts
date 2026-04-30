@@ -15,11 +15,21 @@ describe('useChallenges', () => {
   });
 
   afterEach(() => {
+    act(() => {
+      useMusicStore.setState(initialMusicState, true);
+      useUserStore.setState(initialUserState, true);
+    });
     jest.useRealTimers();
   });
 
-  it('returns SAMPLE_CHALLENGES and loading=false on initial render', () => {
+  it('returns SAMPLE_CHALLENGES and loading=false after initial fetch', async () => {
     const { result } = renderHook(() => useChallenges());
+    // loading=true immediately on mount (auto-fetch triggered)
+    expect(result.current.loading).toBe(true);
+    // after the 500ms simulated delay, loading=false and challenges are loaded
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
     expect(result.current.challenges).toEqual(SAMPLE_CHALLENGES);
@@ -82,6 +92,8 @@ describe('useChallenges', () => {
   });
 
   it('does not update state after unmount', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
     const { result, unmount } = renderHook(() => useChallenges());
 
     await act(async () => {
@@ -91,6 +103,9 @@ describe('useChallenges', () => {
       await promise;
     });
 
-    // No assertion needed — test passes if no "Can't perform state update on unmounted component" warning
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining("Can't perform a React state update"),
+    );
+    consoleSpy.mockRestore();
   });
 });
