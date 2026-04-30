@@ -24,13 +24,13 @@ export const useChallenges = (): UseChallengesReturn => {
   }, []);
 
   const refreshChallenges = useCallback(async (): Promise<void> => {
-    if (!isMounted.current) return;
     setLoading(true);
     setError(null);
     try {
       // TODO: replace with real API call in Phase 4
       // Simulated async delay — no real API in this phase
       await new Promise<void>((resolve) => setTimeout(resolve, 500));
+      if (!isMounted.current) return;
       loadChallenges();
     } catch (err) {
       if (isMounted.current) {
