@@ -163,4 +163,30 @@ describe('usePointsCounter', () => {
     // This test verifies no errors are thrown during unmount cleanup.
     expect(() => unmount()).not.toThrow();
   });
+
+  it('awards full points when position is at NEAR_COMPLETE_RATIO (99%)', () => {
+    // position = 198 out of 200 = 99%
+    mockUseProgress.mockReturnValue({ position: 198, duration: 200, buffered: 0 });
+    const { result } = renderHook(() => usePointsCounter());
+
+    act(() => {
+      result.current.startCounting(TEST_CONFIG);
+    });
+
+    expect(result.current.pointsEarned).toBe(TEST_CONFIG.totalPoints);
+  });
+
+  it('does not award full points just below NEAR_COMPLETE_RATIO', () => {
+    // position = 197 out of 200 = 98.5%, below 99%
+    mockUseProgress.mockReturnValue({ position: 197, duration: 200, buffered: 0 });
+    const { result } = renderHook(() => usePointsCounter());
+
+    act(() => {
+      result.current.startCounting(TEST_CONFIG);
+    });
+
+    // floor(197/200 * 150) = floor(147.75) = 147, not 150
+    expect(result.current.pointsEarned).toBe(147);
+    expect(result.current.pointsEarned).toBeLessThan(TEST_CONFIG.totalPoints);
+  });
 });

@@ -1,23 +1,16 @@
 // ChallengeCard component - Individual challenge display
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
 import { GlassButton } from '../ui/GlassButton';
 import { THEME } from '../../constants/theme';
+import { formatDuration, getDifficultyColor } from '../../utils/challenge';
 import type { MusicChallenge } from '../../types';
-
-const getDifficultyColor = (difficulty: string): string => {
-  switch (difficulty) {
-    case 'easy': return THEME.colors.secondary;
-    case 'medium': return THEME.colors.accent;
-    case 'hard': return THEME.colors.primary;
-    default: return THEME.colors.text.secondary;
-  }
-};
 
 interface ChallengeCardProps {
   challenge: MusicChallenge;
   onPlay: (challenge: MusicChallenge) => void;
+  onPress?: (challenge: MusicChallenge) => void;
   isCurrentTrack?: boolean;
   isPlaying?: boolean;
 }
@@ -25,6 +18,7 @@ interface ChallengeCardProps {
 export const ChallengeCard = React.memo<ChallengeCardProps>(({
   challenge,
   onPlay,
+  onPress,
   isCurrentTrack = false,
   isPlaying = false,
 }) => {
@@ -38,18 +32,20 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(({
     }).start();
   }, [challenge.progress, progressAnim]);
 
-  const formatDuration = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
   const getButtonTitle = () => {
     if (challenge.completed) return 'Completed ✓';
     if (isCurrentTrack && isPlaying) return 'Playing...';
     if (isCurrentTrack && !isPlaying) return 'Resume';
     return 'Play Challenge';
   };
+
+  const handleCardPress = useCallback((): void => {
+    onPress?.(challenge);
+  }, [onPress, challenge]);
+
+  const handlePlay = useCallback((): void => {
+    onPlay(challenge);
+  }, [onPlay, challenge]);
 
   return (
     <GlassCard
@@ -63,7 +59,14 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(({
           : THEME.glass.gradientColors.card
       }
     >
-      <View style={styles.header}>
+      <TouchableOpacity
+        onPress={handleCardPress}
+        disabled={!onPress}
+        activeOpacity={onPress ? 0.7 : 1}
+        accessibilityRole="button"
+        accessibilityLabel={`View details for ${challenge.title}`}
+      >
+        <View style={styles.header}>
         <View style={styles.titleSection}>
           <Text style={styles.title}>{challenge.title}</Text>
           <Text style={styles.artist}>{challenge.artist}</Text>
@@ -115,10 +118,11 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(({
           </View>
         </View>
       )}
+      </TouchableOpacity>
 
       <GlassButton
         title={getButtonTitle()}
-        onPress={() => onPlay(challenge)}
+        onPress={handlePlay}
         variant={isCurrentTrack ? 'primary' : 'secondary'}
         disabled={challenge.completed}
         style={styles.playButton}
@@ -170,7 +174,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: THEME.fonts.sizes.sm,
     color: THEME.colors.text.tertiary,
-    lineHeight: 20,
+    lineHeight: THEME.fonts.sizes.sm * 1.4,
     marginBottom: THEME.spacing.md,
   },
   infoRow: {
@@ -195,15 +199,15 @@ const styles = StyleSheet.create({
     marginBottom: THEME.spacing.md,
   },
   progressTrack: {
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 2,
+    height: THEME.spacing.xs,
+    backgroundColor: THEME.colors.glass,
+    borderRadius: THEME.spacing.xs / 2,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: THEME.colors.accent,
-    borderRadius: 2,
+    borderRadius: THEME.spacing.xs / 2,
   },
   playButton: {
     marginTop: THEME.spacing.sm,

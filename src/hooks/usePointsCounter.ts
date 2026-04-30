@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useProgress } from 'react-native-track-player';
 import { useUserStore } from '../stores/userStore';
-import { PROGRESS_POLL_INTERVAL_MS } from '../constants/theme';
+import { PROGRESS_POLL_INTERVAL_MS, NEAR_COMPLETE_RATIO } from '../constants/theme';
 import type { PointsCounterConfig, UsePointsCounterReturn } from '../types';
 
 export const usePointsCounter = (): UsePointsCounterReturn => {
@@ -31,7 +31,12 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) return;
 
     const position = trackProgress.position;
-    const newEarned = Math.floor((position / durationSeconds) * totalPoints);
+    // When position is ≥99% of duration, award full points — trackProgress.position
+    // rarely equals durationSeconds exactly, so Math.floor would cap at totalPoints-1.
+    const ratio = position / durationSeconds;
+    const newEarned = ratio >= NEAR_COMPLETE_RATIO
+      ? totalPoints
+      : Math.floor(ratio * totalPoints);
     const clamped = Math.min(newEarned, totalPoints);
     const delta = clamped - prevAwardedRef.current;
 

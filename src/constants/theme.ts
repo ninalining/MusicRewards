@@ -54,6 +54,9 @@ export const THEME = {
 // Audio playback constants
 export const PROGRESS_POLL_INTERVAL_MS = 250;
 
+/** Ratio threshold (0–1) at which near-complete playback awards full points. */
+export const NEAR_COMPLETE_RATIO = 0.99;
+
 // Sample challenge data with actual Belong tracks
 export const SAMPLE_CHALLENGES = [
   {
