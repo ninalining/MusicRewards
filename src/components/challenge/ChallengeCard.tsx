@@ -39,17 +39,13 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(({
     return 'Play Challenge';
   };
 
-  const challengeId = challenge.id;
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- use challengeId as stable proxy for challenge object
   const handleCardPress = useCallback((): void => {
     onPress?.(challenge);
-  }, [onPress, challengeId]);
+  }, [onPress, challenge]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- use challengeId as stable proxy for challenge object
   const handlePlay = useCallback((): void => {
     onPlay(challenge);
-  }, [onPlay, challengeId]);
+  }, [onPlay, challenge]);
 
   return (
     <GlassCard
