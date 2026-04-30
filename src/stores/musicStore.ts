@@ -87,3 +87,5 @@ export const useMusicStore = create<MusicStore>()(
 export const selectCurrentTrack = (state: MusicState) => state.currentTrack;
 export const selectIsPlaying = (state: MusicState) => state.isPlaying;
 export const selectChallenges = (state: MusicState) => state.challenges;
+export const selectTotalAvailablePoints = (state: MusicState): number =>
+  state.challenges.reduce((sum, c) => sum + c.points, 0);
