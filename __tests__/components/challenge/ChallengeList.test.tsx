@@ -3,40 +3,42 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ChallengeList } from '../../../src/components/challenge/ChallengeList';
 import type { MusicChallenge } from '../../../src/types';
 
-jest.mock('../../../src/components/challenge/ChallengeCard', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  ChallengeCard: (props: { challenge: { id: string; title: string }; onPlay: (c: unknown) => void }) =>
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('react').createElement(
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('react-native').TouchableOpacity,
-      {
-        testID: `card-${props.challenge.id}`,
-        accessibilityRole: 'button',
-        accessibilityLabel: props.challenge.title,
-        onPress: () => props.onPlay(props.challenge),
-      },
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('react').createElement(
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        require('react-native').Text,
-        null,
-        props.challenge.title,
-      ),
-    ),
-}));
+jest.mock('../../../src/components/challenge/ChallengeCard', () => {
+  // require() is necessary inside jest.mock factories — they are hoisted before ES imports.
+  /* eslint-disable @typescript-eslint/no-require-imports */
+  const React = require('react');
+  const { TouchableOpacity, Text } = require('react-native');
+  /* eslint-enable @typescript-eslint/no-require-imports */
 
-jest.mock('../../../src/components/ui/GlassCard', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  GlassCard: (props: { children: unknown }) =>
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('react').createElement(
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('react-native').View,
-      null,
-      props.children,
-    ),
-}));
+  function MockChallengeCard({ challenge, onPlay }: { challenge: { id: string; title: string }; onPlay: (c: unknown) => void }) {
+    return React.createElement(
+      TouchableOpacity,
+      {
+        testID: `card-${challenge.id}`,
+        accessibilityRole: 'button',
+        accessibilityLabel: challenge.title,
+        onPress: () => onPlay(challenge),
+      },
+      React.createElement(Text, null, challenge.title),
+    );
+  }
+
+  return { ChallengeCard: MockChallengeCard };
+});
+
+jest.mock('../../../src/components/ui/GlassCard', () => {
+  // require() is necessary inside jest.mock factories — they are hoisted before ES imports.
+  /* eslint-disable @typescript-eslint/no-require-imports */
+  const React = require('react');
+  const { View } = require('react-native');
+  /* eslint-enable @typescript-eslint/no-require-imports */
+
+  function MockGlassCard({ children }: { children: React.ReactNode }) {
+    return React.createElement(View, null, children);
+  }
+
+  return { GlassCard: MockGlassCard };
+});
 
 const mockChallenge: MusicChallenge = {
   id: 'challenge-1',

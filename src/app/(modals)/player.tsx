@@ -1,16 +1,17 @@
 // Player modal - Full-screen audio player (Expo Router modal)
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
-  TouchableOpacity,
-  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GlassCard } from '../../components/ui/GlassCard';
-import { GlassButton } from '../../components/ui/GlassButton';
+import { PointsCounter } from '../../components/ui/PointsCounter';
+import { PlayerProgress } from '../../components/challenge/PlayerProgress';
+import { PlayerControls } from '../../components/challenge/PlayerControls';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
+import { usePointsCounter } from '../../hooks/usePointsCounter';
 import { THEME } from '../../constants/theme';
 
 export default function PlayerModal() {
@@ -26,49 +27,61 @@ export default function PlayerModal() {
     error 
   } = useMusicPlayer();
 
-  // Captures the rendered pixel width of the progress bar container via onLayout.
-  // Cannot use nativeEvent.width from a press event — that field doesn't exist on TouchableOpacity.
-  const progressBarWidth = useRef<number>(0);
-  const progressAnim = useRef(new Animated.Value(0)).current;
+  const {
+    pointsEarned,
+    progress: liveProgress,
+    startCounting,
+    stopCounting,
+    resumeCounting,
+  } = usePointsCounter();
 
-  const progress = duration > 0 ? (currentPosition / duration) * 100 : 0;
+  // Start / stop counting based on playback state and track (T008)
+  // Depend on primitives (id, points) to avoid restarting when store creates new object refs.
+  const currentTrackId = currentTrack?.id;
+  const currentTrackPoints = currentTrack?.points;
+
+  // Track which challengeId is actively counting — distinguishes start vs resume.
+  const activeSessionRef = useRef<string | null>(null);
 
   useEffect(() => {
-    progressAnim.stopAnimation();
-    Animated.timing(progressAnim, {
-      toValue: progress,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  }, [progress, progressAnim]);
+    if (!currentTrackId || currentTrackPoints == null || !duration || duration <= 0) return;
 
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const getProgress = (): number => {
-    if (!duration || duration === 0) return 0;
-    return (currentPosition / duration) * 100;
-  };
-
-  const handleSeek = (percentage: number) => {
-    if (duration) {
-      const newPosition = (percentage / 100) * duration;
-      seekTo(newPosition);
-    }
-  };
-
-  const handlePlayPause = async () => {
     if (isPlaying) {
-      pause();
-    } else {
-      if (currentTrack) {
-        resume();
+      // Only call startCounting (which resets progress) when the track changes.
+      // On resume, just re-activate via startCounting with the same config —
+      // usePointsCounter now skips reset when challengeId hasn't changed.
+      if (activeSessionRef.current !== currentTrackId) {
+        activeSessionRef.current = currentTrackId;
+        startCounting({ totalPoints: currentTrackPoints, durationSeconds: duration, challengeId: currentTrackId });
+      } else {
+        resumeCounting();
       }
+    } else {
+      stopCounting();
     }
-  };
+  }, [isPlaying, currentTrackId, currentTrackPoints, duration, startCounting, stopCounting, resumeCounting]);
+
+  // Refs capture latest callbacks so the unmount cleanup always calls the
+  // current version — avoids stale closure and effect churn if identities change.
+  const pauseRef = useRef(pause);
+  pauseRef.current = pause;
+  const stopCountingRef = useRef(stopCounting);
+  stopCountingRef.current = stopCounting;
+
+  // Pause playback and stop counting on unmount — prevents music playing
+  // without earning points after the modal is dismissed.
+  useEffect(() => {
+    return () => {
+      pauseRef.current();
+      stopCountingRef.current();
+    };
+  }, []);
+
+  const handleSeek = useCallback((percentage: number): void => {
+    if (duration) {
+      seekTo((percentage / 100) * duration);
+    }
+  }, [duration, seekTo]);
 
   if (!currentTrack) {
     return (
@@ -93,85 +106,36 @@ export default function PlayerModal() {
           <Text style={styles.trackDescription}>{currentTrack.description}</Text>
           
           <View style={styles.pointsContainer}>
-            <Text style={styles.pointsLabel}>Challenge Points</Text>
-            <Text style={styles.pointsValue}>{currentTrack.points}</Text>
+            <Text style={styles.pointsLabel}>Points Earned</Text>
+            <View style={styles.pointsRow}>
+              <PointsCounter points={pointsEarned} style={styles.pointsCounter} />
+              <Text style={styles.pointsTotal}> / {currentTrack.points} pts</Text>
+            </View>
           </View>
         </GlassCard>
 
         {/* Progress Section */}
-        <GlassCard style={styles.progressCard}>
-          <Text style={styles.progressLabel}>Listening Progress</Text>
-          
-          {/* Progress Bar */}
-          <TouchableOpacity 
-            style={styles.progressTrack}
-            onLayout={(e) => {
-              progressBarWidth.current = e.nativeEvent.layout.width;
-            }}
-            onPress={(event) => {
-              if (progressBarWidth.current === 0) return;
-              const percentage = (event.nativeEvent.locationX / progressBarWidth.current) * 100;
-              handleSeek(percentage);
-            }}
-          >
-            <View style={styles.progressBackground}>
-              <Animated.View 
-                style={[
-                  styles.progressFill,
-                  { width: progressAnim.interpolate({
-                    inputRange: [0, 100],
-                    outputRange: ['0%', '100%'],
-                    extrapolate: 'clamp',
-                  }) }
-                ]} 
-              />
-            </View>
-          </TouchableOpacity>
-
-          {/* Time Display */}
-          <View style={styles.timeContainer}>
-            <Text style={styles.timeText}>{formatTime(currentPosition)}</Text>
-            <Text style={styles.timeText}>{formatTime(duration)}</Text>
-          </View>
-
-          {/* Progress Percentage */}
-          <Text style={styles.progressPercentage}>
-            {Math.round(getProgress())}% Complete
-          </Text>
-        </GlassCard>
+        <PlayerProgress
+          liveProgress={liveProgress}
+          currentPosition={currentPosition}
+          duration={duration}
+          onSeek={handleSeek}
+        />
 
         {/* Controls */}
-        <GlassCard style={styles.controlsCard}>
-          <View style={styles.controlsRow}>
-            <GlassButton
-              title="⏪ -10s"
-              onPress={() => handleSeek(Math.max(0, getProgress() - (10 / duration) * 100))}
-              variant="secondary"
-              style={styles.controlButton}
-            />
-            
-            <GlassButton
-              title={loading ? "..." : isPlaying ? "⏸️ Pause" : "▶️ Play"}
-              onPress={handlePlayPause}
-              variant="primary"
-              style={styles.mainControlButton}
-              loading={loading}
-            />
-            
-            <GlassButton
-              title="⏩ +10s"
-              onPress={() => handleSeek(Math.min(100, getProgress() + (10 / duration) * 100))}
-              variant="secondary"
-              style={styles.controlButton}
-            />
-          </View>
+        <PlayerControls
+          isPlaying={isPlaying}
+          loading={loading}
+          hasTrack={true}
+          error={error}
+          liveProgress={liveProgress}
+          duration={duration}
+          onSeek={handleSeek}
+          onPause={pause}
+          onResume={resume}
+        />
 
-          {error && (
-            <Text style={styles.errorText}>{error}</Text>
-          )}
-        </GlassCard>
-
-        {/* Challenge Progress */}
+        {/* Challenge Status */}
         <GlassCard style={styles.challengeCard}>
           <Text style={styles.challengeLabel}>Challenge Status</Text>
           <View style={styles.challengeInfo}>
@@ -182,7 +146,7 @@ export default function PlayerModal() {
               {currentTrack.completed ? '✅ Completed' : '🎧 In Progress'}
             </Text>
             <Text style={styles.challengeProgress}>
-              {Math.round(currentTrack.progress)}% of challenge complete
+              {Math.round(liveProgress)}% of challenge complete
             </Text>
           </View>
         </GlassCard>
@@ -244,71 +208,16 @@ const styles = StyleSheet.create({
     fontSize: THEME.fonts.sizes.sm,
     color: THEME.colors.text.secondary,
   },
-  pointsValue: {
-    fontSize: THEME.fonts.sizes.xl,
-    fontWeight: 'bold',
-    color: THEME.colors.accent,
-  },
-  progressCard: {
-    // Card styling handled by GlassCard
-  },
-  progressLabel: {
-    fontSize: THEME.fonts.sizes.md,
-    fontWeight: '600',
-    color: THEME.colors.text.primary,
-    textAlign: 'center',
-    marginBottom: THEME.spacing.md,
-  },
-  progressTrack: {
-    marginBottom: THEME.spacing.md,
-  },
-  progressBackground: {
-    height: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: THEME.colors.accent,
-    borderRadius: 4,
-  },
-  timeContainer: {
+  pointsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: THEME.spacing.sm,
+    alignItems: 'baseline',
   },
-  timeText: {
-    fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
+  pointsCounter: {
+    // internal sizing handled by PointsCounter
   },
-  progressPercentage: {
+  pointsTotal: {
     fontSize: THEME.fonts.sizes.lg,
-    fontWeight: 'bold',
-    color: THEME.colors.accent,
-    textAlign: 'center',
-  },
-  controlsCard: {
-    // Card styling handled by GlassCard
-  },
-  controlsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  controlButton: {
-    flex: 0.25,
-    marginHorizontal: THEME.spacing.xs,
-  },
-  mainControlButton: {
-    flex: 0.4,
-    marginHorizontal: THEME.spacing.xs,
-  },
-  errorText: {
-    color: THEME.colors.error,
-    fontSize: THEME.fonts.sizes.sm,
-    textAlign: 'center',
-    marginTop: THEME.spacing.md,
+    color: THEME.colors.text.secondary,
   },
   challengeCard: {
     // Card styling handled by GlassCard

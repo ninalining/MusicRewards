@@ -12,19 +12,14 @@ export const useChallenges = (): UseChallengesReturn => {
   const challenges = useMusicStore(selectChallenges);
   const completedChallenges = useUserStore(selectCompletedChallenges);
 
-  const markChallengeComplete = useMusicStore((s) => s.markChallengeComplete);
-  const completeInUserStore = useUserStore((s) => s.completeChallenge);
-  const loadChallenges = useMusicStore((s) => s.loadChallenges);
-
   const refreshChallenges = useCallback(async (): Promise<void> => {
     setLoading(true);
     setError(null);
     try {
       // TODO: replace with real API call when backend is available (Phase 5+)
-      // Simulated async delay — no real API in this phase
       await new Promise<void>((resolve) => setTimeout(resolve, 500));
       if (!isMounted.current) return;
-      loadChallenges();
+      useMusicStore.getState().loadChallenges();
     } catch (err) {
       if (isMounted.current) {
         setError(err instanceof Error ? err.message : 'Failed to refresh challenges');
@@ -34,7 +29,7 @@ export const useChallenges = (): UseChallengesReturn => {
         setLoading(false);
       }
     }
-  }, [loadChallenges]);
+  }, []);
 
   useEffect(() => {
     isMounted.current = true;
@@ -45,10 +40,14 @@ export const useChallenges = (): UseChallengesReturn => {
   }, [refreshChallenges]);
 
   const completeChallenge = useCallback(async (challengeId: string): Promise<void> => {
-    // Atomic: both store actions called together
-    markChallengeComplete(challengeId);
-    completeInUserStore(challengeId);
-  }, [markChallengeComplete, completeInUserStore]);
+    try {
+      useMusicStore.getState().markChallengeComplete(challengeId);
+      useUserStore.getState().completeChallenge(challengeId);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to complete challenge';
+      setError(message);
+    }
+  }, []);
 
   return {
     challenges,

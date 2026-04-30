@@ -34,7 +34,8 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
   const setCurrentPosition = useMusicStore((state) => state.setCurrentPosition);
   const updateProgress = useMusicStore((state) => state.updateProgress);
   const markChallengeComplete = useMusicStore((state) => state.markChallengeComplete);
-  const addPoints = useUserStore((state) => state.addPoints);
+  // completeChallenge marks the challenge in userStore. Points are handled
+  // separately by usePointsCounter (proportional accumulation, Constitution Rule #5).
   const completeChallenge = useUserStore((state) => state.completeChallenge);
 
   // Track playback state changes
@@ -46,34 +47,39 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
         ? playbackState.state
         : playbackState;
     const isCurrentlyPlaying = state === State.Playing;
-    if (isCurrentlyPlaying !== isPlaying) {
+    // Read current store value directly to avoid including isPlaying in deps,
+    // which would create a write→re-render→read→write loop.
+    if (isCurrentlyPlaying !== useMusicStore.getState().isPlaying) {
       setIsPlaying(isCurrentlyPlaying);
     }
-  }, [playbackState, isPlaying, setIsPlaying]);
+  }, [playbackState, setIsPlaying]);
+
+  // Extract primitives from currentTrack to avoid re-firing when store creates new object refs.
+  const trackId = currentTrack?.id;
 
   // Update position and calculate progress/points
   useEffect(() => {
-    if (currentTrack && progress.position > 0) {
+    if (trackId && progress.position > 0 && Number.isFinite(progress.duration) && progress.duration > 0) {
       setCurrentPosition(progress.position);
       
-      // Calculate progress percentage
-      const progressPercentage = (progress.position / progress.duration) * 100;
-      updateProgress(currentTrack.id, progressPercentage);
+      // Calculate progress percentage — duration guard above prevents Infinity/NaN
+      const progressPercentage = Math.min((progress.position / progress.duration) * 100, 100);
+      updateProgress(trackId, progressPercentage);
       
-      // Award points and mark complete at 90% threshold.
-      // useRef guard prevents duplicate calls when this effect fires on every progress tick
-      // and Zustand's currentTrack reference is still stale from a previous render cycle.
+      // Mark challenge complete at 90% threshold.
+      // Points are NOT awarded here — usePointsCounter accumulates them
+      // proportionally on each progress tick (Constitution Rule #5).
+      // useRef guard prevents duplicate completion calls across progress ticks.
       if (
         progressPercentage >= 90 &&
-        !completedInSession.current.has(currentTrack.id)
+        !completedInSession.current.has(trackId)
       ) {
-        completedInSession.current.add(currentTrack.id);
-        markChallengeComplete(currentTrack.id);
-        completeChallenge(currentTrack.id);
-        addPoints(currentTrack.points);
+        completedInSession.current.add(trackId);
+        markChallengeComplete(trackId);
+        completeChallenge(trackId);
       }
     }
-  }, [progress.position, progress.duration, currentTrack, setCurrentPosition, updateProgress, markChallengeComplete, completeChallenge, addPoints]);
+  }, [progress.position, progress.duration, trackId, setCurrentPosition, updateProgress, markChallengeComplete, completeChallenge]);
 
   // Handle track player events
   useTrackPlayerEvents([Event.PlaybackError], (event) => {
@@ -83,13 +89,10 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     }
   });
 
-  // Constitution Rule #3: reset TrackPlayer on unmount to release native resources.
-  // If background playback is added later (Bonus Feature #4), revisit this cleanup.
-  useEffect(() => {
-    return () => {
-      TrackPlayer.reset().catch(() => {});
-    };
-  }, []);
+  // Constitution Rule #3 exception: TrackPlayer.reset() is NOT called on unmount.
+  // This hook is shared by HomeScreen + PlayerModal. Unmounting one screen must not
+  // destroy playback state for the other. Playback is paused on modal dismiss instead.
+  // See constitution.md Rule #3 for the documented exception.
 
   const play = useCallback(async (track: MusicChallenge) => {
     // Clear the session guard for this track so the completion logic
@@ -118,7 +121,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Playback failed';
       setError(errorMessage);
-      console.error('TrackPlayer error:', err);
+      if (__DEV__) console.error('TrackPlayer error:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -129,7 +132,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     try {
       await TrackPlayer.pause();
     } catch (err) {
-      console.error('Pause error:', err);
+      if (__DEV__) console.error('Pause error:', err);
     }
   }, []);
 
@@ -137,7 +140,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     try {
       await TrackPlayer.seekTo(seconds);
     } catch (err) {
-      console.error('Seek error:', err);
+      if (__DEV__) console.error('Seek error:', err);
     }
   }, []);
 
@@ -145,7 +148,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     try {
       await TrackPlayer.play();
     } catch (err) {
-      console.error('Resume error:', err);
+      if (__DEV__) console.error('Resume error:', err);
     }
   }, []);
 

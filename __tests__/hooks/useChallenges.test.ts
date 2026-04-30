@@ -72,10 +72,12 @@ describe('useChallenges', () => {
   });
 
   it('sets error when refreshChallenges throws', async () => {
-    // Use spyOn to avoid overwriting the entire store state
-    const spy = jest.spyOn(useMusicStore.getState(), 'loadChallenges').mockImplementation(() => {
-      throw new Error('Network error');
-    });
+    // spyOn targets the state object returned by getState() at this moment.
+    // This works here because no store updates occur between the spy and the
+    // refreshChallenges call — if the store were updated, getState() would
+    // return a new object and the spy would no longer intercept the call.
+    const spy = jest.spyOn(useMusicStore.getState(), 'loadChallenges')
+      .mockImplementation(() => { throw new Error('Network error'); });
 
     const { result } = renderHook(() => useChallenges());
 

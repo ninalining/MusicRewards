@@ -18,17 +18,23 @@ export default function HomeScreen() {
       isPlaying: s.isPlaying,
     }))
   );
-  const { play } = useMusicPlayer();
+  const { play, resume } = useMusicPlayer();
+
+  const currentTrackId = currentTrack?.id;
 
   const handlePlayChallenge = useCallback(async (challenge: MusicChallenge) => {
     try {
-      await play(challenge);
+      if (currentTrackId === challenge.id) {
+        await resume();
+      } else {
+        await play(challenge);
+      }
       router.push('/(modals)/player');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to start playback';
       Alert.alert('Playback Error', message);
     }
-  }, [play]);
+  }, [play, resume, currentTrackId]);
 
   return (
     <View style={styles.container}>
