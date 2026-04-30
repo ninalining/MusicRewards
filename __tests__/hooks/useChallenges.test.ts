@@ -92,6 +92,8 @@ describe('useChallenges', () => {
   });
 
   it('does not update state after unmount', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
     const { result, unmount } = renderHook(() => useChallenges());
 
     await act(async () => {
@@ -101,7 +103,9 @@ describe('useChallenges', () => {
       await promise;
     });
 
-    // No assertion needed — test passes if no "Can't perform state update on unmounted component" warning
-    expect(result.current.loading).toBeDefined();
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining("Can't perform a React state update"),
+    );
+    consoleSpy.mockRestore();
   });
 });

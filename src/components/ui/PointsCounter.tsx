@@ -93,7 +93,7 @@ export const PointsCounter = React.memo<PointsCounterProps>(({
       <Text
         style={styles.value}
         accessibilityRole="text"
-        accessibilityLabel={`${displayValue} ${label ?? 'points'}`}
+        accessibilityLabel={`${displayValue} ${label?.trim() || 'points'}`}
       >
         {displayValue}
       </Text>

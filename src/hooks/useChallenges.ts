@@ -20,7 +20,7 @@ export const useChallenges = (): UseChallengesReturn => {
     setLoading(true);
     setError(null);
     try {
-      // TODO: replace with real API call in Phase 4
+      // TODO: replace with real API call when backend is available (Phase 5+)
       // Simulated async delay — no real API in this phase
       await new Promise<void>((resolve) => setTimeout(resolve, 500));
       if (!isMounted.current) return;
