@@ -1,9 +1,10 @@
 // Tab layout for main navigation
+import React from 'react';
 import { Tabs } from 'expo-router';
-import { Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '../../constants/theme';
 
-export default function TabLayout() {
+export default function TabLayout(): React.ReactElement {
   return (
     <Tabs
       screenOptions={{
@@ -23,22 +24,18 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Challenges',
-          tabBarIcon: ({ color }) => <Text style={[tabStyles.icon, { color }]}>🎵</Text>,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="musical-notes" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <Text style={[tabStyles.icon, { color }]}>👤</Text>,
+          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
         }}
       />
     </Tabs>
   );
 }
-
-const tabStyles = StyleSheet.create({
-  icon: {
-    fontSize: THEME.fonts.sizes.lg,
-  },
-});
