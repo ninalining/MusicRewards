@@ -51,7 +51,7 @@ export default function ProfileScreen() {
             <Text style={styles.statSubvalue}>/ {totalAvailablePoints}</Text>
             <Text style={styles.statLabel}>Total Points</Text>
           </View>
-          <View style={styles.statItem} accessible accessibilityRole="text" accessibilityLabel={`${completedChallenges.length} challenges completed`}>
+          <View style={styles.statItem} accessible accessibilityRole="text" accessibilityLabel={`${completedChallenges.length} ${completedChallenges.length === 1 ? 'challenge' : 'challenges'} completed`}>
             <Text style={styles.statValue}>{completedChallenges.length}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
@@ -155,7 +155,6 @@ const styles = StyleSheet.create({
   statSubvalue: {
     fontSize: THEME.fonts.sizes.sm,
     color: THEME.colors.text.secondary,
-    marginBottom: THEME.spacing.xs,
   },
   progressCard: {
     marginBottom: THEME.spacing.md,
@@ -178,9 +177,6 @@ const styles = StyleSheet.create({
   challengeTitle: {
     fontSize: THEME.fonts.sizes.md,
     color: THEME.colors.text.primary,
-  },
-  challengeStatus: {
-    fontSize: THEME.fonts.sizes.lg,
   },
   challengeStatusCompleted: {
     fontSize: THEME.fonts.sizes.lg,
