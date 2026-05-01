@@ -2,10 +2,10 @@
 
 export const THEME = {
   colors: {
-    primary: '#7553DB',     // Belong purple
-    secondary: '#34CB76',   // Belong green  
-    accent: '#FCBE25',      // Belong yellow
-    background: '#1a1a1a',  // Dark background
+    primary: '#7553DB', // Belong purple
+    secondary: '#34CB76', // Belong green
+    accent: '#FCBE25', // Belong yellow
+    background: '#1a1a1a', // Dark background
     glass: 'rgba(255, 255, 255, 0.1)',
     text: {
       primary: '#FFFFFF',
@@ -17,7 +17,7 @@ export const THEME = {
   },
   fonts: {
     regular: 'System',
-    medium: 'System', 
+    medium: 'System',
     bold: 'System',
     sizes: {
       xs: 12,
@@ -26,7 +26,7 @@ export const THEME = {
       lg: 18,
       xl: 24,
       xxl: 32,
-    }
+    },
   },
   spacing: {
     xs: 4,
@@ -35,6 +35,13 @@ export const THEME = {
     lg: 24,
     xl: 32,
     xxl: 48,
+  },
+  sizing: {
+    buttonHeight: 48,
+    skeletonCardHeight: 120,
+    skeletonTitleHeight: 16,
+    skeletonSubtitleHeight: 12,
+    skeletonChipWidth: 60,
   },
   borderRadius: {
     sm: 8,
@@ -47,8 +54,8 @@ export const THEME = {
       primary: ['rgba(117, 83, 219, 0.3)', 'rgba(117, 83, 219, 0.1)'],
       secondary: ['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)'],
       card: ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)'],
-    }
-  }
+    },
+  },
 };
 
 // Audio playback constants
@@ -65,7 +72,8 @@ export const SAMPLE_CHALLENGES = [
     artist: 'Camo & Krooked',
     duration: 219, // 3:39
     points: 150,
-    audioUrl: 'https://belong-dev-public2.s3.us-east-1.amazonaws.com/misc/Camo-Krooked-All-Night.mp3',
+    audioUrl:
+      'https://belong-dev-public2.s3.us-east-1.amazonaws.com/misc/Camo-Krooked-All-Night.mp3',
     description: 'Listen to this drum & bass classic to earn points',
     difficulty: 'easy' as const,
     completed: false,

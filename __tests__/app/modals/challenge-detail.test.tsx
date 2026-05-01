@@ -48,7 +48,15 @@ jest.mock('../../../src/components/ui/GlassButton', () => {
   const { TouchableOpacity, Text } = require('react-native');
   /* eslint-enable @typescript-eslint/no-require-imports */
 
-  function MockGlassButton({ title, onPress, disabled }: { title: string; onPress: () => void; disabled?: boolean }) {
+  function MockGlassButton({
+    title,
+    onPress,
+    disabled,
+  }: {
+    title: string;
+    onPress: () => void;
+    disabled?: boolean;
+  }) {
     return React.createElement(
       TouchableOpacity,
       { onPress, disabled, accessibilityRole: 'button', accessibilityLabel: title },
@@ -93,6 +101,7 @@ jest.mock('../../../src/stores/musicStore', () => ({
 }));
 
 // Import after all mocks
+// eslint-disable-next-line import/first
 import ChallengeDetailModal from '../../../src/app/(modals)/challenge-detail';
 
 describe('ChallengeDetailModal', () => {

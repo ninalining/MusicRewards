@@ -46,8 +46,8 @@ export const useUserStore = create<UserStore>()(
     {
       name: 'user-store',
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 );
 
 // Selector functions

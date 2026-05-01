@@ -16,10 +16,6 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
   const prevAwardedRef = useRef<number>(0);
 
   const addPoints = useUserStore((s) => s.addPoints);
-  // currentPoints subscribes to totalPoints for reactive display in callers.
-  // No circular re-render risk: the points effect depends on trackProgress.position,
-  // not on totalPoints — so a re-render from addPoints does NOT re-trigger the effect.
-  const currentPoints = useUserStore((s) => s.totalPoints);
 
   const trackProgress = useProgress(PROGRESS_POLL_INTERVAL_MS);
 
@@ -34,9 +30,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     // When position is ≥99% of duration, award full points — trackProgress.position
     // rarely equals durationSeconds exactly, so Math.floor would cap at totalPoints-1.
     const ratio = position / durationSeconds;
-    const newEarned = ratio >= NEAR_COMPLETE_RATIO
-      ? totalPoints
-      : Math.floor(ratio * totalPoints);
+    const newEarned = ratio >= NEAR_COMPLETE_RATIO ? totalPoints : Math.floor(ratio * totalPoints);
     const clamped = Math.min(newEarned, totalPoints);
     const delta = clamped - prevAwardedRef.current;
 
@@ -66,14 +60,17 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     prevAwardedRef.current = 0;
   }, []);
 
-  const startCounting = useCallback((config: PointsCounterConfig): void => {
-    // Stop any existing session and reset local state before starting new session.
-    // resetProgress must be called so Math.max on setProgress doesn't carry over stale values.
-    stopCounting();
-    configRef.current = config;
-    resetProgress();
-    setIsActive(true);
-  }, [stopCounting, resetProgress]);
+  const startCounting = useCallback(
+    (config: PointsCounterConfig): void => {
+      // Stop any existing session and reset local state before starting new session.
+      // resetProgress must be called so Math.max on setProgress doesn't carry over stale values.
+      stopCounting();
+      configRef.current = config;
+      resetProgress();
+      setIsActive(true);
+    },
+    [stopCounting, resetProgress],
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -83,7 +80,6 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
   }, [stopCounting]);
 
   return {
-    currentPoints,
     pointsEarned,
     progress,
     isActive,

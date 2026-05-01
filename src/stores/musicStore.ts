@@ -44,7 +44,7 @@ export const useMusicStore = create<MusicStore>()(
           challenges: state.challenges.map((challenge) =>
             challenge.id === challengeId
               ? { ...challenge, progress: Math.min(progress, 100) }
-              : challenge
+              : challenge,
           ),
         }));
       },
@@ -53,13 +53,13 @@ export const useMusicStore = create<MusicStore>()(
         set((state) => ({
           challenges: state.challenges.map((challenge) =>
             challenge.id === challengeId
-              ? { 
-                  ...challenge, 
-                  completed: true, 
+              ? {
+                  ...challenge,
+                  completed: true,
                   progress: 100,
-                  completedAt: new Date().toISOString()
+                  completedAt: new Date().toISOString(),
                 }
-              : challenge
+              : challenge,
           ),
         }));
       },
@@ -79,8 +79,8 @@ export const useMusicStore = create<MusicStore>()(
       partialize: (state) => ({
         challenges: state.challenges,
       }),
-    }
-  )
+    },
+  ),
 );
 
 // Selector functions for performance

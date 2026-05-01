@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { ChallengeList } from '../../components/challenge/ChallengeList';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { useChallenges } from '../../hooks/useChallenges';
 import { useMusicStore } from '../../stores/musicStore';
@@ -16,7 +17,7 @@ export default function HomeScreen() {
     useShallow((s) => ({
       currentTrack: s.currentTrack,
       isPlaying: s.isPlaying,
-    }))
+    })),
   );
   const { play, resume } = useMusicPlayer();
 
@@ -26,34 +27,39 @@ export default function HomeScreen() {
     router.push(`/(modals)/challenge-detail?challengeId=${challenge.id}`);
   }, []);
 
-  const handlePlayChallenge = useCallback(async (challenge: MusicChallenge) => {
-    try {
-      if (currentTrackId === challenge.id) {
-        await resume();
-      } else {
-        await play(challenge);
+  const handlePlayChallenge = useCallback(
+    async (challenge: MusicChallenge): Promise<void> => {
+      try {
+        if (currentTrackId === challenge.id) {
+          await resume();
+        } else {
+          await play(challenge);
+        }
+        router.push('/(modals)/player');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to start playback';
+        Alert.alert('Playback Error', message);
       }
-      router.push('/(modals)/player');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to start playback';
-      Alert.alert('Playback Error', message);
-    }
-  }, [play, resume, currentTrackId]);
+    },
+    [play, resume, currentTrackId],
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Music Challenges</Text>
-      <Text style={styles.subtitle}>
-        Complete listening challenges to earn points and unlock achievements
-      </Text>
-      <ChallengeList
-        challenges={challenges}
-        loading={loading}
-        onPlay={handlePlayChallenge}
-        onPressChallenge={handlePressChallenge}
-        currentTrackId={currentTrack?.id}
-        isPlaying={isPlaying}
-      />
+      <ErrorBoundary>
+        <Text style={styles.header}>Music Challenges</Text>
+        <Text style={styles.subtitle}>
+          Complete listening challenges to earn points and unlock achievements
+        </Text>
+        <ChallengeList
+          challenges={challenges}
+          loading={loading}
+          onPlay={handlePlayChallenge}
+          onPressChallenge={handlePressChallenge}
+          currentTrackId={currentTrack?.id}
+          isPlaying={isPlaying}
+        />
+      </ErrorBoundary>
     </View>
   );
 }

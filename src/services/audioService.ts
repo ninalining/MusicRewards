@@ -15,7 +15,16 @@ export const setupTrackPlayer = async (): Promise<void> => {
         waitForBuffer: true,
         maxCacheSize: 1024 * 10,
       });
+    } catch (error: unknown) {
+      // setupPlayer throws when already initialized — this is safe to ignore.
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes('already been initialized')) {
+        setupPromise = null;
+        throw error;
+      }
+    }
 
+    try {
       await TrackPlayer.updateOptions({
         capabilities: [
           Capability.Play,
@@ -30,10 +39,8 @@ export const setupTrackPlayer = async (): Promise<void> => {
         },
         notificationCapabilities: [Capability.Play, Capability.Pause],
       });
-    } catch (error) {
-      // Reset so a future call can retry
+    } catch (error: unknown) {
       setupPromise = null;
-      console.error('TrackPlayer setup error:', error);
       throw error;
     }
   })();
@@ -120,5 +127,8 @@ export const cleanupTrackPlayer = async (): Promise<void> => {
     await TrackPlayer.reset();
   } catch (error) {
     console.error('Cleanup error:', error);
+  } finally {
+    // Allow re-initialization after cleanup (e.g. hot reload)
+    setupPromise = null;
   }
 };

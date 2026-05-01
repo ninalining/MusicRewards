@@ -16,7 +16,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
   // TrackPlayer hooks
   const playbackState = usePlaybackState();
   const progress = useProgress(250);
-  
+
   // Local state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +25,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
   // useRef (not useState) so updates don't trigger re-renders and are
   // immune to stale Zustand closures between render cycles.
   const completedInSession = useRef<Set<string>>(new Set());
-  
+
   // Zustand store selectors
   const currentTrack = useMusicStore(selectCurrentTrack);
   const isPlaying = useMusicStore(selectIsPlaying);
@@ -59,27 +59,37 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
 
   // Update position and calculate progress/points
   useEffect(() => {
-    if (trackId && progress.position > 0 && Number.isFinite(progress.duration) && progress.duration > 0) {
+    if (
+      trackId &&
+      progress.position > 0 &&
+      Number.isFinite(progress.duration) &&
+      progress.duration > 0
+    ) {
       setCurrentPosition(progress.position);
-      
+
       // Calculate progress percentage — duration guard above prevents Infinity/NaN
       const progressPercentage = Math.min((progress.position / progress.duration) * 100, 100);
       updateProgress(trackId, progressPercentage);
-      
+
       // Mark challenge complete at 90% threshold.
       // Points are NOT awarded here — usePointsCounter accumulates them
       // proportionally on each progress tick (Constitution Rule #5).
       // useRef guard prevents duplicate completion calls across progress ticks.
-      if (
-        progressPercentage >= 90 &&
-        !completedInSession.current.has(trackId)
-      ) {
+      if (progressPercentage >= 90 && !completedInSession.current.has(trackId)) {
         completedInSession.current.add(trackId);
         markChallengeComplete(trackId);
         completeChallenge(trackId);
       }
     }
-  }, [progress.position, progress.duration, trackId, setCurrentPosition, updateProgress, markChallengeComplete, completeChallenge]);
+  }, [
+    progress.position,
+    progress.duration,
+    trackId,
+    setCurrentPosition,
+    updateProgress,
+    markChallengeComplete,
+    completeChallenge,
+  ]);
 
   // Handle track player events
   useTrackPlayerEvents([Event.PlaybackError], (event) => {
@@ -94,39 +104,42 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
   // destroy playback state for the other. Playback is paused on modal dismiss instead.
   // See constitution.md Rule #3 for the documented exception.
 
-  const play = useCallback(async (track: MusicChallenge) => {
-    // Clear the session guard for this track so the completion logic
-    // can fire once in this new play session (while guarding against duplicates).
-    completedInSession.current.delete(track.id);
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Ensure player is initialized before use
-      await setupTrackPlayer();
+  const play = useCallback(
+    async (track: MusicChallenge) => {
+      // Clear the session guard for this track so the completion logic
+      // can fire once in this new play session (while guarding against duplicates).
+      completedInSession.current.delete(track.id);
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Reset and add new track
-      await TrackPlayer.reset();
-      await TrackPlayer.add({
-        id: track.id,
-        url: track.audioUrl,
-        title: track.title,
-        artist: track.artist,
-        duration: track.duration,
-      });
-      
-      // Start playback
-      await TrackPlayer.play();
-      setCurrentTrack(track);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Playback failed';
-      setError(errorMessage);
-      if (__DEV__) console.error('TrackPlayer error:', err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [setCurrentTrack]);
+        // Ensure player is initialized before use
+        await setupTrackPlayer();
+
+        // Reset and add new track
+        await TrackPlayer.reset();
+        await TrackPlayer.add({
+          id: track.id,
+          url: track.audioUrl,
+          title: track.title,
+          artist: track.artist,
+          duration: track.duration,
+        });
+
+        // Start playback
+        await TrackPlayer.play();
+        setCurrentTrack(track);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Playback failed';
+        setError(errorMessage);
+        if (__DEV__) console.error('TrackPlayer error:', err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [setCurrentTrack],
+  );
 
   const pause = useCallback(async () => {
     try {

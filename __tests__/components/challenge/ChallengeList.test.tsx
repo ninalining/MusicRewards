@@ -3,6 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ChallengeList } from '../../../src/components/challenge/ChallengeList';
 import type { MusicChallenge } from '../../../src/types';
 
+jest.useFakeTimers();
+
 jest.mock('../../../src/components/challenge/ChallengeCard', () => {
   // require() is necessary inside jest.mock factories — they are hoisted before ES imports.
   /* eslint-disable @typescript-eslint/no-require-imports */
@@ -10,7 +12,13 @@ jest.mock('../../../src/components/challenge/ChallengeCard', () => {
   const { TouchableOpacity, Text } = require('react-native');
   /* eslint-enable @typescript-eslint/no-require-imports */
 
-  function MockChallengeCard({ challenge, onPlay }: { challenge: { id: string; title: string }; onPlay: (c: unknown) => void }) {
+  function MockChallengeCard({
+    challenge,
+    onPlay,
+  }: {
+    challenge: { id: string; title: string };
+    onPlay: (c: unknown) => void;
+  }) {
     return React.createElement(
       TouchableOpacity,
       {
@@ -61,66 +69,36 @@ describe('ChallengeList', () => {
   });
 
   it('shows ActivityIndicator when loading, hidden list and empty state', () => {
-    render(
-      <ChallengeList
-        challenges={[]}
-        loading={true}
-        onPlay={mockOnPlay}
-      />,
-    );
+    render(<ChallengeList challenges={[]} loading={true} onPlay={mockOnPlay} />);
 
-    // Verify the loading indicator is rendered with correct accessibility attributes
-    const indicator = screen.getByLabelText('Loading challenges');
-    expect(indicator).toBeOnTheScreen();
-    expect(indicator.props.accessibilityRole).toBe('progressbar');
+    // Verify skeleton loading cards are rendered with correct accessibility attributes
+    const skeletons = screen.getAllByLabelText('Loading challenge');
+    expect(skeletons.length).toBe(3);
+    expect(skeletons[0].props.accessibilityRole).toBe('progressbar');
     expect(screen.queryByText('🎵 No challenges available yet')).toBeNull();
   });
 
   it('shows empty state when challenges array is empty and not loading', () => {
-    render(
-      <ChallengeList
-        challenges={[]}
-        loading={false}
-        onPlay={mockOnPlay}
-      />,
-    );
+    render(<ChallengeList challenges={[]} loading={false} onPlay={mockOnPlay} />);
 
     expect(screen.getByText('🎵 No challenges available yet')).toBeOnTheScreen();
   });
 
   it('renders challenge titles when challenges are provided', () => {
-    render(
-      <ChallengeList
-        challenges={[mockChallenge]}
-        loading={false}
-        onPlay={mockOnPlay}
-      />,
-    );
+    render(<ChallengeList challenges={[mockChallenge]} loading={false} onPlay={mockOnPlay} />);
 
     expect(screen.getByText('Chill Vibes')).toBeOnTheScreen();
   });
 
   it('does not show loading indicator or empty state when challenges are present', () => {
-    render(
-      <ChallengeList
-        challenges={[mockChallenge]}
-        loading={false}
-        onPlay={mockOnPlay}
-      />,
-    );
+    render(<ChallengeList challenges={[mockChallenge]} loading={false} onPlay={mockOnPlay} />);
 
     expect(screen.queryByRole('progressbar')).toBeNull();
     expect(screen.queryByText('🎵 No challenges available yet')).toBeNull();
   });
 
   it('calls onPlay with the challenge when a card is pressed', () => {
-    render(
-      <ChallengeList
-        challenges={[mockChallenge]}
-        loading={false}
-        onPlay={mockOnPlay}
-      />,
-    );
+    render(<ChallengeList challenges={[mockChallenge]} loading={false} onPlay={mockOnPlay} />);
 
     fireEvent.press(screen.getByRole('button', { name: 'Chill Vibes' }));
     expect(mockOnPlay).toHaveBeenCalledTimes(1);

@@ -13,9 +13,13 @@ export const formatDuration = (seconds: number): string => {
 /** Map difficulty level to its THEME color. */
 export const getDifficultyColor = (difficulty: MusicChallenge['difficulty']): string => {
   switch (difficulty) {
-    case 'easy': return THEME.colors.secondary;
-    case 'medium': return THEME.colors.accent;
-    case 'hard': return THEME.colors.primary;
-    default: return THEME.colors.text.secondary;
+    case 'easy':
+      return THEME.colors.secondary;
+    case 'medium':
+      return THEME.colors.accent;
+    case 'hard':
+      return THEME.colors.primary;
+    default:
+      return THEME.colors.text.secondary;
   }
 };

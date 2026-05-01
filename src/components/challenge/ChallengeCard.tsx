@@ -15,121 +15,114 @@ interface ChallengeCardProps {
   isPlaying?: boolean;
 }
 
-export const ChallengeCard = React.memo<ChallengeCardProps>(({
-  challenge,
-  onPlay,
-  onPress,
-  isCurrentTrack = false,
-  isPlaying = false,
-}) => {
-  const progressAnim = useRef(new Animated.Value(challenge.progress)).current;
+export const ChallengeCard = React.memo<ChallengeCardProps>(
+  ({ challenge, onPlay, onPress, isCurrentTrack = false, isPlaying = false }) => {
+    const progressAnim = useRef(new Animated.Value(challenge.progress)).current;
 
-  useEffect(() => {
-    Animated.timing(progressAnim, {
-      toValue: challenge.progress,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  }, [challenge.progress, progressAnim]);
+    useEffect(() => {
+      Animated.timing(progressAnim, {
+        toValue: challenge.progress,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }, [challenge.progress, progressAnim]);
 
-  const getButtonTitle = () => {
-    if (challenge.completed) return 'Completed ✓';
-    if (isCurrentTrack && isPlaying) return 'Playing...';
-    if (isCurrentTrack && !isPlaying) return 'Resume';
-    return 'Play Challenge';
-  };
+    const getButtonTitle = () => {
+      if (challenge.completed) return 'Completed ✓';
+      if (isCurrentTrack && isPlaying) return 'Playing...';
+      if (isCurrentTrack && !isPlaying) return 'Resume';
+      return 'Play Challenge';
+    };
 
-  const handleCardPress = useCallback((): void => {
-    onPress?.(challenge);
-  }, [onPress, challenge]);
+    const handleCardPress = useCallback((): void => {
+      onPress?.(challenge);
+    }, [onPress, challenge]);
 
-  const handlePlay = useCallback((): void => {
-    onPlay(challenge);
-  }, [onPlay, challenge]);
+    const handlePlay = useCallback((): void => {
+      onPlay(challenge);
+    }, [onPlay, challenge]);
 
-  return (
-    <GlassCard
-      style={StyleSheet.flatten([
-        styles.card,
-        isCurrentTrack && styles.currentTrackCard
-      ])}
-      gradientColors={
-        isCurrentTrack
-          ? THEME.glass.gradientColors.primary
-          : THEME.glass.gradientColors.card
-      }
-    >
-      <TouchableOpacity
-        onPress={handleCardPress}
-        disabled={!onPress}
-        activeOpacity={onPress ? 0.7 : 1}
-        accessibilityRole="button"
-        accessibilityLabel={`View details for ${challenge.title}`}
+    return (
+      <GlassCard
+        style={StyleSheet.flatten([styles.card, isCurrentTrack && styles.currentTrackCard])}
+        gradientColors={
+          isCurrentTrack ? THEME.glass.gradientColors.primary : THEME.glass.gradientColors.card
+        }
       >
-        <View style={styles.header}>
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>{challenge.title}</Text>
-          <Text style={styles.artist}>{challenge.artist}</Text>
-        </View>
-        <View style={StyleSheet.flatten([
-          styles.difficultyBadge,
-          { backgroundColor: getDifficultyColor(challenge.difficulty) }
-        ])}>
-          <Text style={styles.difficultyText}>
-            {challenge.difficulty.toUpperCase()}
-          </Text>
-        </View>
-      </View>
-
-      <Text style={styles.description} numberOfLines={2}>
-        {challenge.description}
-      </Text>
-
-      <View style={styles.infoRow}>
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Duration</Text>
-          <Text style={styles.infoValue}>{formatDuration(challenge.duration)}</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Points</Text>
-          <Text style={[styles.infoValue, { color: THEME.colors.accent }]}> 
-            {challenge.points}
-          </Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Progress</Text>
-          <Text style={styles.infoValue}>{Math.round(challenge.progress)}%</Text>
-        </View>
-      </View>
-
-      {challenge.progress > 0 && (
-        <View style={styles.progressContainer}>
-          <View style={styles.progressTrack}>
-            <Animated.View
-              style={[
-                styles.progressFill,
-                { width: progressAnim.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: ['0%', '100%'],
-                  extrapolate: 'clamp',
-                }) },
-              ]}
-            />
+        <TouchableOpacity
+          onPress={handleCardPress}
+          disabled={!onPress}
+          activeOpacity={onPress ? 0.7 : 1}
+          accessibilityRole="button"
+          accessibilityLabel={`View details for ${challenge.title}`}
+        >
+          <View style={styles.header}>
+            <View style={styles.titleSection}>
+              <Text style={styles.title}>{challenge.title}</Text>
+              <Text style={styles.artist}>{challenge.artist}</Text>
+            </View>
+            <View
+              style={StyleSheet.flatten([
+                styles.difficultyBadge,
+                { backgroundColor: getDifficultyColor(challenge.difficulty) },
+              ])}
+            >
+              <Text style={styles.difficultyText}>{challenge.difficulty.toUpperCase()}</Text>
+            </View>
           </View>
-        </View>
-      )}
-      </TouchableOpacity>
 
-      <GlassButton
-        title={getButtonTitle()}
-        onPress={handlePlay}
-        variant={isCurrentTrack ? 'primary' : 'secondary'}
-        disabled={challenge.completed}
-        style={styles.playButton}
-      />
-    </GlassCard>
-  );
-});
+          <Text style={styles.description} numberOfLines={2}>
+            {challenge.description}
+          </Text>
+
+          <View style={styles.infoRow}>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Duration</Text>
+              <Text style={styles.infoValue}>{formatDuration(challenge.duration)}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Points</Text>
+              <Text style={[styles.infoValue, { color: THEME.colors.accent }]}>
+                {challenge.points}
+              </Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Progress</Text>
+              <Text style={styles.infoValue}>{Math.round(challenge.progress)}%</Text>
+            </View>
+          </View>
+
+          {challenge.progress > 0 && (
+            <View style={styles.progressContainer}>
+              <View style={styles.progressTrack}>
+                <Animated.View
+                  style={[
+                    styles.progressFill,
+                    {
+                      width: progressAnim.interpolate({
+                        inputRange: [0, 100],
+                        outputRange: ['0%', '100%'],
+                        extrapolate: 'clamp',
+                      }),
+                    },
+                  ]}
+                />
+              </View>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        <GlassButton
+          title={getButtonTitle()}
+          onPress={handlePlay}
+          variant={isCurrentTrack ? 'primary' : 'secondary'}
+          disabled={challenge.completed}
+          style={styles.playButton}
+        />
+      </GlassCard>
+    );
+  },
+);
 
 ChallengeCard.displayName = 'ChallengeCard';
 

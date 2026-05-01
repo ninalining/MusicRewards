@@ -17,67 +17,57 @@ interface PlayerControlsProps {
   onResume: () => void;
 }
 
-export const PlayerControls = React.memo<PlayerControlsProps>(({
-  isPlaying,
-  loading,
-  hasTrack,
-  error,
-  liveProgress,
-  duration,
-  onSeek,
-  onPause,
-  onResume,
-}) => {
-  const handlePlayPause = useCallback((): void => {
-    if (isPlaying) {
-      onPause();
-    } else if (hasTrack) {
-      onResume();
-    }
-  }, [isPlaying, hasTrack, onPause, onResume]);
+export const PlayerControls = React.memo<PlayerControlsProps>(
+  ({ isPlaying, loading, hasTrack, error, liveProgress, duration, onSeek, onPause, onResume }) => {
+    const handlePlayPause = useCallback((): void => {
+      if (isPlaying) {
+        onPause();
+      } else if (hasTrack) {
+        onResume();
+      }
+    }, [isPlaying, hasTrack, onPause, onResume]);
 
-  const handleSeekBack = useCallback((): void => {
-    if (!duration || duration <= 0) return;
-    onSeek(Math.max(0, liveProgress - (10 / duration) * 100));
-  }, [onSeek, liveProgress, duration]);
+    const handleSeekBack = useCallback((): void => {
+      if (!duration || duration <= 0) return;
+      onSeek(Math.max(0, liveProgress - (10 / duration) * 100));
+    }, [onSeek, liveProgress, duration]);
 
-  const handleSeekForward = useCallback((): void => {
-    if (!duration || duration <= 0) return;
-    onSeek(Math.min(100, liveProgress + (10 / duration) * 100));
-  }, [onSeek, liveProgress, duration]);
+    const handleSeekForward = useCallback((): void => {
+      if (!duration || duration <= 0) return;
+      onSeek(Math.min(100, liveProgress + (10 / duration) * 100));
+    }, [onSeek, liveProgress, duration]);
 
-  return (
-    <GlassCard style={styles.controlsCard}>
-      <View style={styles.controlsRow}>
-        <GlassButton
-          title="⏪ -10s"
-          onPress={handleSeekBack}
-          variant="secondary"
-          style={styles.controlButton}
-        />
+    return (
+      <GlassCard style={styles.controlsCard}>
+        <View style={styles.controlsRow}>
+          <GlassButton
+            title="⏪ -10s"
+            onPress={handleSeekBack}
+            variant="secondary"
+            style={styles.controlButton}
+          />
 
-        <GlassButton
-          title={loading ? '...' : isPlaying ? '⏸️ Pause' : '▶️ Play'}
-          onPress={handlePlayPause}
-          variant="primary"
-          style={styles.mainControlButton}
-          loading={loading}
-        />
+          <GlassButton
+            title={loading ? '...' : isPlaying ? '⏸️ Pause' : '▶️ Play'}
+            onPress={handlePlayPause}
+            variant="primary"
+            style={styles.mainControlButton}
+            loading={loading}
+          />
 
-        <GlassButton
-          title="⏩ +10s"
-          onPress={handleSeekForward}
-          variant="secondary"
-          style={styles.controlButton}
-        />
-      </View>
+          <GlassButton
+            title="⏩ +10s"
+            onPress={handleSeekForward}
+            variant="secondary"
+            style={styles.controlButton}
+          />
+        </View>
 
-      {error && (
-        <Text style={styles.errorText}>{error}</Text>
-      )}
-    </GlassCard>
-  );
-});
+        {error && <Text style={styles.errorText}>{error}</Text>}
+      </GlassCard>
+    );
+  },
+);
 
 PlayerControls.displayName = 'PlayerControls';
 
