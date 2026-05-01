@@ -1,4 +1,4 @@
-import { useMusicStore } from '../../src/stores/musicStore';
+import { useMusicStore, selectTotalAvailablePoints } from '../../src/stores/musicStore';
 import { SAMPLE_CHALLENGES } from '../../src/constants/theme';
 
 const initialState = useMusicStore.getState();
@@ -67,5 +67,18 @@ describe('musicStore', () => {
   it('sets currentPosition', () => {
     useMusicStore.getState().setCurrentPosition(42);
     expect(useMusicStore.getState().currentPosition).toBe(42);
+  });
+
+  describe('selectTotalAvailablePoints', () => {
+    it('sums points across all challenges', () => {
+      const total = selectTotalAvailablePoints(useMusicStore.getState());
+      const expected = SAMPLE_CHALLENGES.reduce((sum, c) => sum + c.points, 0);
+      expect(total).toBe(expected);
+    });
+
+    it('returns 0 for an empty challenges array', () => {
+      useMusicStore.setState({ challenges: [] });
+      expect(selectTotalAvailablePoints(useMusicStore.getState())).toBe(0);
+    });
   });
 });
