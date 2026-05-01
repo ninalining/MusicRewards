@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
 import { THEME } from '../../constants/theme';
+import { calculateHitSlop } from '../../utils/accessibility';
 
 // Pure utility — no component state dependency, defined at module scope to avoid recreation.
 const formatTime = (seconds: number): string => {
@@ -54,6 +55,8 @@ export const PlayerProgress = React.memo<PlayerProgressProps>(
           style={styles.progressTrack}
           accessibilityRole="button"
           accessibilityLabel="Seek playback position"
+          accessibilityHint="Double tap to seek to this position"
+          hitSlop={calculateHitSlop(THEME.spacing.sm)}
           onLayout={handleLayout}
           onPress={handleProgressBarPress}
         >

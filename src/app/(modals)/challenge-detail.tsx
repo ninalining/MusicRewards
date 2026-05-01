@@ -126,6 +126,11 @@ export default function ChallengeDetailModal(): React.ReactElement {
           disabled={challenge.completed}
           loading={loading}
           style={styles.playButton}
+          accessibilityHint={
+            challenge.completed
+              ? 'Challenge already completed'
+              : 'Double tap to start playing this challenge'
+          }
         />
       </ScrollView>
     </SafeAreaView>

@@ -45,6 +45,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
             onPress={handleSeekBack}
             variant="secondary"
             style={styles.controlButton}
+            accessibilityHint="Double tap to seek back 10 seconds"
           />
 
           <GlassButton
@@ -53,6 +54,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
             variant="primary"
             style={styles.mainControlButton}
             loading={loading}
+            accessibilityHint={isPlaying ? 'Double tap to pause' : 'Double tap to play'}
           />
 
           <GlassButton
@@ -60,6 +62,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
             onPress={handleSeekForward}
             variant="secondary"
             style={styles.controlButton}
+            accessibilityHint="Double tap to seek forward 10 seconds"
           />
         </View>
 
