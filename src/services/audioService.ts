@@ -15,27 +15,29 @@ export const setupTrackPlayer = async (): Promise<void> => {
         waitForBuffer: true,
         maxCacheSize: 1024 * 10,
       });
-
-      await TrackPlayer.updateOptions({
-        capabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.SkipToNext,
-          Capability.SkipToPrevious,
-          Capability.SeekTo,
-        ],
-        compactCapabilities: [Capability.Play, Capability.Pause],
-        android: {
-          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
-        },
-        notificationCapabilities: [Capability.Play, Capability.Pause],
-      });
-    } catch (error) {
-      // Reset so a future call can retry
-      setupPromise = null;
-      console.error('TrackPlayer setup error:', error);
-      throw error;
+    } catch (error: unknown) {
+      // setupPlayer throws when already initialized — this is safe to ignore.
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes('already been initialized')) {
+        setupPromise = null;
+        throw error;
+      }
     }
+
+    await TrackPlayer.updateOptions({
+      capabilities: [
+        Capability.Play,
+        Capability.Pause,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
+        Capability.SeekTo,
+      ],
+      compactCapabilities: [Capability.Play, Capability.Pause],
+      android: {
+        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+      },
+      notificationCapabilities: [Capability.Play, Capability.Pause],
+    });
   })();
 
   return setupPromise;
@@ -120,5 +122,8 @@ export const cleanupTrackPlayer = async (): Promise<void> => {
     await TrackPlayer.reset();
   } catch (error) {
     console.error('Cleanup error:', error);
+  } finally {
+    // Allow re-initialization after cleanup (e.g. hot reload)
+    setupPromise = null;
   }
 };
