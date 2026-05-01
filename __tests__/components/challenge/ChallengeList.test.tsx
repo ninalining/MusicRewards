@@ -3,6 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ChallengeList } from '../../../src/components/challenge/ChallengeList';
 import type { MusicChallenge } from '../../../src/types';
 
+jest.useFakeTimers();
+
 jest.mock('../../../src/components/challenge/ChallengeCard', () => {
   // require() is necessary inside jest.mock factories — they are hoisted before ES imports.
   /* eslint-disable @typescript-eslint/no-require-imports */

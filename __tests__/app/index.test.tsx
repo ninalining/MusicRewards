@@ -2,6 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import type { MusicChallenge } from '../../src/types';
 
+jest.useFakeTimers();
+
 // Mock expo-router
 jest.mock('expo-router', () => ({
   router: { push: jest.fn() },
