@@ -81,8 +81,8 @@ export default function PlayerModal(): React.ReactElement {
 
   // Pause playback and stop counting on unmount — prevents music playing
   // without earning points after the modal is dismissed.
-  // Resources released: TrackPlayer paused (not reset — Constitution Rule #3
-  // exception), points counter deactivated (no more delta awards).
+  // Resources released: TrackPlayer paused (not reset — Constitution Rule #3 exception),
+  // points counter deactivated (no more delta awards).
   useEffect(() => {
     return () => {
       pauseRef.current();

@@ -53,9 +53,9 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(
           onPress={handleCardPress}
           disabled={!onPress}
           activeOpacity={onPress ? 0.7 : 1}
-          accessibilityRole="button"
-          accessibilityLabel={`View details for ${challenge.title}`}
-          accessibilityHint="Double tap to view challenge details"
+          accessibilityRole={onPress ? 'button' : undefined}
+          accessibilityLabel={onPress ? `View details for ${challenge.title}` : undefined}
+          accessibilityHint={onPress ? 'Double tap to view challenge details' : undefined}
         >
           <View style={styles.header}>
             <View style={styles.titleSection}>
