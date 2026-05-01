@@ -47,8 +47,8 @@ export default function PlayerModal() {
 
     if (isPlaying) {
       // Only call startCounting (which resets progress) when the track changes.
-      // On resume, just re-activate via startCounting with the same config —
-      // usePointsCounter now skips reset when challengeId hasn't changed.
+      // On resume of the same track, call resumeCounting() which re-activates
+      // without resetting accumulated progress.
       if (activeSessionRef.current !== currentTrackId) {
         activeSessionRef.current = currentTrackId;
         startCounting({
@@ -97,9 +97,13 @@ export default function PlayerModal() {
     [duration, seekTo],
   );
 
-  const handleRetry = useCallback((): void => {
-    if (currentTrack) {
-      play(currentTrack);
+  const handleRetry = useCallback(async (): Promise<void> => {
+    if (!currentTrack) return;
+    try {
+      await play(currentTrack);
+    } catch {
+      // play() already sets error state internally; catch here to prevent
+      // an unhandled promise rejection from the retry button.
     }
   }, [currentTrack, play]);
 
@@ -163,7 +167,7 @@ export default function PlayerModal() {
             isPlaying={isPlaying}
             loading={loading}
             hasTrack={true}
-            error={error}
+            error={null}
             liveProgress={liveProgress}
             duration={duration}
             onSeek={handleSeek}

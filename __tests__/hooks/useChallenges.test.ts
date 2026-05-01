@@ -61,9 +61,7 @@ describe('useChallenges', () => {
     });
 
     // musicStore: challenge should be marked complete
-    const challenge = useMusicStore
-      .getState()
-      .challenges.find((c) => c.id === challengeId);
+    const challenge = useMusicStore.getState().challenges.find((c) => c.id === challengeId);
     expect(challenge?.completed).toBe(true);
     expect(challenge?.progress).toBe(100);
 
@@ -76,8 +74,9 @@ describe('useChallenges', () => {
     // This works here because no store updates occur between the spy and the
     // refreshChallenges call — if the store were updated, getState() would
     // return a new object and the spy would no longer intercept the call.
-    const spy = jest.spyOn(useMusicStore.getState(), 'loadChallenges')
-      .mockImplementation(() => { throw new Error('Network error'); });
+    const spy = jest.spyOn(useMusicStore.getState(), 'loadChallenges').mockImplementation(() => {
+      throw new Error('Network error');
+    });
 
     const { result } = renderHook(() => useChallenges());
 

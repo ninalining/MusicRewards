@@ -23,14 +23,20 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     this.state = { hasError: false, errorMessage: '' };
   }
 
+  private static getUserFacingMessage(error: unknown): string {
+    if (__DEV__) {
+      return error instanceof Error ? error.message : String(error);
+    }
+    return 'Something went wrong. Please try again.';
+  }
+
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
-    return { hasError: true, errorMessage: String(error) };
+    return { hasError: true, errorMessage: ErrorBoundary.getUserFacingMessage(error) };
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo): void {
-    if (__DEV__) {
-      console.error('ErrorBoundary caught:', error, info.componentStack);
-    }
+    // Always log for diagnostics; console.error is stripped in production builds.
+    console.error('ErrorBoundary caught:', error, info.componentStack);
   }
 
   private handleRetry = (): void => {
@@ -44,7 +50,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       }
 
       return (
-        <View style={styles.container} accessibilityRole="alert">
+        <View
+          style={styles.container}
+          accessibilityRole="alert"
+          accessibilityLabel="Something went wrong"
+        >
           <GlassCard style={styles.card}>
             <Text style={styles.icon} accessible={false}>
               ⚠️

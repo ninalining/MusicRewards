@@ -24,20 +24,25 @@ export const setupTrackPlayer = async (): Promise<void> => {
       }
     }
 
-    await TrackPlayer.updateOptions({
-      capabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.SkipToNext,
-        Capability.SkipToPrevious,
-        Capability.SeekTo,
-      ],
-      compactCapabilities: [Capability.Play, Capability.Pause],
-      android: {
-        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
-      },
-      notificationCapabilities: [Capability.Play, Capability.Pause],
-    });
+    try {
+      await TrackPlayer.updateOptions({
+        capabilities: [
+          Capability.Play,
+          Capability.Pause,
+          Capability.SkipToNext,
+          Capability.SkipToPrevious,
+          Capability.SeekTo,
+        ],
+        compactCapabilities: [Capability.Play, Capability.Pause],
+        android: {
+          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+        },
+        notificationCapabilities: [Capability.Play, Capability.Pause],
+      });
+    } catch (error: unknown) {
+      setupPromise = null;
+      throw error;
+    }
   })();
 
   return setupPromise;
