@@ -34,6 +34,9 @@ export const useChallenges = (): UseChallengesReturn => {
   useEffect(() => {
     isMounted.current = true;
     refreshChallenges();
+    // Cleanup: mark unmounted so in-flight refreshChallenges() calls skip
+    // setState — prevents "Can't perform a React state update on an unmounted
+    // component" warnings and stale data writes.
     return () => {
       isMounted.current = false;
     };
