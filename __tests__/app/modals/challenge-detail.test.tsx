@@ -93,6 +93,7 @@ jest.mock('../../../src/stores/musicStore', () => ({
 }));
 
 // Import after all mocks
+// eslint-disable-next-line import/first
 import ChallengeDetailModal from '../../../src/app/(modals)/challenge-detail';
 
 describe('ChallengeDetailModal', () => {

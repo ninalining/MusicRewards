@@ -5,7 +5,7 @@ import TrackPlayer, { Event } from 'react-native-track-player';
 export default async function playbackService() {
   // This service needs to be registered in order for the TrackPlayer to work
   // when the app is in the background
-  
+
   TrackPlayer.addEventListener(Event.RemotePause, () => {
     TrackPlayer.pause();
   });

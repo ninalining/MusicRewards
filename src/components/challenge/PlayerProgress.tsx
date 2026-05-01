@@ -1,12 +1,6 @@
 // PlayerProgress — progress bar, time display, and percentage for the player modal
 import React, { useCallback, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
 import { THEME } from '../../constants/theme';
 
@@ -24,73 +18,71 @@ interface PlayerProgressProps {
   onSeek: (percentage: number) => void;
 }
 
-export const PlayerProgress = React.memo<PlayerProgressProps>(({
-  liveProgress,
-  currentPosition,
-  duration,
-  onSeek,
-}) => {
-  const progressBarWidth = useRef<number>(0);
-  const progressAnim = useRef(new Animated.Value(0)).current;
+export const PlayerProgress = React.memo<PlayerProgressProps>(
+  ({ liveProgress, currentPosition, duration, onSeek }) => {
+    const progressBarWidth = useRef<number>(0);
+    const progressAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    progressAnim.stopAnimation();
-    Animated.timing(progressAnim, {
-      toValue: liveProgress,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  }, [liveProgress, progressAnim]);
+    useEffect(() => {
+      progressAnim.stopAnimation();
+      Animated.timing(progressAnim, {
+        toValue: liveProgress,
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    }, [liveProgress, progressAnim]);
 
-  const handleProgressBarPress = useCallback((event: { nativeEvent: { locationX: number } }): void => {
-    if (progressBarWidth.current === 0) return;
-    const rawPercentage = (event.nativeEvent.locationX / progressBarWidth.current) * 100;
-    const percentage = Math.max(0, Math.min(100, rawPercentage));
-    onSeek(percentage);
-  }, [onSeek]);
+    const handleProgressBarPress = useCallback(
+      (event: { nativeEvent: { locationX: number } }): void => {
+        if (progressBarWidth.current === 0) return;
+        const rawPercentage = (event.nativeEvent.locationX / progressBarWidth.current) * 100;
+        const percentage = Math.max(0, Math.min(100, rawPercentage));
+        onSeek(percentage);
+      },
+      [onSeek],
+    );
 
-  const handleLayout = useCallback((e: { nativeEvent: { layout: { width: number } } }): void => {
-    progressBarWidth.current = e.nativeEvent.layout.width;
-  }, []);
+    const handleLayout = useCallback((e: { nativeEvent: { layout: { width: number } } }): void => {
+      progressBarWidth.current = e.nativeEvent.layout.width;
+    }, []);
 
-  return (
-    <GlassCard style={styles.progressCard}>
-      <Text style={styles.progressLabel}>Listening Progress</Text>
+    return (
+      <GlassCard style={styles.progressCard}>
+        <Text style={styles.progressLabel}>Listening Progress</Text>
 
-      <TouchableOpacity
-        style={styles.progressTrack}
-        accessibilityRole="button"
-        accessibilityLabel="Seek playback position"
-        onLayout={handleLayout}
-        onPress={handleProgressBarPress}
-      >
-        <View style={styles.progressBackground}>
-          <Animated.View
-            style={[
-              styles.progressFill,
-              {
-                width: progressAnim.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: ['0%', '100%'],
-                  extrapolate: 'clamp',
-                }),
-              },
-            ]}
-          />
+        <TouchableOpacity
+          style={styles.progressTrack}
+          accessibilityRole="button"
+          accessibilityLabel="Seek playback position"
+          onLayout={handleLayout}
+          onPress={handleProgressBarPress}
+        >
+          <View style={styles.progressBackground}>
+            <Animated.View
+              style={[
+                styles.progressFill,
+                {
+                  width: progressAnim.interpolate({
+                    inputRange: [0, 100],
+                    outputRange: ['0%', '100%'],
+                    extrapolate: 'clamp',
+                  }),
+                },
+              ]}
+            />
+          </View>
+        </TouchableOpacity>
+
+        <View style={styles.timeContainer}>
+          <Text style={styles.timeText}>{formatTime(currentPosition)}</Text>
+          <Text style={styles.timeText}>{formatTime(duration)}</Text>
         </View>
-      </TouchableOpacity>
 
-      <View style={styles.timeContainer}>
-        <Text style={styles.timeText}>{formatTime(currentPosition)}</Text>
-        <Text style={styles.timeText}>{formatTime(duration)}</Text>
-      </View>
-
-      <Text style={styles.progressPercentage}>
-        {Math.round(liveProgress)}% Complete
-      </Text>
-    </GlassCard>
-  );
-});
+        <Text style={styles.progressPercentage}>{Math.round(liveProgress)}% Complete</Text>
+      </GlassCard>
+    );
+  },
+);
 
 PlayerProgress.displayName = 'PlayerProgress';
 

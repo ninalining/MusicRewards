@@ -30,23 +30,28 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   textStyle,
   variant = 'primary',
 }) => {
-  const gradientColors = variant === 'primary'
-    ? THEME.glass.gradientColors.primary
-    : THEME.glass.gradientColors.secondary;
+  const gradientColors =
+    variant === 'primary'
+      ? THEME.glass.gradientColors.primary
+      : THEME.glass.gradientColors.secondary;
 
   return (
-    <GlassCard
-      gradientColors={gradientColors}
-      style={StyleSheet.flatten([styles.button, style])}
-    >
+    <GlassCard gradientColors={gradientColors} style={StyleSheet.flatten([styles.button, style])}>
       <TouchableOpacity
         onPress={onPress}
         disabled={disabled || loading}
         style={styles.buttonContent}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={title}
       >
         {loading ? (
-          <ActivityIndicator color={THEME.colors.text.primary} size="small" />
+          <ActivityIndicator
+            color={THEME.colors.text.primary}
+            size="small"
+            accessibilityRole="progressbar"
+            accessibilityLabel={`Loading ${title}`}
+          />
         ) : (
           <Text style={[styles.buttonText, textStyle]}>{title}</Text>
         )}
@@ -57,7 +62,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    height: 48,
+    height: THEME.sizing.buttonHeight,
     justifyContent: 'center',
     alignItems: 'center',
   },

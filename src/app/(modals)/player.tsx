@@ -1,30 +1,29 @@
 // Player modal - Full-screen audio player (Expo Router modal)
 import React, { useCallback, useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GlassCard } from '../../components/ui/GlassCard';
+import { GlassButton } from '../../components/ui/GlassButton';
 import { PointsCounter } from '../../components/ui/PointsCounter';
 import { PlayerProgress } from '../../components/challenge/PlayerProgress';
 import { PlayerControls } from '../../components/challenge/PlayerControls';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { usePointsCounter } from '../../hooks/usePointsCounter';
 import { THEME } from '../../constants/theme';
 
 export default function PlayerModal() {
-  const { 
-    currentTrack, 
-    isPlaying, 
-    currentPosition, 
-    duration, 
-    pause, 
-    resume, 
+  const {
+    currentTrack,
+    isPlaying,
+    currentPosition,
+    duration,
+    play,
+    pause,
+    resume,
     seekTo,
     loading,
-    error 
+    error,
   } = useMusicPlayer();
 
   const {
@@ -52,14 +51,26 @@ export default function PlayerModal() {
       // usePointsCounter now skips reset when challengeId hasn't changed.
       if (activeSessionRef.current !== currentTrackId) {
         activeSessionRef.current = currentTrackId;
-        startCounting({ totalPoints: currentTrackPoints, durationSeconds: duration, challengeId: currentTrackId });
+        startCounting({
+          totalPoints: currentTrackPoints,
+          durationSeconds: duration,
+          challengeId: currentTrackId,
+        });
       } else {
         resumeCounting();
       }
     } else {
       stopCounting();
     }
-  }, [isPlaying, currentTrackId, currentTrackPoints, duration, startCounting, stopCounting, resumeCounting]);
+  }, [
+    isPlaying,
+    currentTrackId,
+    currentTrackPoints,
+    duration,
+    startCounting,
+    stopCounting,
+    resumeCounting,
+  ]);
 
   // Refs capture latest callbacks so the unmount cleanup always calls the
   // current version — avoids stale closure and effect churn if identities change.
@@ -77,80 +88,108 @@ export default function PlayerModal() {
     };
   }, []);
 
-  const handleSeek = useCallback((percentage: number): void => {
-    if (duration) {
-      seekTo((percentage / 100) * duration);
+  const handleSeek = useCallback(
+    (percentage: number): void => {
+      if (duration) {
+        seekTo((percentage / 100) * duration);
+      }
+    },
+    [duration, seekTo],
+  );
+
+  const handleRetry = useCallback((): void => {
+    if (currentTrack) {
+      play(currentTrack);
     }
-  }, [duration, seekTo]);
+  }, [currentTrack, play]);
 
   if (!currentTrack) {
     return (
       <SafeAreaView style={styles.container}>
-        <GlassCard style={styles.noTrackCard}>
-          <Text style={styles.noTrackText}>No track selected</Text>
-          <Text style={styles.noTrackSubtext}>
-            Go back and select a challenge to start playing music
-          </Text>
-        </GlassCard>
+        <ErrorBoundary>
+          <GlassCard style={styles.noTrackCard}>
+            <Text style={styles.noTrackText}>No track selected</Text>
+            <Text style={styles.noTrackSubtext}>
+              Go back and select a challenge to start playing music
+            </Text>
+          </GlassCard>
+        </ErrorBoundary>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Track Info */}
-        <GlassCard style={styles.trackInfoCard}>
-          <Text style={styles.trackTitle}>{currentTrack.title}</Text>
-          <Text style={styles.trackArtist}>{currentTrack.artist}</Text>
-          <Text style={styles.trackDescription}>{currentTrack.description}</Text>
-          
-          <View style={styles.pointsContainer}>
-            <Text style={styles.pointsLabel}>Points Earned</Text>
-            <View style={styles.pointsRow}>
-              <PointsCounter points={pointsEarned} style={styles.pointsCounter} />
-              <Text style={styles.pointsTotal}> / {currentTrack.points} pts</Text>
+      <ErrorBoundary>
+        <View style={styles.content}>
+          {/* Track Info */}
+          <GlassCard style={styles.trackInfoCard}>
+            <Text style={styles.trackTitle}>{currentTrack.title}</Text>
+            <Text style={styles.trackArtist}>{currentTrack.artist}</Text>
+            <Text style={styles.trackDescription}>{currentTrack.description}</Text>
+
+            <View style={styles.pointsContainer}>
+              <Text style={styles.pointsLabel}>Points Earned</Text>
+              <View style={styles.pointsRow}>
+                <PointsCounter points={pointsEarned} style={styles.pointsCounter} />
+                <Text style={styles.pointsTotal}> / {currentTrack.points} pts</Text>
+              </View>
             </View>
-          </View>
-        </GlassCard>
+          </GlassCard>
 
-        {/* Progress Section */}
-        <PlayerProgress
-          liveProgress={liveProgress}
-          currentPosition={currentPosition}
-          duration={duration}
-          onSeek={handleSeek}
-        />
+          {/* Error Banner */}
+          {error && (
+            <GlassCard style={styles.errorBanner}>
+              <Text style={styles.errorText}>{error}</Text>
+              <GlassButton
+                title="Retry"
+                onPress={handleRetry}
+                variant="secondary"
+                style={styles.retryButton}
+              />
+            </GlassCard>
+          )}
 
-        {/* Controls */}
-        <PlayerControls
-          isPlaying={isPlaying}
-          loading={loading}
-          hasTrack={true}
-          error={error}
-          liveProgress={liveProgress}
-          duration={duration}
-          onSeek={handleSeek}
-          onPause={pause}
-          onResume={resume}
-        />
+          {/* Progress Section */}
+          <PlayerProgress
+            liveProgress={liveProgress}
+            currentPosition={currentPosition}
+            duration={duration}
+            onSeek={handleSeek}
+          />
 
-        {/* Challenge Status */}
-        <GlassCard style={styles.challengeCard}>
-          <Text style={styles.challengeLabel}>Challenge Status</Text>
-          <View style={styles.challengeInfo}>
-            <Text style={[
-              styles.challengeStatus,
-              { color: currentTrack.completed ? THEME.colors.secondary : THEME.colors.accent }
-            ]}>
-              {currentTrack.completed ? '✅ Completed' : '🎧 In Progress'}
-            </Text>
-            <Text style={styles.challengeProgress}>
-              {Math.round(liveProgress)}% of challenge complete
-            </Text>
-          </View>
-        </GlassCard>
-      </View>
+          {/* Controls */}
+          <PlayerControls
+            isPlaying={isPlaying}
+            loading={loading}
+            hasTrack={true}
+            error={error}
+            liveProgress={liveProgress}
+            duration={duration}
+            onSeek={handleSeek}
+            onPause={pause}
+            onResume={resume}
+          />
+
+          {/* Challenge Status */}
+          <GlassCard style={styles.challengeCard}>
+            <Text style={styles.challengeLabel}>Challenge Status</Text>
+            <View style={styles.challengeInfo}>
+              <Text
+                style={[
+                  styles.challengeStatus,
+                  { color: currentTrack.completed ? THEME.colors.secondary : THEME.colors.accent },
+                ]}
+              >
+                {currentTrack.completed ? '✅ Completed' : '🎧 In Progress'}
+              </Text>
+              <Text style={styles.challengeProgress}>
+                {Math.round(liveProgress)}% of challenge complete
+              </Text>
+            </View>
+          </GlassCard>
+        </View>
+      </ErrorBoundary>
     </SafeAreaView>
   );
 }
@@ -240,5 +279,20 @@ const styles = StyleSheet.create({
   challengeProgress: {
     fontSize: THEME.fonts.sizes.sm,
     color: THEME.colors.text.secondary,
+  },
+  errorBanner: {
+    marginHorizontal: THEME.spacing.md,
+    marginTop: THEME.spacing.sm,
+    padding: THEME.spacing.md,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: THEME.colors.accent,
+    fontSize: THEME.fonts.sizes.sm,
+    textAlign: 'center',
+    marginBottom: THEME.spacing.sm,
+  },
+  retryButton: {
+    minWidth: 120,
   },
 });

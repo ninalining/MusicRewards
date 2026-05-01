@@ -69,10 +69,10 @@ describe('ChallengeList', () => {
       />,
     );
 
-    // Verify the loading indicator is rendered with correct accessibility attributes
-    const indicator = screen.getByLabelText('Loading challenges');
-    expect(indicator).toBeOnTheScreen();
-    expect(indicator.props.accessibilityRole).toBe('progressbar');
+    // Verify skeleton loading cards are rendered with correct accessibility attributes
+    const skeletons = screen.getAllByLabelText('Loading challenge');
+    expect(skeletons.length).toBe(3);
+    expect(skeletons[0].props.accessibilityRole).toBe('progressbar');
     expect(screen.queryByText('🎵 No challenges available yet')).toBeNull();
   });
 

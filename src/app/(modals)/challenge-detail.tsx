@@ -12,9 +12,7 @@ import { formatDuration, getDifficultyColor } from '../../utils/challenge';
 
 export default function ChallengeDetailModal(): React.ReactElement {
   const { challengeId } = useLocalSearchParams<{ challengeId: string }>();
-  const challenge = useMusicStore(
-    (s) => s.challenges.find((c) => c.id === challengeId) ?? null,
-  );
+  const challenge = useMusicStore((s) => s.challenges.find((c) => c.id === challengeId) ?? null);
   const { currentTrack, play, resume, loading } = useMusicPlayer();
 
   const isCurrentTrack = currentTrack?.id === challengeId;
@@ -61,10 +59,12 @@ export default function ChallengeDetailModal(): React.ReactElement {
               <Text style={styles.title}>{challenge.title}</Text>
               <Text style={styles.artist}>{challenge.artist}</Text>
             </View>
-            <View style={StyleSheet.flatten([
-              styles.difficultyBadge,
-              { backgroundColor: getDifficultyColor(challenge.difficulty) },
-            ])}>
+            <View
+              style={StyleSheet.flatten([
+                styles.difficultyBadge,
+                { backgroundColor: getDifficultyColor(challenge.difficulty) },
+              ])}
+            >
               <Text style={styles.difficultyText} accessibilityRole="text">
                 {challenge.difficulty.toUpperCase()}
               </Text>
@@ -76,23 +76,29 @@ export default function ChallengeDetailModal(): React.ReactElement {
 
         <GlassCard style={styles.statsCard}>
           <View style={styles.infoRow}>
-            <View style={styles.infoItem} accessible accessibilityLabel={`Duration: ${formatDuration(challenge.duration)}`}>
+            <View
+              style={styles.infoItem}
+              accessible
+              accessibilityLabel={`Duration: ${formatDuration(challenge.duration)}`}
+            >
               <Text style={styles.infoLabel}>Duration</Text>
-              <Text style={styles.infoValue}>
-                {formatDuration(challenge.duration)}
-              </Text>
+              <Text style={styles.infoValue}>{formatDuration(challenge.duration)}</Text>
             </View>
-            <View style={styles.infoItem} accessible accessibilityLabel={`Points: ${challenge.points}`}>
+            <View
+              style={styles.infoItem}
+              accessible
+              accessibilityLabel={`Points: ${challenge.points}`}
+            >
               <Text style={styles.infoLabel}>Points</Text>
-              <Text style={[styles.infoValue, styles.pointsValue]}>
-                {challenge.points}
-              </Text>
+              <Text style={[styles.infoValue, styles.pointsValue]}>{challenge.points}</Text>
             </View>
-            <View style={styles.infoItem} accessible accessibilityLabel={`Progress: ${Math.round(challenge.progress)} percent`}>
+            <View
+              style={styles.infoItem}
+              accessible
+              accessibilityLabel={`Progress: ${Math.round(challenge.progress)} percent`}
+            >
               <Text style={styles.infoLabel}>Progress</Text>
-              <Text style={styles.infoValue}>
-                {Math.round(challenge.progress)}%
-              </Text>
+              <Text style={styles.infoValue}>{Math.round(challenge.progress)}%</Text>
             </View>
           </View>
         </GlassCard>
@@ -101,10 +107,7 @@ export default function ChallengeDetailModal(): React.ReactElement {
           <View style={styles.progressContainer}>
             <View style={styles.progressTrack}>
               <View
-                style={[
-                  styles.progressFill,
-                  { width: `${Math.min(challenge.progress, 100)}%` },
-                ]}
+                style={[styles.progressFill, { width: `${Math.min(challenge.progress, 100)}%` }]}
               />
             </View>
           </View>

@@ -2,7 +2,11 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Animated } from 'react-native';
 import { GlassCard } from '../../components/ui/GlassCard';
-import { useMusicStore, selectChallenges, selectTotalAvailablePoints } from '../../stores/musicStore';
+import {
+  useMusicStore,
+  selectChallenges,
+  selectTotalAvailablePoints,
+} from '../../stores/musicStore';
 import { useUserStore, selectTotalPoints, selectCompletedChallenges } from '../../stores/userStore';
 import { THEME } from '../../constants/theme';
 
@@ -21,7 +25,13 @@ const AnimatedProgressBar = React.memo<{ progress: number }>(({ progress }) => {
       <Animated.View
         style={[
           styles.progressFill,
-          { width: anim.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'], extrapolate: 'clamp' }) },
+          {
+            width: anim.interpolate({
+              inputRange: [0, 100],
+              outputRange: ['0%', '100%'],
+              extrapolate: 'clamp',
+            }),
+          },
         ]}
       />
     </View>
@@ -37,7 +47,8 @@ export default function ProfileScreen() {
   const completedChallenges = useUserStore(selectCompletedChallenges);
 
   const totalChallenges = challenges.length;
-  const completionRate = totalChallenges > 0 ? (completedChallenges.length / totalChallenges) * 100 : 0;
+  const completionRate =
+    totalChallenges > 0 ? (completedChallenges.length / totalChallenges) * 100 : 0;
 
   return (
     <ScrollView style={styles.container}>
@@ -46,16 +57,31 @@ export default function ProfileScreen() {
       {/* Stats Overview */}
       <GlassCard style={styles.statsCard}>
         <View style={styles.statsGrid}>
-          <View style={styles.statItem} accessible accessibilityRole="text" accessibilityLabel={`${totalPoints} out of ${totalAvailablePoints} total points`}>
+          <View
+            style={styles.statItem}
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={`${totalPoints} out of ${totalAvailablePoints} total points`}
+          >
             <Text style={styles.statValue}>{totalPoints}</Text>
             <Text style={styles.statSubvalue}>/ {totalAvailablePoints}</Text>
             <Text style={styles.statLabel}>Total Points</Text>
           </View>
-          <View style={styles.statItem} accessible accessibilityRole="text" accessibilityLabel={`${completedChallenges.length} ${completedChallenges.length === 1 ? 'challenge' : 'challenges'} completed`}>
+          <View
+            style={styles.statItem}
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={`${completedChallenges.length} ${completedChallenges.length === 1 ? 'challenge' : 'challenges'} completed`}
+          >
             <Text style={styles.statValue}>{completedChallenges.length}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
-          <View style={styles.statItem} accessible accessibilityRole="text" accessibilityLabel={`${Math.round(completionRate)} percent success rate`}>
+          <View
+            style={styles.statItem}
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={`${Math.round(completionRate)} percent success rate`}
+          >
             <Text style={styles.statValue}>{Math.round(completionRate)}%</Text>
             <Text style={styles.statLabel}>Success Rate</Text>
           </View>
@@ -71,7 +97,11 @@ export default function ProfileScreen() {
             <View key={challenge.id} style={styles.challengeItem}>
               <View style={styles.challengeHeader}>
                 <Text style={styles.challengeTitle}>{challenge.title}</Text>
-                <Text style={isCompleted ? styles.challengeStatusCompleted : styles.challengeStatusPending}>
+                <Text
+                  style={
+                    isCompleted ? styles.challengeStatusCompleted : styles.challengeStatusPending
+                  }
+                >
                   {isCompleted ? '✅' : '⏳'}
                 </Text>
               </View>
@@ -87,21 +117,21 @@ export default function ProfileScreen() {
       {/* Achievements */}
       <GlassCard style={styles.achievementsCard}>
         <Text style={styles.sectionTitle}>Achievements</Text>
-        
+
         {totalPoints >= 100 && (
           <View style={styles.achievement}>
             <Text style={styles.achievementIcon}>🏆</Text>
             <Text style={styles.achievementText}>First 100 Points!</Text>
           </View>
         )}
-        
+
         {completedChallenges.length >= 1 && (
           <View style={styles.achievement}>
             <Text style={styles.achievementIcon}>🎵</Text>
             <Text style={styles.achievementText}>Music Lover</Text>
           </View>
         )}
-        
+
         {completionRate >= 100 && (
           <View style={styles.achievement}>
             <Text style={styles.achievementIcon}>🌟</Text>
@@ -110,9 +140,7 @@ export default function ProfileScreen() {
         )}
 
         {totalPoints === 0 && completedChallenges.length === 0 && (
-          <Text style={styles.noAchievements}>
-            Complete challenges to unlock achievements!
-          </Text>
+          <Text style={styles.noAchievements}>Complete challenges to unlock achievements!</Text>
         )}
       </GlassCard>
     </ScrollView>

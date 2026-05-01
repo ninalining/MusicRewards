@@ -1,10 +1,6 @@
 // Glass Card component - Belong's signature UI
 import React from 'react';
-import { 
-  View, 
-  ViewStyle, 
-  StyleSheet 
-} from 'react-native';
+import { View, ViewStyle, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { THEME } from '../../constants/theme';
@@ -25,28 +21,20 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   gradientColors = THEME.glass.gradientColors.card,
   style,
 }) => {
-    return (
-      <View style={StyleSheet.flatten([{ borderRadius, overflow: 'hidden' }, style])}>
-        <BlurView 
-          intensity={blurIntensity} 
-          style={StyleSheet.absoluteFillObject}
-          tint="dark"
-        />
-        
-        <LinearGradient
-          colors={gradientColors as [string, string]}
-          style={StyleSheet.absoluteFillObject}
-        />
-        
-        <View 
-          style={[styles.borderOverlay, { borderRadius }]}
-        />
-        
-        <View style={styles.contentContainer}>
-          {children}
-        </View>
-      </View>
-    );
+  return (
+    <View style={StyleSheet.flatten([{ borderRadius, overflow: 'hidden' }, style])}>
+      <BlurView intensity={blurIntensity} style={StyleSheet.absoluteFillObject} tint="dark" />
+
+      <LinearGradient
+        colors={gradientColors as [string, string]}
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      <View style={[styles.borderOverlay, { borderRadius }]} />
+
+      <View style={styles.contentContainer}>{children}</View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
