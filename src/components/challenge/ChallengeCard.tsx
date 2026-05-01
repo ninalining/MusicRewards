@@ -53,8 +53,9 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(
           onPress={handleCardPress}
           disabled={!onPress}
           activeOpacity={onPress ? 0.7 : 1}
-          accessibilityRole="button"
-          accessibilityLabel={`View details for ${challenge.title}`}
+          accessibilityRole={onPress ? 'button' : undefined}
+          accessibilityLabel={onPress ? `View details for ${challenge.title}` : undefined}
+          accessibilityHint={onPress ? 'Double tap to view challenge details' : undefined}
         >
           <View style={styles.header}>
             <View style={styles.titleSection}>
@@ -118,6 +119,11 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(
           variant={isCurrentTrack ? 'primary' : 'secondary'}
           disabled={challenge.completed}
           style={styles.playButton}
+          accessibilityHint={
+            challenge.completed
+              ? 'Challenge already completed'
+              : `Double tap to play ${challenge.title}`
+          }
         />
       </GlassCard>
     );

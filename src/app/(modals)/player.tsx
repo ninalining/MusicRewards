@@ -12,7 +12,7 @@ import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { usePointsCounter } from '../../hooks/usePointsCounter';
 import { THEME } from '../../constants/theme';
 
-export default function PlayerModal() {
+export default function PlayerModal(): React.ReactElement {
   const {
     currentTrack,
     isPlaying,
@@ -81,6 +81,8 @@ export default function PlayerModal() {
 
   // Pause playback and stop counting on unmount — prevents music playing
   // without earning points after the modal is dismissed.
+  // Resources released: TrackPlayer paused (not reset — Constitution Rule #3 exception),
+  // points counter deactivated (no more delta awards).
   useEffect(() => {
     return () => {
       pauseRef.current();
@@ -150,6 +152,7 @@ export default function PlayerModal() {
                 onPress={handleRetry}
                 variant="secondary"
                 style={styles.retryButton}
+                accessibilityHint="Double tap to retry playback"
               />
             </GlassCard>
           )}

@@ -72,7 +72,9 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     [stopCounting, resetProgress],
   );
 
-  // Cleanup on unmount
+  // Cleanup on unmount — stops the counting session so the progress-tick effect
+  // (which depends on isActive) no longer awards points or updates state.
+  // No explicit timer/interval to clear — useProgress() is managed by RNTP internally.
   useEffect(() => {
     return () => {
       stopCounting();

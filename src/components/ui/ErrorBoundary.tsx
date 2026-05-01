@@ -63,7 +63,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <Text style={styles.message} numberOfLines={3}>
               {this.state.errorMessage}
             </Text>
-            <GlassButton title="Try Again" onPress={this.handleRetry} />
+            <GlassButton
+              title="Try Again"
+              onPress={this.handleRetry}
+              accessibilityHint="Double tap to retry"
+            />
           </GlassCard>
         </View>
       );
