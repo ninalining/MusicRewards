@@ -26,9 +26,9 @@ describe('usePointsCounter', () => {
     mockUseProgress.mockReturnValue({ position: 0, duration: 200, buffered: 0 });
   });
 
-  it('starts with zero pointsEarned, progress=0, isActive=false', () => {
+  it('starts with zero currentPoints, progress=0, isActive=false', () => {
     const { result } = renderHook(() => usePointsCounter());
-    expect(result.current.pointsEarned).toBe(0);
+    expect(result.current.currentPoints).toBe(0);
     expect(result.current.progress).toBe(0);
     expect(result.current.isActive).toBe(false);
   });
@@ -49,8 +49,8 @@ describe('usePointsCounter', () => {
       result.current.startCounting(TEST_CONFIG);
     });
 
-    // pointsEarned = floor(100/200 * 150) = 75
-    expect(result.current.pointsEarned).toBe(75);
+    // currentPoints = floor(100/200 * 150) = 75
+    expect(result.current.currentPoints).toBe(75);
     expect(result.current.progress).toBeCloseTo(50);
   });
 
@@ -75,7 +75,7 @@ describe('usePointsCounter', () => {
     expect(pointsAfterSecondTick).toBe(pointsAfterFirstTick + 38);
   });
 
-  it('does not decrease pointsEarned when position seeks backwards', () => {
+  it('does not decrease currentPoints when position seeks backwards', () => {
     mockUseProgress.mockReturnValue({ position: 100, duration: 200, buffered: 0 });
     const { result, rerender } = renderHook(() => usePointsCounter());
 
@@ -83,13 +83,13 @@ describe('usePointsCounter', () => {
       result.current.startCounting(TEST_CONFIG);
     });
 
-    const earnedBeforeSeek = result.current.pointsEarned;
+    const earnedBeforeSeek = result.current.currentPoints;
 
     // Seek back to 10%
     mockUseProgress.mockReturnValue({ position: 20, duration: 200, buffered: 0 });
     rerender({});
 
-    expect(result.current.pointsEarned).toBe(earnedBeforeSeek);
+    expect(result.current.currentPoints).toBe(earnedBeforeSeek);
     expect(useUserStore.getState().totalPoints).toBe(earnedBeforeSeek);
   });
 
@@ -115,7 +115,7 @@ describe('usePointsCounter', () => {
     expect(useUserStore.getState().totalPoints).toBe(pointsAfterStop);
   });
 
-  it('resetProgress resets pointsEarned and progress to 0', () => {
+  it('resetProgress resets currentPoints and progress to 0', () => {
     mockUseProgress.mockReturnValue({ position: 100, duration: 200, buffered: 0 });
     const { result } = renderHook(() => usePointsCounter());
 
@@ -123,13 +123,13 @@ describe('usePointsCounter', () => {
       result.current.startCounting(TEST_CONFIG);
     });
 
-    expect(result.current.pointsEarned).toBeGreaterThan(0);
+    expect(result.current.currentPoints).toBeGreaterThan(0);
 
     act(() => {
       result.current.resetProgress();
     });
 
-    expect(result.current.pointsEarned).toBe(0);
+    expect(result.current.currentPoints).toBe(0);
     expect(result.current.progress).toBe(0);
   });
 
@@ -173,7 +173,7 @@ describe('usePointsCounter', () => {
       result.current.startCounting(TEST_CONFIG);
     });
 
-    expect(result.current.pointsEarned).toBe(TEST_CONFIG.totalPoints);
+    expect(result.current.currentPoints).toBe(TEST_CONFIG.totalPoints);
   });
 
   it('does not award full points just below NEAR_COMPLETE_RATIO', () => {
@@ -186,7 +186,7 @@ describe('usePointsCounter', () => {
     });
 
     // floor(197/200 * 150) = floor(147.75) = 147, not 150
-    expect(result.current.pointsEarned).toBe(147);
-    expect(result.current.pointsEarned).toBeLessThan(TEST_CONFIG.totalPoints);
+    expect(result.current.currentPoints).toBe(147);
+    expect(result.current.currentPoints).toBeLessThan(TEST_CONFIG.totalPoints);
   });
 });
