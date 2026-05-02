@@ -35,7 +35,7 @@ export interface UseMusicPlayerReturn {
 }
 
 export interface UsePointsCounterReturn {
-  pointsEarned: number;
+  currentPoints: number;
   progress: number; // 0-100
   isActive: boolean;
   startCounting: (config: PointsCounterConfig) => void;

@@ -27,7 +27,7 @@ export default function PlayerModal(): React.ReactElement {
   } = useMusicPlayer();
 
   const {
-    pointsEarned,
+    currentPoints,
     progress: liveProgress,
     startCounting,
     stopCounting,
@@ -137,7 +137,7 @@ export default function PlayerModal(): React.ReactElement {
             <View style={styles.pointsContainer}>
               <Text style={styles.pointsLabel}>Points Earned</Text>
               <View style={styles.pointsRow}>
-                <PointsCounter points={pointsEarned} style={styles.pointsCounter} />
+                <PointsCounter points={currentPoints} style={styles.pointsCounter} />
                 <Text style={styles.pointsTotal}> / {currentTrack.points} pts</Text>
               </View>
             </View>

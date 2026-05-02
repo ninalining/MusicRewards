@@ -7,7 +7,7 @@ import type { PointsCounterConfig, UsePointsCounterReturn } from '../types';
 
 export const usePointsCounter = (): UsePointsCounterReturn => {
   const [isActive, setIsActive] = useState(false);
-  const [pointsEarned, setPointsEarned] = useState(0);
+  const [currentPoints, setCurrentPoints] = useState(0);
   const [progress, setProgress] = useState(0);
 
   // Stable ref for the current session config — avoids stale closure in effect
@@ -36,7 +36,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
 
     if (delta > 0) {
       prevAwardedRef.current = clamped;
-      setPointsEarned(clamped);
+      setCurrentPoints(clamped);
       addPoints(delta);
     }
 
@@ -55,7 +55,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
   }, []);
 
   const resetProgress = useCallback((): void => {
-    setPointsEarned(0);
+    setCurrentPoints(0);
     setProgress(0);
     prevAwardedRef.current = 0;
   }, []);
@@ -82,7 +82,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
   }, [stopCounting]);
 
   return {
-    pointsEarned,
+    currentPoints,
     progress,
     isActive,
     startCounting,
