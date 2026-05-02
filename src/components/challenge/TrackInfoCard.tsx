@@ -28,11 +28,12 @@ export const TrackInfoCard = React.memo<TrackInfoCardProps>(function TrackInfoCa
         style={styles.pointsContainer}
         accessibilityRole="text"
         accessibilityLabel={`${currentPoints} of ${track.points} points earned`}
+        importantForAccessibility="yes"
       >
         <Text style={[styles.pointsLabel, { color: colors.textSecondary }]} accessible={false}>
           Points Earned
         </Text>
-        <View style={styles.pointsRow} accessible={false}>
+        <View style={styles.pointsRow} importantForAccessibility="no-hide-descendants">
           <PointsCounter points={currentPoints} />
           <Text style={[styles.pointsTotal, { color: colors.textSecondary }]}>
             {' '}

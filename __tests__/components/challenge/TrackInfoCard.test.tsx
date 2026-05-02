@@ -66,8 +66,7 @@ describe('TrackInfoCard', () => {
   it('renders the current points and total points', () => {
     render(<TrackInfoCard track={mockTrack} currentPoints={42} />);
 
-    expect(screen.getByTestId('points-counter')).toHaveTextContent('42');
-    expect(screen.getByText(/\/ 100 pts/)).toBeOnTheScreen();
+    expect(screen.getByLabelText('42 of 100 points earned')).toBeOnTheScreen();
   });
 
   it('provides an accessibility label for the points section', () => {

@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
     marginLeft: THEME.spacing.xs,
   },
   statusRow: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: THEME.spacing.xs,
   },
   progress: {
