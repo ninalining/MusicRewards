@@ -10,6 +10,7 @@ import TrackPlayer, {
 import { setupTrackPlayer } from '../services/audioService';
 import { useMusicStore, selectCurrentTrack, selectIsPlaying } from '../stores/musicStore';
 import { useUserStore } from '../stores/userStore';
+import { hapticSuccess } from '../utils/haptics';
 import type { MusicChallenge, UseMusicPlayerReturn } from '../types';
 
 export const useMusicPlayer = (): UseMusicPlayerReturn => {
@@ -79,6 +80,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
         completedInSession.current.add(trackId);
         markChallengeComplete(trackId);
         completeChallenge(trackId);
+        hapticSuccess();
       }
     }
   }, [
