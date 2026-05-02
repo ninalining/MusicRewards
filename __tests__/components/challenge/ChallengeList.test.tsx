@@ -75,13 +75,13 @@ describe('ChallengeList', () => {
     const skeletons = screen.getAllByLabelText('Loading challenge');
     expect(skeletons.length).toBe(3);
     expect(skeletons[0].props.accessibilityRole).toBe('progressbar');
-    expect(screen.queryByText('🎵 No challenges available yet')).toBeNull();
+    expect(screen.queryByText('No challenges available yet')).toBeNull();
   });
 
   it('shows empty state when challenges array is empty and not loading', () => {
     render(<ChallengeList challenges={[]} loading={false} onPlay={mockOnPlay} />);
 
-    expect(screen.getByText('🎵 No challenges available yet')).toBeOnTheScreen();
+    expect(screen.getByText('No challenges available yet')).toBeOnTheScreen();
   });
 
   it('renders challenge titles when challenges are provided', () => {
@@ -94,7 +94,7 @@ describe('ChallengeList', () => {
     render(<ChallengeList challenges={[mockChallenge]} loading={false} onPlay={mockOnPlay} />);
 
     expect(screen.queryByRole('progressbar')).toBeNull();
-    expect(screen.queryByText('🎵 No challenges available yet')).toBeNull();
+    expect(screen.queryByText('No challenges available yet')).toBeNull();
   });
 
   it('calls onPlay with the challenge when a card is pressed', () => {

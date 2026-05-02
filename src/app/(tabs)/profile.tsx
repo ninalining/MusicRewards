@@ -1,6 +1,7 @@
 // Profile screen - User progress and stats
 import React, { useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Animated, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { GlassCard } from '../../components/ui/GlassCard';
 import {
   useMusicStore,
@@ -89,9 +90,18 @@ export default function ProfileScreen() {
               accessibilityLabel={`Set theme to ${option}${preference === option ? ', currently selected' : ''}`}
               accessibilityState={{ selected: preference === option }}
             >
-              <Text style={[styles.themeOptionIcon, { color: colors.textPrimary }]}>
-                {option === 'system' ? '⚙️' : option === 'light' ? '☀️' : '🌙'}
-              </Text>
+              <Ionicons
+                name={
+                  option === 'system'
+                    ? 'settings-outline'
+                    : option === 'light'
+                      ? 'sunny-outline'
+                      : 'moon-outline'
+                }
+                size={THEME.fonts.sizes.xl}
+                color={preference === option ? colors.brandPrimary : colors.textPrimary}
+                accessible={false}
+              />
               <Text
                 style={[
                   styles.themeOptionLabel,
@@ -156,15 +166,12 @@ export default function ProfileScreen() {
                 <Text style={[styles.challengeTitle, { color: colors.textPrimary }]}>
                   {challenge.title}
                 </Text>
-                <Text
-                  style={
-                    isCompleted
-                      ? [styles.challengeStatusCompleted, { color: colors.brandSecondary }]
-                      : [styles.challengeStatusPending, { color: colors.textSecondary }]
-                  }
-                >
-                  {isCompleted ? '✅' : '⏳'}
-                </Text>
+                <Ionicons
+                  name={isCompleted ? 'checkmark-circle' : 'time-outline'}
+                  size={THEME.fonts.sizes.lg}
+                  color={isCompleted ? colors.brandSecondary : colors.textSecondary}
+                  accessible={false}
+                />
               </View>
               <AnimatedProgressBar progress={challenge.progress} colors={colors} />
               <Text style={[styles.progressText, { color: colors.textSecondary }]}>
@@ -181,7 +188,12 @@ export default function ProfileScreen() {
 
         {totalPoints >= 100 && (
           <View style={styles.achievement}>
-            <Text style={styles.achievementIcon}>🏆</Text>
+            <Ionicons
+              name="trophy"
+              size={THEME.fonts.sizes.xl}
+              color={colors.brandAccent}
+              accessible={false}
+            />
             <Text style={[styles.achievementText, { color: colors.textPrimary }]}>
               First 100 Points!
             </Text>
@@ -190,14 +202,24 @@ export default function ProfileScreen() {
 
         {completedChallenges.length >= 1 && (
           <View style={styles.achievement}>
-            <Text style={styles.achievementIcon}>🎵</Text>
+            <Ionicons
+              name="musical-notes"
+              size={THEME.fonts.sizes.xl}
+              color={colors.brandAccent}
+              accessible={false}
+            />
             <Text style={[styles.achievementText, { color: colors.textPrimary }]}>Music Lover</Text>
           </View>
         )}
 
         {completionRate >= 100 && (
           <View style={styles.achievement}>
-            <Text style={styles.achievementIcon}>🌟</Text>
+            <Ionicons
+              name="star"
+              size={THEME.fonts.sizes.xl}
+              color={colors.brandAccent}
+              accessible={false}
+            />
             <Text style={[styles.achievementText, { color: colors.textPrimary }]}>
               Perfect Score!
             </Text>
@@ -239,10 +261,6 @@ const styles = StyleSheet.create({
     paddingVertical: THEME.spacing.md,
     borderRadius: THEME.borderRadius.sm,
     borderWidth: StyleSheet.hairlineWidth * 2,
-  },
-  themeOptionIcon: {
-    fontSize: THEME.fonts.sizes.xl,
-    marginBottom: THEME.spacing.xs,
   },
   themeOptionLabel: {
     fontSize: THEME.fonts.sizes.sm,
