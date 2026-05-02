@@ -16,7 +16,10 @@ export const migrateThemeStore = (persistedState: unknown, version: number): The
       preference: state.preference ?? 'system',
     };
   }
-  return state as ThemeState;
+  // Always guarantee a valid preference for any version (guards against corruption)
+  return {
+    preference: state.preference ?? 'system',
+  };
 };
 
 export const useThemeStore = create<ThemeStore>()(

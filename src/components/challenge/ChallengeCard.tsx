@@ -51,7 +51,7 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(
           isCurrentTrack && styles.currentTrackCard,
           isCurrentTrack && { borderColor: colors.brandPrimary },
         ])}
-        gradientColors={isCurrentTrack ? THEME.glass.gradientColors.primary : undefined}
+        gradientColors={isCurrentTrack ? colors.glassPrimary : undefined}
       >
         <TouchableOpacity
           onPress={handleCardPress}

@@ -12,7 +12,7 @@ interface GlassCardProps {
   blurIntensity?: number;
   borderRadius?: number;
   style?: ViewStyle;
-  gradientColors?: readonly string[];
+  gradientColors?: readonly [string, string];
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({
@@ -33,6 +33,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         tint={resolvedTheme === 'dark' ? 'dark' : 'light'}
       />
 
+      {/* Cast required: LinearGradient expects mutable array; tuple length is guaranteed by prop type */}
       <LinearGradient
         colors={effectiveGradient as [string, string]}
         style={StyleSheet.absoluteFillObject}

@@ -163,7 +163,7 @@ export default function PlayerModal(): React.ReactElement {
           {/* Error Banner */}
           {error && (
             <GlassCard style={styles.errorBanner}>
-              <Text style={[styles.errorText, { color: colors.brandAccent }]}>{error}</Text>
+              <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
               <GlassButton
                 title="Retry"
                 onPress={handleRetry}
