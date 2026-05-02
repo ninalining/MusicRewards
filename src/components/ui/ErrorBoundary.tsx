@@ -6,6 +6,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { GlassCard } from './GlassCard';
 import { GlassButton } from './GlassButton';
 import { THEME } from '../../constants/theme';
+import { ThemeContext } from '../../hooks/useTheme';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -18,6 +19,15 @@ interface ErrorBoundaryState {
 }
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  static contextType = ThemeContext;
+
+  private get themeColors() {
+    // Type assertion required: class component `contextType` typing doesn't
+    // narrow `this.context` automatically — this is a React/TS limitation.
+    const ctx = this.context as React.ContextType<typeof ThemeContext>;
+    return ctx?.colors;
+  }
+
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, errorMessage: '' };
@@ -59,8 +69,18 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <Text style={styles.icon} accessible={false}>
               ⚠️
             </Text>
-            <Text style={styles.title}>Something went wrong</Text>
-            <Text style={styles.message} numberOfLines={3}>
+            <Text
+              style={[styles.title, this.themeColors && { color: this.themeColors.textPrimary }]}
+            >
+              Something went wrong
+            </Text>
+            <Text
+              style={[
+                styles.message,
+                this.themeColors && { color: this.themeColors.textSecondary },
+              ]}
+              numberOfLines={3}
+            >
               {this.state.errorMessage}
             </Text>
             <GlassButton
@@ -95,13 +115,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: THEME.fonts.sizes.lg,
     fontWeight: 'bold',
-    color: THEME.colors.text.primary,
     textAlign: 'center',
     marginBottom: THEME.spacing.sm,
   },
   message: {
     fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
     textAlign: 'center',
     marginBottom: THEME.spacing.lg,
   },

@@ -8,6 +8,7 @@ import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { useChallenges } from '../../hooks/useChallenges';
 import { useMusicStore } from '../../stores/musicStore';
 import { useShallow } from 'zustand/react/shallow';
+import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
 import type { MusicChallenge } from '../../types';
 
@@ -20,6 +21,7 @@ export default function HomeScreen() {
     })),
   );
   const { play, resume } = useMusicPlayer();
+  const { colors } = useTheme();
 
   const currentTrackId = currentTrack?.id;
 
@@ -45,10 +47,10 @@ export default function HomeScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
       <ErrorBoundary>
-        <Text style={styles.header}>Music Challenges</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.header, { color: colors.textPrimary }]}>Music Challenges</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Complete listening challenges to earn points and unlock achievements
         </Text>
         <ChallengeList
@@ -67,20 +69,17 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.colors.background,
     paddingHorizontal: THEME.spacing.md,
     paddingTop: THEME.spacing.lg,
   },
   header: {
     fontSize: THEME.fonts.sizes.xxl,
     fontWeight: 'bold',
-    color: THEME.colors.text.primary,
     marginBottom: THEME.spacing.sm,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
     textAlign: 'center',
     marginBottom: THEME.spacing.lg,
   },

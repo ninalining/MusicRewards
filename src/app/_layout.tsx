@@ -1,7 +1,30 @@
 // Root layout for Expo Router
 import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { setupTrackPlayer, cleanupTrackPlayer } from '../services/audioService';
+import { ThemeProvider } from '../components/ui/ThemeProvider';
+import { useTheme } from '../hooks/useTheme';
+
+function RootNavigation(): React.ReactElement {
+  const { resolvedTheme } = useTheme();
+
+  return (
+    <>
+      <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(modals)"
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+      </Stack>
+    </>
+  );
+}
 
 export default function RootLayout() {
   useEffect(() => {
@@ -22,15 +45,8 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="(modals)"
-        options={{
-          presentation: 'modal',
-          headerShown: false,
-        }}
-      />
-    </Stack>
+    <ThemeProvider>
+      <RootNavigation />
+    </ThemeProvider>
   );
 }

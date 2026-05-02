@@ -1,6 +1,6 @@
 // Shared utility functions for challenge display
 
-import { THEME } from '../constants/theme';
+import { BRAND } from '../constants/theme';
 import type { MusicChallenge } from '../types';
 
 /** Format seconds into `m:ss` display string. */
@@ -10,16 +10,16 @@ export const formatDuration = (seconds: number): string => {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
-/** Map difficulty level to its THEME color. */
+/** Map difficulty level to its brand color (constant across themes). */
 export const getDifficultyColor = (difficulty: MusicChallenge['difficulty']): string => {
   switch (difficulty) {
     case 'easy':
-      return THEME.colors.secondary;
+      return BRAND.secondary;
     case 'medium':
-      return THEME.colors.accent;
+      return BRAND.accent;
     case 'hard':
-      return THEME.colors.primary;
+      return BRAND.primary;
     default:
-      return THEME.colors.text.secondary;
+      return BRAND.primary;
   }
 };

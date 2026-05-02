@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
 import { GlassButton } from '../ui/GlassButton';
+import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
 
 interface PlayerControlsProps {
@@ -41,6 +42,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
     onResume,
     onPlaybackRateChange,
   }) => {
+    const { colors } = useTheme();
     const handlePlayPause = useCallback((): void => {
       if (isPlaying) {
         onPause();
@@ -92,7 +94,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
           />
         </View>
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
 
         <View style={styles.speedRow}>
           <GlassButton
@@ -129,7 +131,6 @@ const styles = StyleSheet.create({
     marginHorizontal: THEME.spacing.xs,
   },
   errorText: {
-    color: THEME.colors.error,
     fontSize: THEME.fonts.sizes.sm,
     textAlign: 'center',
     marginTop: THEME.spacing.md,
