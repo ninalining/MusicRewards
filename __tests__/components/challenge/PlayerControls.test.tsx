@@ -107,7 +107,9 @@ describe('PlayerControls', () => {
   it('calls onSeekTo with position minus 10 seconds on seek back', () => {
     const onSeekTo = jest.fn();
     // currentPosition=100, duration=200 → seek back = max(0, 100-10) = 90
-    render(<PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={100} duration={200} />);
+    render(
+      <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={100} duration={200} />,
+    );
     fireEvent.press(screen.getByText('⏪ -10s'));
     expect(onSeekTo).toHaveBeenCalledTimes(1);
     expect(onSeekTo).toHaveBeenCalledWith(90);
@@ -116,7 +118,9 @@ describe('PlayerControls', () => {
   it('calls onSeekTo with position plus 10 seconds on seek forward', () => {
     const onSeekTo = jest.fn();
     // currentPosition=100, duration=200 → seek forward = min(200, 100+10) = 110
-    render(<PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={100} duration={200} />);
+    render(
+      <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={100} duration={200} />,
+    );
     fireEvent.press(screen.getByText('⏩ +10s'));
     expect(onSeekTo).toHaveBeenCalledTimes(1);
     expect(onSeekTo).toHaveBeenCalledWith(110);
@@ -125,7 +129,9 @@ describe('PlayerControls', () => {
   it('clamps seek back to 0 when near start', () => {
     const onSeekTo = jest.fn();
     // currentPosition=5, duration=200 → max(0, 5-10) = 0
-    render(<PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={5} duration={200} />);
+    render(
+      <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={5} duration={200} />,
+    );
     fireEvent.press(screen.getByText('⏪ -10s'));
     expect(onSeekTo).toHaveBeenCalledWith(0);
   });
@@ -133,7 +139,9 @@ describe('PlayerControls', () => {
   it('clamps seek forward to duration when near end', () => {
     const onSeekTo = jest.fn();
     // currentPosition=195, duration=200 → min(200, 195+10) = 200
-    render(<PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={195} duration={200} />);
+    render(
+      <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={195} duration={200} />,
+    );
     fireEvent.press(screen.getByText('⏩ +10s'));
     expect(onSeekTo).toHaveBeenCalledWith(200);
   });
