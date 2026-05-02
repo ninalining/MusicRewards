@@ -12,6 +12,21 @@ type MusicState = {
   currentPosition: number;
 };
 
+type PersistedMusicState = Pick<MusicState, 'challenges'>;
+
+/** Exported for testing — handles store schema migrations. */
+export const migrateMusicStore = (
+  persistedState: unknown,
+  version: number,
+): PersistedMusicState => {
+  const state = persistedState as Partial<PersistedMusicState>;
+  if (version === 0) {
+    // v0 → v1: ensure challenges array exists with defaults
+    return { challenges: state.challenges ?? SAMPLE_CHALLENGES };
+  }
+  return state as PersistedMusicState;
+};
+
 type MusicStore = MusicState & {
   loadChallenges: () => void;
   setCurrentTrack: (track: MusicChallenge) => void;
@@ -74,11 +89,13 @@ export const useMusicStore = create<MusicStore>()(
     }),
     {
       name: 'music-store',
+      version: 1,
       storage: createJSONStorage(() => AsyncStorage),
       // Only persist challenges, not playback state
       partialize: (state) => ({
         challenges: state.challenges,
       }),
+      migrate: migrateMusicStore,
     },
   ),
 );

@@ -1,4 +1,8 @@
-import { useMusicStore, selectTotalAvailablePoints } from '../../src/stores/musicStore';
+import {
+  useMusicStore,
+  selectTotalAvailablePoints,
+  migrateMusicStore,
+} from '../../src/stores/musicStore';
 import { SAMPLE_CHALLENGES } from '../../src/constants/theme';
 
 const initialState = useMusicStore.getState();
@@ -80,5 +84,25 @@ describe('musicStore', () => {
       useMusicStore.setState({ challenges: [] });
       expect(selectTotalAvailablePoints(useMusicStore.getState())).toBe(0);
     });
+  });
+});
+
+describe('migrateMusicStore', () => {
+  it('migrates v0 state with missing challenges to defaults', () => {
+    const result = migrateMusicStore({}, 0);
+    expect(result.challenges).toBeDefined();
+    expect(result.challenges.length).toBeGreaterThan(0);
+  });
+
+  it('migrates v0 state preserving existing challenges', () => {
+    const fakeChallenges = [{ id: 'test' }];
+    const result = migrateMusicStore({ challenges: fakeChallenges }, 0);
+    expect(result.challenges).toEqual(fakeChallenges);
+  });
+
+  it('returns state unchanged for current version', () => {
+    const state = { challenges: [{ id: 'x' }] };
+    const result = migrateMusicStore(state, 1);
+    expect(result).toEqual(state);
   });
 });
