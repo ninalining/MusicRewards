@@ -38,16 +38,16 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       : THEME.glass.gradientColors.secondary;
 
   return (
-    <GlassCard gradientColors={gradientColors} style={StyleSheet.flatten([styles.button, style])}>
-      <TouchableOpacity
-        onPress={onPress}
-        disabled={disabled || loading}
-        style={styles.buttonContent}
-        activeOpacity={0.7}
-        accessibilityRole="button"
-        accessibilityLabel={title}
-        accessibilityHint={accessibilityHint ?? 'Double tap to activate'}
-      >
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled || loading}
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityHint={accessibilityHint ?? 'Double tap to activate'}
+      style={StyleSheet.flatten([styles.touchable, style])}
+    >
+      <GlassCard gradientColors={gradientColors} style={styles.button}>
         {loading ? (
           <ActivityIndicator
             color={THEME.colors.text.primary}
@@ -58,20 +58,16 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
         ) : (
           <Text style={[styles.buttonText, textStyle]}>{title}</Text>
         )}
-      </TouchableOpacity>
-    </GlassCard>
+      </GlassCard>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  button: {
-    height: THEME.sizing.buttonHeight,
-    justifyContent: 'center',
-    alignItems: 'center',
+  touchable: {
+    minHeight: THEME.sizing.buttonHeight,
   },
-  buttonContent: {
-    width: '100%',
-    height: '100%',
+  button: {
     justifyContent: 'center',
     alignItems: 'center',
   },
