@@ -1,81 +1,89 @@
-# MusicRewards Test App
+# MusicRewards
 
-This is the recommended project structure for the Belong React Native assessment. Use this as your starting point!
+A React Native + Expo app that rewards users with points for completing music listening challenges. Built as a Belong technical assessment.
 
-## 🚀 Setup Instructions
+## 🚀 Getting Started
 
-**📖 See [../SETUP.md](../SETUP.md) for complete setup instructions**
-
-This test-app folder contains the complete starter code structure for your MusicRewards implementation. Don't run setup commands from here - follow the main setup guide above.
-
-**Quick Reference:**
 ```bash
-# From the parent react-native/ folder:
-cp -r test-app ~/MusicRewards
-cd ~/MusicRewards
-npx create-expo-app . --template typescript
+# Install dependencies
 npm install
+
+# Install iOS pods
+cd ios && pod install && cd ..
+
+# Start development server
 npx expo start
+
+# Run on iOS simulator
+npx expo run:ios
+
+# Run tests
+npm test
+
+# Type check
+npm run typecheck
+
+# Lint
+npm run lint
+
+# Format
+npm run format:check
 ```
 
 ## 📁 Project Structure
 
-This structure follows Belong's mobile app architecture patterns:
-
 ```
 src/
-├── app/                    # Expo Router pages
-│   ├── (tabs)/
-│   │   ├── index.tsx       # Home screen with challenge list
-│   │   ├── profile.tsx     # Profile with user progress
-│   │   └── _layout.tsx     # Tab navigation setup
-│   ├── (modals)/
-│   │   ├── player.tsx      # Full-screen audio player
-│   │   └── _layout.tsx     # Modal navigation setup
-│   └── _layout.tsx         # Root layout
+├── app/                    # Expo Router screens (file-based navigation)
+│   ├── _layout.tsx         # Root layout — TrackPlayer init
+│   ├── (tabs)/             # Tab screens (Challenges, Profile)
+│   └── (modals)/           # Modal screens (Player, Challenge Detail)
 ├── components/
-│   ├── ui/                 # Glass design system components
-│   │   ├── GlassCard.tsx
-│   │   ├── GlassButton.tsx
-│   │   └── PointsCounter.tsx
-│   └── challenge/          # Challenge-specific components
-│       ├── ChallengeCard.tsx
-│       └── ChallengeList.tsx
-├── hooks/                  # Business logic hooks
-│   ├── useMusicPlayer.ts
-│   ├── usePointsCounter.ts
-│   └── useChallenges.ts
-├── stores/                 # Zustand stores
-│   ├── musicStore.ts
-│   └── userStore.ts
-├── services/               # External services
-│   └── audioService.ts
-├── constants/              # Theme and configuration
-│   └── theme.ts
-└── types/                  # TypeScript definitions
-    └── index.ts
+│   ├── ui/                 # Glass design system (GlassCard, GlassButton, PointsCounter)
+│   └── challenge/          # Domain components (ChallengeCard, PlayerControls, etc.)
+├── hooks/                  # Business logic (useMusicPlayer, usePointsCounter, useChallenges)
+├── stores/                 # Zustand stores (musicStore, userStore)
+├── services/               # TrackPlayer setup + background playback service
+├── constants/              # THEME tokens + sample challenge data
+├── types/                  # Shared TypeScript interfaces
+└── utils/                  # Accessibility helpers, formatting utilities
 ```
 
-## 🎵 Audio Files
+## 🎵 Features
 
-The assessment uses these pre-hosted tracks:
-- **Track 1:** Camo & Krooked - All Night (3:39, 150 points)
-- **Track 2:** Roni Size - New Forms (7:44, 300 points)
+- **Music Challenges** — stream tracks from AWS S3 and earn points by listening
+- **Live Points** — points accumulate proportionally as playback progresses
+- **90% Completion** — challenges complete when 90% of the track is heard
+- **Background Playback** — audio continues when the app is backgrounded (iOS)
+- **Audio Interruptions** — phone calls pause/resume playback intelligently
+- **Glass UI** — blur + gradient design system with animated points counter
+- **Persistence** — progress and points survive app restarts (AsyncStorage)
 
-URLs and sample data are in [`../assets/audio/README.md`](../assets/audio/README.md)
+## �️ Tech Stack
 
-## 🎯 Implementation Order
+| Layer | Technology |
+|-------|-----------|
+| Framework | React Native + Expo ~54 |
+| Navigation | Expo Router 3.5 |
+| State | Zustand v5 + AsyncStorage |
+| Audio | react-native-track-player ^4.1 |
+| Testing | Jest + @testing-library/react-native |
+| Language | TypeScript (strict mode) |
 
-1. **Set up basic navigation structure**
-2. **Create Zustand stores (musicStore.ts, userStore.ts)**
-3. **Build glass design components (GlassCard, GlassButton)**
-4. **Implement useMusicPlayer hook with TrackPlayer**
-5. **Create challenge list and player modal UI**
-6. **Add points counter and progress tracking**
-7. **Test on both platforms and add error handling**
+## 📐 Architecture
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation including data flow, state management patterns, audio lifecycle, and design decisions.
+
+## 🧪 Testing
+
+14 test suites, 111 tests covering stores, hooks, components, services, and utilities.
+
+```bash
+npm test                    # Run all tests
+npm test -- --watch         # Watch mode
+npm test -- --coverage      # With coverage report
+```
 
 ## 📖 Reference
 
-See the main [README.md](../README.md) for detailed technical requirements and evaluation criteria.
-
-Good luck! 🚀🎵
+See [docs/README.md](./docs/README.md) for the full technical requirements specification.
