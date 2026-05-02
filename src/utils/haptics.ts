@@ -12,3 +12,8 @@ export const hapticLight = (): void => {
 export const hapticSuccess = (): void => {
   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
 };
+
+/** Error notification — use on failures that need user attention. */
+export const hapticError = (): void => {
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+};

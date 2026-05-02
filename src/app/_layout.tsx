@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { setupTrackPlayer, cleanupTrackPlayer } from '../services/audioService';
 import { ThemeProvider } from '../components/ui/ThemeProvider';
+import { Toast } from '../components/ui/Toast';
 import { useTheme } from '../hooks/useTheme';
 
 function RootNavigation(): React.ReactElement {
@@ -47,6 +48,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <RootNavigation />
+      <Toast />
     </ThemeProvider>
   );
 }
