@@ -18,10 +18,12 @@ export default function PlayerModal(): React.ReactElement {
     isPlaying,
     currentPosition,
     duration,
+    playbackRate,
     play,
     pause,
     resume,
     seekTo,
+    setPlaybackRate,
     loading,
     error,
   } = useMusicPlayer();
@@ -173,9 +175,11 @@ export default function PlayerModal(): React.ReactElement {
             error={null}
             liveProgress={liveProgress}
             duration={duration}
+            playbackRate={playbackRate}
             onSeek={handleSeek}
             onPause={pause}
             onResume={resume}
+            onPlaybackRateChange={setPlaybackRate}
           />
 
           {/* Challenge Status */}

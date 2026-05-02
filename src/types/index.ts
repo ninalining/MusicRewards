@@ -26,10 +26,12 @@ export interface UseMusicPlayerReturn {
   currentTrack: MusicChallenge | null;
   currentPosition: number;
   duration: number;
+  playbackRate: number;
   play: (track: MusicChallenge) => Promise<void>;
   pause: () => void;
   resume: () => void;
   seekTo: (seconds: number) => void;
+  setPlaybackRate: (rate: number) => Promise<void>;
   loading: boolean;
   error: string | null;
 }
