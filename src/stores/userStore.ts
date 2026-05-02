@@ -14,9 +14,20 @@ type UserStore = UserState & {
   resetProgress: () => void;
 };
 
+/** Current schema version for the user store. */
+const USER_STORE_VERSION = 1;
+
 /** Exported for testing — handles store schema migrations. */
 export const migrateUserStore = (persistedState: unknown, version: number): UserState => {
+  const defaults: UserState = { totalPoints: 0, completedChallenges: [] };
+
+  // Guard against null, primitives, or corrupted payloads
+  if (persistedState == null || typeof persistedState !== 'object') {
+    return defaults;
+  }
+
   const state = persistedState as Partial<UserState>;
+
   if (version === 0) {
     // v0 → v1: ensure required fields exist with defaults
     return {
@@ -24,6 +35,12 @@ export const migrateUserStore = (persistedState: unknown, version: number): User
       completedChallenges: state.completedChallenges ?? [],
     };
   }
+
+  // Reject unknown future versions — reset to safe defaults
+  if (version > USER_STORE_VERSION) {
+    return defaults;
+  }
+
   return state as UserState;
 };
 

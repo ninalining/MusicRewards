@@ -14,16 +14,31 @@ type MusicState = {
 
 type PersistedMusicState = Pick<MusicState, 'challenges'>;
 
+/** Current schema version for the music store. */
+const MUSIC_STORE_VERSION = 1;
+
 /** Exported for testing — handles store schema migrations. */
 export const migrateMusicStore = (
   persistedState: unknown,
   version: number,
 ): PersistedMusicState => {
+  // Guard against null, primitives, or corrupted payloads
+  if (persistedState == null || typeof persistedState !== 'object') {
+    return { challenges: SAMPLE_CHALLENGES };
+  }
+
   const state = persistedState as Partial<PersistedMusicState>;
+
   if (version === 0) {
     // v0 → v1: ensure challenges array exists with defaults
     return { challenges: state.challenges ?? SAMPLE_CHALLENGES };
   }
+
+  // Reject unknown future versions — reset to safe defaults
+  if (version > MUSIC_STORE_VERSION) {
+    return { challenges: SAMPLE_CHALLENGES };
+  }
+
   return state as PersistedMusicState;
 };
 
