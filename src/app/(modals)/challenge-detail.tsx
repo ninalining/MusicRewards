@@ -1,12 +1,13 @@
 // Challenge detail modal — full challenge information with Play/Resume CTA
 import React, { useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { GlassButton } from '../../components/ui/GlassButton';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { useMusicStore } from '../../stores/musicStore';
+import { useToastStore } from '../../stores/toastStore';
 import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
 import { formatDuration, getDifficultyColor } from '../../utils/challenge';
@@ -16,6 +17,7 @@ export default function ChallengeDetailModal(): React.ReactElement {
   const challenge = useMusicStore((s) => s.challenges.find((c) => c.id === challengeId) ?? null);
   const { currentTrack, play, resume, loading } = useMusicPlayer();
   const { colors } = useTheme();
+  const showToast = useToastStore((s) => s.showToast);
 
   const isCurrentTrack = currentTrack?.id === challengeId;
 
@@ -30,9 +32,9 @@ export default function ChallengeDetailModal(): React.ReactElement {
       router.replace('/(modals)/player');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to start playback';
-      Alert.alert('Playback Error', message);
+      showToast(message, 'error');
     }
-  }, [challenge, isCurrentTrack, play, resume, loading]);
+  }, [challenge, isCurrentTrack, play, resume, loading, showToast]);
 
   if (!challenge) {
     return (

@@ -1,12 +1,13 @@
 // Home screen - Challenge list (Expo Router)
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { ChallengeList } from '../../components/challenge/ChallengeList';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { useChallenges } from '../../hooks/useChallenges';
 import { useMusicStore } from '../../stores/musicStore';
+import { useToastStore } from '../../stores/toastStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
@@ -22,6 +23,7 @@ export default function HomeScreen() {
   );
   const { play, resume } = useMusicPlayer();
   const { colors } = useTheme();
+  const showToast = useToastStore((s) => s.showToast);
 
   const currentTrackId = currentTrack?.id;
 
@@ -40,10 +42,10 @@ export default function HomeScreen() {
         router.push('/(modals)/player');
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to start playback';
-        Alert.alert('Playback Error', message);
+        showToast(message, 'error');
       }
     },
-    [play, resume, currentTrackId],
+    [play, resume, currentTrackId, showToast],
   );
 
   return (
