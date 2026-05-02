@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   listContainer: {
-    paddingBottom: THEME.spacing.xl,
+    paddingBottom: THEME.spacing.xxl + THEME.spacing.xl,
   },
 });
 
