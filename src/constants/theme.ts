@@ -1,6 +1,55 @@
 // Belong design tokens and theme constants
+import type { ColorPalette } from '../types/theme';
+
+// Brand colors — constant across themes
+export const BRAND = {
+  primary: '#7553DB', // Belong purple
+  secondary: '#34CB76', // Belong green
+  accent: '#FCBE25', // Belong yellow
+} as const;
+
+/** Dark mode color palette */
+export const darkPalette: ColorPalette = {
+  surfacePrimary: '#1a1a1a',
+  surfaceSecondary: '#2a2a2a',
+  surfaceGlass: 'rgba(255, 255, 255, 0.1)',
+  surfaceGlassStrong: 'rgba(255, 255, 255, 0.15)',
+  textPrimary: '#FFFFFF',
+  textSecondary: 'rgba(255, 255, 255, 0.7)',
+  textTertiary: 'rgba(255, 255, 255, 0.5)',
+  brandPrimary: BRAND.primary,
+  brandSecondary: BRAND.secondary,
+  brandAccent: BRAND.accent,
+  textOnBrand: '#FFFFFF',
+  border: 'rgba(255, 255, 255, 0.2)',
+  error: '#FF6B6B',
+  glassPrimary: ['rgba(117, 83, 219, 0.3)', 'rgba(117, 83, 219, 0.1)'],
+  glassSecondary: ['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)'],
+  glassCard: ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)'],
+};
+
+/** Light mode color palette */
+export const lightPalette: ColorPalette = {
+  surfacePrimary: '#FFFFFF',
+  surfaceSecondary: '#F5F5F7',
+  surfaceGlass: 'rgba(0, 0, 0, 0.05)',
+  surfaceGlassStrong: 'rgba(0, 0, 0, 0.08)',
+  textPrimary: '#1a1a1a',
+  textSecondary: 'rgba(0, 0, 0, 0.6)',
+  textTertiary: 'rgba(0, 0, 0, 0.4)',
+  brandPrimary: BRAND.primary,
+  brandSecondary: BRAND.secondary,
+  brandAccent: BRAND.accent,
+  textOnBrand: '#FFFFFF',
+  border: 'rgba(0, 0, 0, 0.12)',
+  error: '#DC3545',
+  glassPrimary: ['rgba(117, 83, 219, 0.2)', 'rgba(117, 83, 219, 0.08)'],
+  glassSecondary: ['rgba(0, 0, 0, 0.06)', 'rgba(0, 0, 0, 0.03)'],
+  glassCard: ['rgba(0, 0, 0, 0.08)', 'rgba(0, 0, 0, 0.03)'],
+};
 
 export const THEME = {
+  /** @deprecated Use `darkPalette` / `lightPalette` via `useTheme()` hook instead. */
   colors: {
     primary: '#7553DB', // Belong purple
     secondary: '#34CB76', // Belong green
