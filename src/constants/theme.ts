@@ -91,4 +91,17 @@ export const SAMPLE_CHALLENGES = [
     completed: false,
     progress: 0,
   },
+  {
+    id: 'challenge-3',
+    title: 'Bonus Challenge',
+    artist: 'Camo & Krooked',
+    duration: 219, // 3:39
+    points: 250,
+    audioUrl:
+      'https://belong-dev-public2.s3.us-east-1.amazonaws.com/misc/Camo-Krooked-All-Night.mp3',
+    description: 'Listen again for extra points - test repeat functionality',
+    difficulty: 'hard' as const,
+    completed: false,
+    progress: 0,
+  },
 ];
