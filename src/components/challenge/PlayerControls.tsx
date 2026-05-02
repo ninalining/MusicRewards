@@ -74,7 +74,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
       <GlassCard style={styles.controlsCard}>
         <View style={styles.controlsRow}>
           <GlassButton
-            title="⏪ -10s"
+            title="-10s"
             onPress={handleSeekBack}
             variant="secondary"
             style={styles.controlButton}
@@ -82,7 +82,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
           />
 
           <GlassButton
-            title={loading ? '...' : isPlaying ? '⏸️ Pause' : '▶️ Play'}
+            title={loading ? '...' : isPlaying ? 'Pause' : 'Play'}
             onPress={handlePlayPause}
             variant="primary"
             style={styles.mainControlButton}
@@ -91,7 +91,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
           />
 
           <GlassButton
-            title="⏩ +10s"
+            title="+10s"
             onPress={handleSeekForward}
             variant="secondary"
             style={styles.controlButton}
