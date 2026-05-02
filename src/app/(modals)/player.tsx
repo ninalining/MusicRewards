@@ -188,10 +188,10 @@ export default function PlayerModal(): React.ReactElement {
             loading={loading}
             hasTrack={true}
             error={null}
-            liveProgress={liveProgress}
+            currentPosition={currentPosition}
             duration={duration}
             playbackRate={playbackRate}
-            onSeek={handleSeek}
+            onSeekTo={seekTo}
             onPause={pause}
             onResume={resume}
             onPlaybackRateChange={setPlaybackRate}

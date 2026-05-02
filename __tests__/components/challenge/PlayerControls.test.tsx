@@ -43,10 +43,10 @@ const defaultProps = {
   loading: false,
   hasTrack: true,
   error: null,
-  liveProgress: 50,
+  currentPosition: 100,
   duration: 200,
   playbackRate: 1,
-  onSeek: jest.fn(),
+  onSeekTo: jest.fn(),
   onPause: jest.fn(),
   onResume: jest.fn(),
   onPlaybackRateChange: jest.fn(),
@@ -104,48 +104,56 @@ describe('PlayerControls', () => {
 
   // --- Seek callbacks ---
 
-  it('calls onSeek with decreased percentage on seek back', () => {
-    const onSeek = jest.fn();
-    // duration=200, liveProgress=50 → seek back = 50 - (10/200)*100 = 45
-    render(<PlayerControls {...defaultProps} onSeek={onSeek} liveProgress={50} duration={200} />);
+  it('calls onSeekTo with position minus 10 seconds on seek back', () => {
+    const onSeekTo = jest.fn();
+    // currentPosition=100, duration=200 → seek back = max(0, 100-10) = 90
+    render(
+      <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={100} duration={200} />,
+    );
     fireEvent.press(screen.getByText('⏪ -10s'));
-    expect(onSeek).toHaveBeenCalledTimes(1);
-    expect(onSeek).toHaveBeenCalledWith(45);
+    expect(onSeekTo).toHaveBeenCalledTimes(1);
+    expect(onSeekTo).toHaveBeenCalledWith(90);
   });
 
-  it('calls onSeek with increased percentage on seek forward', () => {
-    const onSeek = jest.fn();
-    // duration=200, liveProgress=50 → seek forward = 50 + (10/200)*100 = 55
-    render(<PlayerControls {...defaultProps} onSeek={onSeek} liveProgress={50} duration={200} />);
+  it('calls onSeekTo with position plus 10 seconds on seek forward', () => {
+    const onSeekTo = jest.fn();
+    // currentPosition=100, duration=200 → seek forward = min(200, 100+10) = 110
+    render(
+      <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={100} duration={200} />,
+    );
     fireEvent.press(screen.getByText('⏩ +10s'));
-    expect(onSeek).toHaveBeenCalledTimes(1);
-    expect(onSeek).toHaveBeenCalledWith(55);
+    expect(onSeekTo).toHaveBeenCalledTimes(1);
+    expect(onSeekTo).toHaveBeenCalledWith(110);
   });
 
   it('clamps seek back to 0 when near start', () => {
-    const onSeek = jest.fn();
-    // duration=200, liveProgress=2 → 2 - 5 = -3 → clamped to 0
-    render(<PlayerControls {...defaultProps} onSeek={onSeek} liveProgress={2} duration={200} />);
+    const onSeekTo = jest.fn();
+    // currentPosition=5, duration=200 → max(0, 5-10) = 0
+    render(
+      <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={5} duration={200} />,
+    );
     fireEvent.press(screen.getByText('⏪ -10s'));
-    expect(onSeek).toHaveBeenCalledWith(0);
+    expect(onSeekTo).toHaveBeenCalledWith(0);
   });
 
-  it('clamps seek forward to 100 when near end', () => {
-    const onSeek = jest.fn();
-    // duration=200, liveProgress=98 → 98 + 5 = 103 → clamped to 100
-    render(<PlayerControls {...defaultProps} onSeek={onSeek} liveProgress={98} duration={200} />);
+  it('clamps seek forward to duration when near end', () => {
+    const onSeekTo = jest.fn();
+    // currentPosition=195, duration=200 → min(200, 195+10) = 200
+    render(
+      <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={195} duration={200} />,
+    );
     fireEvent.press(screen.getByText('⏩ +10s'));
-    expect(onSeek).toHaveBeenCalledWith(100);
+    expect(onSeekTo).toHaveBeenCalledWith(200);
   });
 
   // --- Division-by-zero guard ---
 
-  it('does not call onSeek when duration is 0', () => {
-    const onSeek = jest.fn();
-    render(<PlayerControls {...defaultProps} onSeek={onSeek} duration={0} />);
+  it('does not call onSeekTo when duration is 0', () => {
+    const onSeekTo = jest.fn();
+    render(<PlayerControls {...defaultProps} onSeekTo={onSeekTo} duration={0} />);
     fireEvent.press(screen.getByText('⏪ -10s'));
     fireEvent.press(screen.getByText('⏩ +10s'));
-    expect(onSeek).not.toHaveBeenCalled();
+    expect(onSeekTo).not.toHaveBeenCalled();
   });
 
   // --- Error display ---
