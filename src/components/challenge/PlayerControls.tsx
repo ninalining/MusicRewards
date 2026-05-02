@@ -98,6 +98,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
           <GlassButton
             title={`${playbackRate}x`}
             onPress={handleSpeedChange}
+            disabled={loading || !hasTrack}
             variant="secondary"
             style={styles.speedButton}
             accessibilityHint={`Current speed ${playbackRate}x. Double tap to change playback speed`}
