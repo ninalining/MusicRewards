@@ -1,5 +1,5 @@
 // PlayerControls — play/pause and seek buttons for the player modal
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
 import { GlassButton } from '../ui/GlassButton';
@@ -11,10 +11,10 @@ interface PlayerControlsProps {
   loading: boolean;
   hasTrack: boolean;
   error: string | null;
-  liveProgress: number;
+  currentPosition: number;
   duration: number;
   playbackRate: number;
-  onSeek: (percentage: number) => void;
+  onSeekTo: (seconds: number) => void;
   onPause: () => void;
   onResume: () => void;
   onPlaybackRateChange: (rate: number) => void;
@@ -34,15 +34,20 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
     loading,
     hasTrack,
     error,
-    liveProgress,
+    currentPosition,
     duration,
     playbackRate,
-    onSeek,
+    onSeekTo,
     onPause,
     onResume,
     onPlaybackRateChange,
   }) => {
     const { colors } = useTheme();
+
+    // Use ref to avoid recreating seek callbacks every 250ms as position updates
+    const positionRef = useRef(currentPosition);
+    positionRef.current = currentPosition;
+
     const handlePlayPause = useCallback((): void => {
       if (isPlaying) {
         onPause();
@@ -53,13 +58,13 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
 
     const handleSeekBack = useCallback((): void => {
       if (!duration || duration <= 0) return;
-      onSeek(Math.max(0, liveProgress - (10 / duration) * 100));
-    }, [onSeek, liveProgress, duration]);
+      onSeekTo(Math.max(0, positionRef.current - 10));
+    }, [onSeekTo, duration]);
 
     const handleSeekForward = useCallback((): void => {
       if (!duration || duration <= 0) return;
-      onSeek(Math.min(100, liveProgress + (10 / duration) * 100));
-    }, [onSeek, liveProgress, duration]);
+      onSeekTo(Math.min(duration, positionRef.current + 10));
+    }, [onSeekTo, duration]);
 
     const handleSpeedChange = useCallback((): void => {
       onPlaybackRateChange(getNextRate(playbackRate));
