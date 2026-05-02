@@ -12,13 +12,35 @@ interface PlayerControlsProps {
   error: string | null;
   liveProgress: number;
   duration: number;
+  playbackRate: number;
   onSeek: (percentage: number) => void;
   onPause: () => void;
   onResume: () => void;
+  onPlaybackRateChange: (rate: number) => void;
 }
 
+const PLAYBACK_RATES = [1, 1.25, 1.5, 2, 0.5] as const;
+
+const getNextRate = (current: number): number => {
+  const index = PLAYBACK_RATES.findIndex((r) => r === current);
+  // Falls back to 1x (index 0) if current rate is unrecognized
+  return PLAYBACK_RATES[(index + 1) % PLAYBACK_RATES.length];
+};
+
 export const PlayerControls = React.memo<PlayerControlsProps>(
-  ({ isPlaying, loading, hasTrack, error, liveProgress, duration, onSeek, onPause, onResume }) => {
+  ({
+    isPlaying,
+    loading,
+    hasTrack,
+    error,
+    liveProgress,
+    duration,
+    playbackRate,
+    onSeek,
+    onPause,
+    onResume,
+    onPlaybackRateChange,
+  }) => {
     const handlePlayPause = useCallback((): void => {
       if (isPlaying) {
         onPause();
@@ -36,6 +58,10 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
       if (!duration || duration <= 0) return;
       onSeek(Math.min(100, liveProgress + (10 / duration) * 100));
     }, [onSeek, liveProgress, duration]);
+
+    const handleSpeedChange = useCallback((): void => {
+      onPlaybackRateChange(getNextRate(playbackRate));
+    }, [onPlaybackRateChange, playbackRate]);
 
     return (
       <GlassCard style={styles.controlsCard}>
@@ -67,6 +93,17 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
         </View>
 
         {error && <Text style={styles.errorText}>{error}</Text>}
+
+        <View style={styles.speedRow}>
+          <GlassButton
+            title={`${playbackRate}x`}
+            onPress={handleSpeedChange}
+            disabled={loading || !hasTrack}
+            variant="secondary"
+            style={styles.speedButton}
+            accessibilityHint={`Current speed ${playbackRate}x. Double tap to change playback speed`}
+          />
+        </View>
       </GlassCard>
     );
   },
@@ -96,5 +133,13 @@ const styles = StyleSheet.create({
     fontSize: THEME.fonts.sizes.sm,
     textAlign: 'center',
     marginTop: THEME.spacing.md,
+  },
+  speedRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: THEME.spacing.sm,
+  },
+  speedButton: {
+    minWidth: THEME.spacing.xxl * 2,
   },
 });

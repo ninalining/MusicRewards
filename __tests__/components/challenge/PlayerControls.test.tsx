@@ -45,9 +45,11 @@ const defaultProps = {
   error: null,
   liveProgress: 50,
   duration: 200,
+  playbackRate: 1,
   onSeek: jest.fn(),
   onPause: jest.fn(),
   onResume: jest.fn(),
+  onPlaybackRateChange: jest.fn(),
 };
 
 describe('PlayerControls', () => {
@@ -156,5 +158,40 @@ describe('PlayerControls', () => {
   it('does not display error text when error is null', () => {
     render(<PlayerControls {...defaultProps} error={null} />);
     expect(screen.queryByText('Something went wrong')).toBeNull();
+  });
+
+  // --- Playback speed ---
+
+  it('renders speed button with current playback rate', () => {
+    render(<PlayerControls {...defaultProps} playbackRate={1.5} />);
+    expect(screen.getByText('1.5x')).toBeOnTheScreen();
+  });
+
+  it('calls onPlaybackRateChange with next rate when speed button pressed', () => {
+    const onPlaybackRateChange = jest.fn();
+    // Current rate is 1, next in cycle [1, 1.25, 1.5, 2, 0.5] is 1.25
+    render(
+      <PlayerControls
+        {...defaultProps}
+        playbackRate={1}
+        onPlaybackRateChange={onPlaybackRateChange}
+      />,
+    );
+    fireEvent.press(screen.getByText('1x'));
+    expect(onPlaybackRateChange).toHaveBeenCalledWith(1.25);
+  });
+
+  it('wraps around to first rate after reaching the last', () => {
+    const onPlaybackRateChange = jest.fn();
+    // Current rate is 0.5 (last in cycle), next should be 1 (first)
+    render(
+      <PlayerControls
+        {...defaultProps}
+        playbackRate={0.5}
+        onPlaybackRateChange={onPlaybackRateChange}
+      />,
+    );
+    fireEvent.press(screen.getByText('0.5x'));
+    expect(onPlaybackRateChange).toHaveBeenCalledWith(1);
   });
 });

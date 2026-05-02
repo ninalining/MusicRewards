@@ -21,6 +21,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
   // Local state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [playbackRate, setPlaybackRateState] = useState(1);
 
   // Tracks which challenge IDs have had completion fired in this session.
   // useRef (not useState) so updates don't trigger re-renders and are
@@ -167,6 +168,15 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     }
   }, []);
 
+  const setPlaybackRate = useCallback(async (rate: number): Promise<void> => {
+    try {
+      await TrackPlayer.setRate(rate);
+      setPlaybackRateState(rate);
+    } catch (err) {
+      if (__DEV__) console.error('SetRate error:', err);
+    }
+  }, []);
+
   // isPlaying is sourced from the Zustand selector (selectIsPlaying) which is kept
   // in sync by the playbackState useEffect above — no need to re-derive here.
   return {
@@ -174,10 +184,12 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     currentTrack,
     currentPosition: progress.position,
     duration: progress.duration,
+    playbackRate,
     play,
     pause,
     seekTo,
     resume,
+    setPlaybackRate,
     loading,
     error,
   };
