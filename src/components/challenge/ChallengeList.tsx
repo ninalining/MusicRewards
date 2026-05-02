@@ -5,6 +5,7 @@ import { Animated, FlatList, StyleSheet, Text, View } from 'react-native';
 import { ChallengeCard } from './ChallengeCard';
 import { GlassCard } from '../ui/GlassCard';
 import { THEME } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 import type { MusicChallenge } from '../../types';
 
 interface ChallengeListProps {
@@ -28,6 +29,7 @@ const SKELETON_COUNT = 3;
 
 /** Pulsing placeholder card shown while challenges load. */
 const SkeletonCard = React.memo((): React.ReactElement => {
+  const { colors } = useTheme();
   const opacity = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
@@ -51,15 +53,15 @@ const SkeletonCard = React.memo((): React.ReactElement => {
 
   return (
     <Animated.View
-      style={[skeletonStyles.card, { opacity }]}
+      style={[skeletonStyles.card, { opacity, backgroundColor: colors.surfaceGlass }]}
       accessibilityRole="progressbar"
       accessibilityLabel="Loading challenge"
     >
-      <View style={skeletonStyles.titleBar} />
-      <View style={skeletonStyles.subtitleBar} />
+      <View style={[skeletonStyles.titleBar, { backgroundColor: colors.border }]} />
+      <View style={[skeletonStyles.subtitleBar, { backgroundColor: colors.border }]} />
       <View style={skeletonStyles.bottomRow}>
-        <View style={skeletonStyles.chip} />
-        <View style={skeletonStyles.chip} />
+        <View style={[skeletonStyles.chip, { backgroundColor: colors.border }]} />
+        <View style={[skeletonStyles.chip, { backgroundColor: colors.border }]} />
       </View>
     </Animated.View>
   );
@@ -76,6 +78,7 @@ export const ChallengeList = React.memo<ChallengeListProps>(
     currentTrackId,
     isPlaying = false,
   }): React.ReactElement => {
+    const { colors } = useTheme();
     const renderItem = useCallback(
       ({ item }: { item: MusicChallenge }): React.ReactElement => (
         <ChallengeCard
@@ -103,7 +106,10 @@ export const ChallengeList = React.memo<ChallengeListProps>(
       return (
         <View style={styles.centeredContainer}>
           <GlassCard style={styles.emptyCard}>
-            <Text style={styles.emptyText} accessibilityRole="text">
+            <Text
+              style={[styles.emptyText, { color: colors.textSecondary }]}
+              accessibilityRole="text"
+            >
               🎵 No challenges available yet
             </Text>
           </GlassCard>
@@ -139,7 +145,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: THEME.fonts.sizes.md,
-    color: THEME.colors.text.secondary,
     textAlign: 'center',
   },
   listContainer: {
@@ -149,7 +154,6 @@ const styles = StyleSheet.create({
 
 const skeletonStyles = StyleSheet.create({
   card: {
-    backgroundColor: THEME.colors.glass,
     borderRadius: THEME.borderRadius.lg,
     padding: THEME.spacing.md,
     marginHorizontal: THEME.spacing.md,
@@ -161,14 +165,12 @@ const skeletonStyles = StyleSheet.create({
     width: '60%',
     height: THEME.sizing.skeletonTitleHeight,
     borderRadius: THEME.borderRadius.sm,
-    backgroundColor: THEME.colors.border,
     marginBottom: THEME.spacing.sm,
   },
   subtitleBar: {
     width: '40%',
     height: THEME.sizing.skeletonSubtitleHeight,
     borderRadius: THEME.borderRadius.sm,
-    backgroundColor: THEME.colors.border,
     marginBottom: THEME.spacing.md,
   },
   bottomRow: {
@@ -179,6 +181,5 @@ const skeletonStyles = StyleSheet.create({
     width: THEME.sizing.skeletonChipWidth,
     height: THEME.sizing.skeletonSubtitleHeight,
     borderRadius: THEME.borderRadius.sm,
-    backgroundColor: THEME.colors.border,
   },
 });

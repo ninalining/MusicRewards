@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text } from 'react-native';
 import type { ViewStyle } from 'react-native';
 import { THEME } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 
 interface PointsCounterProps {
   /** Live-earned points to display. Animates on increase, snaps on decrease. */
@@ -18,6 +19,7 @@ interface PointsCounterProps {
 
 export const PointsCounter = React.memo<PointsCounterProps>(
   ({ points, label, animated = true, style }): React.ReactElement => {
+    const { colors } = useTheme();
     const safePoints = Number.isFinite(points) ? Math.round(points) : 0;
     const [displayValue, setDisplayValue] = useState(safePoints);
     const displayRef = useRef(safePoints);
@@ -85,14 +87,18 @@ export const PointsCounter = React.memo<PointsCounterProps>(
     return (
       <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }, style]}>
         <Text
-          style={styles.value}
+          style={[styles.value, { color: colors.brandAccent }]}
           accessibilityRole="text"
           accessibilityLabel={`${displayValue} ${label?.trim() || 'points'}`}
         >
           {displayValue}
         </Text>
         {label !== undefined && label !== '' ? (
-          <Text style={styles.label} importantForAccessibility="no" accessible={false}>
+          <Text
+            style={[styles.label, { color: colors.textSecondary }]}
+            importantForAccessibility="no"
+            accessible={false}
+          >
             {label}
           </Text>
         ) : null}
@@ -110,11 +116,9 @@ const styles = StyleSheet.create({
   value: {
     fontSize: THEME.fonts.sizes.xxl,
     fontWeight: 'bold',
-    color: THEME.colors.accent,
   },
   label: {
     fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
     marginTop: THEME.spacing.xs,
   },
 });

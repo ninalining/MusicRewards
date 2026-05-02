@@ -3,6 +3,7 @@ import React from 'react';
 import { View, ViewStyle, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
 
 // Glass Card Component
@@ -18,19 +19,26 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   children,
   blurIntensity = THEME.glass.blurIntensity,
   borderRadius = THEME.borderRadius.md,
-  gradientColors = THEME.glass.gradientColors.card,
+  gradientColors,
   style,
 }) => {
+  const { colors, resolvedTheme } = useTheme();
+  const effectiveGradient = gradientColors ?? colors.glassCard;
+
   return (
     <View style={StyleSheet.flatten([{ borderRadius, overflow: 'hidden' }, style])}>
-      <BlurView intensity={blurIntensity} style={StyleSheet.absoluteFillObject} tint="dark" />
+      <BlurView
+        intensity={blurIntensity}
+        style={StyleSheet.absoluteFillObject}
+        tint={resolvedTheme === 'dark' ? 'dark' : 'light'}
+      />
 
       <LinearGradient
-        colors={gradientColors as [string, string]}
+        colors={effectiveGradient as [string, string]}
         style={StyleSheet.absoluteFillObject}
       />
 
-      <View style={[styles.borderOverlay, { borderRadius }]} />
+      <View style={[styles.borderOverlay, { borderRadius, borderColor: colors.border }]} />
 
       <View style={styles.contentContainer}>{children}</View>
     </View>
@@ -44,6 +52,5 @@ const styles = StyleSheet.create({
   borderOverlay: {
     ...StyleSheet.absoluteFillObject,
     borderWidth: 1,
-    borderColor: THEME.colors.border,
   },
 });

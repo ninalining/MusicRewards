@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
 import { THEME } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 import { calculateHitSlop } from '../../utils/accessibility';
 
 // Pure utility — no component state dependency, defined at module scope to avoid recreation.
@@ -21,6 +22,7 @@ interface PlayerProgressProps {
 
 export const PlayerProgress = React.memo<PlayerProgressProps>(
   ({ liveProgress, currentPosition, duration, onSeek }) => {
+    const { colors } = useTheme();
     const progressBarWidth = useRef<number>(0);
     const progressAnim = useRef(new Animated.Value(0)).current;
 
@@ -49,7 +51,9 @@ export const PlayerProgress = React.memo<PlayerProgressProps>(
 
     return (
       <GlassCard style={styles.progressCard}>
-        <Text style={styles.progressLabel}>Listening Progress</Text>
+        <Text style={[styles.progressLabel, { color: colors.textPrimary }]}>
+          Listening Progress
+        </Text>
 
         <TouchableOpacity
           style={styles.progressTrack}
@@ -60,10 +64,11 @@ export const PlayerProgress = React.memo<PlayerProgressProps>(
           onLayout={handleLayout}
           onPress={handleProgressBarPress}
         >
-          <View style={styles.progressBackground}>
+          <View style={[styles.progressBackground, { backgroundColor: colors.surfaceGlass }]}>
             <Animated.View
               style={[
                 styles.progressFill,
+                { backgroundColor: colors.brandAccent },
                 {
                   width: progressAnim.interpolate({
                     inputRange: [0, 100],
@@ -77,11 +82,17 @@ export const PlayerProgress = React.memo<PlayerProgressProps>(
         </TouchableOpacity>
 
         <View style={styles.timeContainer}>
-          <Text style={styles.timeText}>{formatTime(currentPosition)}</Text>
-          <Text style={styles.timeText}>{formatTime(duration)}</Text>
+          <Text style={[styles.timeText, { color: colors.textSecondary }]}>
+            {formatTime(currentPosition)}
+          </Text>
+          <Text style={[styles.timeText, { color: colors.textSecondary }]}>
+            {formatTime(duration)}
+          </Text>
         </View>
 
-        <Text style={styles.progressPercentage}>{Math.round(liveProgress)}% Complete</Text>
+        <Text style={[styles.progressPercentage, { color: colors.brandAccent }]}>
+          {Math.round(liveProgress)}% Complete
+        </Text>
       </GlassCard>
     );
   },
@@ -96,7 +107,6 @@ const styles = StyleSheet.create({
   progressLabel: {
     fontSize: THEME.fonts.sizes.md,
     fontWeight: '600',
-    color: THEME.colors.text.primary,
     textAlign: 'center',
     marginBottom: THEME.spacing.md,
   },
@@ -105,13 +115,11 @@ const styles = StyleSheet.create({
   },
   progressBackground: {
     height: THEME.spacing.sm,
-    backgroundColor: THEME.colors.glass,
     borderRadius: THEME.spacing.xs,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: THEME.colors.accent,
     borderRadius: THEME.spacing.xs,
   },
   timeContainer: {
@@ -121,12 +129,10 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
   },
   progressPercentage: {
     fontSize: THEME.fonts.sizes.lg,
     fontWeight: 'bold',
-    color: THEME.colors.accent,
     textAlign: 'center',
   },
 });

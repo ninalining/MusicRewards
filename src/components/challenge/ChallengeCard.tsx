@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native
 import { GlassCard } from '../ui/GlassCard';
 import { GlassButton } from '../ui/GlassButton';
 import { THEME } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 import { formatDuration, getDifficultyColor } from '../../utils/challenge';
 import type { MusicChallenge } from '../../types';
 
@@ -17,6 +18,7 @@ interface ChallengeCardProps {
 
 export const ChallengeCard = React.memo<ChallengeCardProps>(
   ({ challenge, onPlay, onPress, isCurrentTrack = false, isPlaying = false }) => {
+    const { colors } = useTheme();
     const progressAnim = useRef(new Animated.Value(challenge.progress)).current;
 
     useEffect(() => {
@@ -44,10 +46,12 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(
 
     return (
       <GlassCard
-        style={StyleSheet.flatten([styles.card, isCurrentTrack && styles.currentTrackCard])}
-        gradientColors={
-          isCurrentTrack ? THEME.glass.gradientColors.primary : THEME.glass.gradientColors.card
-        }
+        style={StyleSheet.flatten([
+          styles.card,
+          isCurrentTrack && styles.currentTrackCard,
+          isCurrentTrack && { borderColor: colors.brandPrimary },
+        ])}
+        gradientColors={isCurrentTrack ? THEME.glass.gradientColors.primary : undefined}
       >
         <TouchableOpacity
           onPress={handleCardPress}
@@ -59,8 +63,10 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(
         >
           <View style={styles.header}>
             <View style={styles.titleSection}>
-              <Text style={styles.title}>{challenge.title}</Text>
-              <Text style={styles.artist}>{challenge.artist}</Text>
+              <Text style={[styles.title, { color: colors.textPrimary }]}>{challenge.title}</Text>
+              <Text style={[styles.artist, { color: colors.textSecondary }]}>
+                {challenge.artist}
+              </Text>
             </View>
             <View
               style={StyleSheet.flatten([
@@ -68,37 +74,44 @@ export const ChallengeCard = React.memo<ChallengeCardProps>(
                 { backgroundColor: getDifficultyColor(challenge.difficulty) },
               ])}
             >
-              <Text style={styles.difficultyText}>{challenge.difficulty.toUpperCase()}</Text>
+              <Text style={[styles.difficultyText, { color: colors.textOnBrand }]}>
+                {challenge.difficulty.toUpperCase()}
+              </Text>
             </View>
           </View>
 
-          <Text style={styles.description} numberOfLines={2}>
+          <Text style={[styles.description, { color: colors.textTertiary }]} numberOfLines={2}>
             {challenge.description}
           </Text>
 
           <View style={styles.infoRow}>
             <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Duration</Text>
-              <Text style={styles.infoValue}>{formatDuration(challenge.duration)}</Text>
+              <Text style={[styles.infoLabel, { color: colors.textTertiary }]}>Duration</Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+                {formatDuration(challenge.duration)}
+              </Text>
             </View>
             <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Points</Text>
-              <Text style={[styles.infoValue, { color: THEME.colors.accent }]}>
+              <Text style={[styles.infoLabel, { color: colors.textTertiary }]}>Points</Text>
+              <Text style={[styles.infoValue, { color: colors.brandAccent }]}>
                 {challenge.points}
               </Text>
             </View>
             <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Progress</Text>
-              <Text style={styles.infoValue}>{Math.round(challenge.progress)}%</Text>
+              <Text style={[styles.infoLabel, { color: colors.textTertiary }]}>Progress</Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+                {Math.round(challenge.progress)}%
+              </Text>
             </View>
           </View>
 
           {challenge.progress > 0 && (
             <View style={styles.progressContainer}>
-              <View style={styles.progressTrack}>
+              <View style={[styles.progressTrack, { backgroundColor: colors.surfaceGlass }]}>
                 <Animated.View
                   style={[
                     styles.progressFill,
+                    { backgroundColor: colors.brandAccent },
                     {
                       width: progressAnim.interpolate({
                         inputRange: [0, 100],
@@ -138,7 +151,6 @@ const styles = StyleSheet.create({
   },
   currentTrackCard: {
     borderWidth: 2,
-    borderColor: THEME.colors.primary,
   },
   header: {
     flexDirection: 'row',
@@ -153,12 +165,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: THEME.fonts.sizes.lg,
     fontWeight: 'bold',
-    color: THEME.colors.text.primary,
     marginBottom: THEME.spacing.xs,
   },
   artist: {
     fontSize: THEME.fonts.sizes.md,
-    color: THEME.colors.text.secondary,
   },
   difficultyBadge: {
     paddingHorizontal: THEME.spacing.sm,
@@ -168,11 +178,9 @@ const styles = StyleSheet.create({
   difficultyText: {
     fontSize: THEME.fonts.sizes.xs,
     fontWeight: 'bold',
-    color: THEME.colors.background,
   },
   description: {
     fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.tertiary,
     lineHeight: THEME.fonts.sizes.sm * 1.4,
     marginBottom: THEME.spacing.md,
   },
@@ -186,26 +194,22 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: THEME.fonts.sizes.xs,
-    color: THEME.colors.text.tertiary,
     marginBottom: THEME.spacing.xs,
   },
   infoValue: {
     fontSize: THEME.fonts.sizes.sm,
     fontWeight: '600',
-    color: THEME.colors.text.primary,
   },
   progressContainer: {
     marginBottom: THEME.spacing.md,
   },
   progressTrack: {
     height: THEME.spacing.xs,
-    backgroundColor: THEME.colors.glass,
     borderRadius: THEME.spacing.xs / 2,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: THEME.colors.accent,
     borderRadius: THEME.spacing.xs / 2,
   },
   playButton: {
