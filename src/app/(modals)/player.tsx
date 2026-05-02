@@ -1,12 +1,13 @@
 // Player modal - Full-screen audio player (Expo Router modal)
 import React, { useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { GlassButton } from '../../components/ui/GlassButton';
-import { PointsCounter } from '../../components/ui/PointsCounter';
 import { PlayerProgress } from '../../components/challenge/PlayerProgress';
 import { PlayerControls } from '../../components/challenge/PlayerControls';
+import { TrackInfoCard } from '../../components/challenge/TrackInfoCard';
+import { ChallengeStatusCard } from '../../components/challenge/ChallengeStatusCard';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { usePointsCounter } from '../../hooks/usePointsCounter';
@@ -133,32 +134,13 @@ export default function PlayerModal(): React.ReactElement {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
       <ErrorBoundary>
-        <View style={styles.content}>
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Track Info */}
-          <GlassCard style={styles.trackInfoCard}>
-            <Text style={[styles.trackTitle, { color: colors.textPrimary }]}>
-              {currentTrack.title}
-            </Text>
-            <Text style={[styles.trackArtist, { color: colors.textSecondary }]}>
-              {currentTrack.artist}
-            </Text>
-            <Text style={[styles.trackDescription, { color: colors.textTertiary }]}>
-              {currentTrack.description}
-            </Text>
-
-            <View style={styles.pointsContainer}>
-              <Text style={[styles.pointsLabel, { color: colors.textSecondary }]}>
-                Points Earned
-              </Text>
-              <View style={styles.pointsRow}>
-                <PointsCounter points={currentPoints} style={styles.pointsCounter} />
-                <Text style={[styles.pointsTotal, { color: colors.textSecondary }]}>
-                  {' '}
-                  / {currentTrack.points} pts
-                </Text>
-              </View>
-            </View>
-          </GlassCard>
+          <TrackInfoCard track={currentTrack} currentPoints={currentPoints} />
 
           {/* Error Banner */}
           {error && (
@@ -198,25 +180,8 @@ export default function PlayerModal(): React.ReactElement {
           />
 
           {/* Challenge Status */}
-          <GlassCard style={styles.challengeCard}>
-            <Text style={[styles.challengeLabel, { color: colors.textPrimary }]}>
-              Challenge Status
-            </Text>
-            <View style={styles.challengeInfo}>
-              <Text
-                style={[
-                  styles.challengeStatus,
-                  { color: currentTrack.completed ? colors.brandSecondary : colors.brandAccent },
-                ]}
-              >
-                {currentTrack.completed ? '✅ Completed' : '🎧 In Progress'}
-              </Text>
-              <Text style={[styles.challengeProgress, { color: colors.textSecondary }]}>
-                {Math.round(liveProgress)}% of challenge complete
-              </Text>
-            </View>
-          </GlassCard>
-        </View>
+          <ChallengeStatusCard completed={currentTrack.completed} progressPercent={liveProgress} />
+        </ScrollView>
       </ErrorBoundary>
     </SafeAreaView>
   );
@@ -229,7 +194,10 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: THEME.spacing.lg,
-    justifyContent: 'space-between',
+  },
+  contentContainer: {
+    gap: THEME.spacing.md,
+    paddingBottom: THEME.spacing.lg,
   },
   noTrackCard: {
     margin: THEME.spacing.xl,
@@ -243,60 +211,6 @@ const styles = StyleSheet.create({
   noTrackSubtext: {
     fontSize: THEME.fonts.sizes.md,
     textAlign: 'center',
-  },
-  trackInfoCard: {
-    alignItems: 'center',
-  },
-  trackTitle: {
-    fontSize: THEME.fonts.sizes.xxl,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: THEME.spacing.xs,
-  },
-  trackArtist: {
-    fontSize: THEME.fonts.sizes.lg,
-    marginBottom: THEME.spacing.md,
-  },
-  trackDescription: {
-    fontSize: THEME.fonts.sizes.sm,
-    textAlign: 'center',
-    marginBottom: THEME.spacing.lg,
-  },
-  pointsContainer: {
-    alignItems: 'center',
-  },
-  pointsLabel: {
-    fontSize: THEME.fonts.sizes.sm,
-  },
-  pointsRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  pointsCounter: {
-    // internal sizing handled by PointsCounter
-  },
-  pointsTotal: {
-    fontSize: THEME.fonts.sizes.lg,
-  },
-  challengeCard: {
-    // Card styling handled by GlassCard
-  },
-  challengeLabel: {
-    fontSize: THEME.fonts.sizes.md,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: THEME.spacing.md,
-  },
-  challengeInfo: {
-    alignItems: 'center',
-  },
-  challengeStatus: {
-    fontSize: THEME.fonts.sizes.lg,
-    fontWeight: 'bold',
-    marginBottom: THEME.spacing.xs,
-  },
-  challengeProgress: {
-    fontSize: THEME.fonts.sizes.sm,
   },
   errorBanner: {
     marginHorizontal: THEME.spacing.md,
