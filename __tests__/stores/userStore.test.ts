@@ -1,4 +1,4 @@
-import { useUserStore } from '../../src/stores/userStore';
+import { useUserStore, migrateUserStore } from '../../src/stores/userStore';
 
 const initialState = useUserStore.getState();
 
@@ -35,5 +35,23 @@ describe('userStore', () => {
     useUserStore.getState().resetProgress();
     expect(useUserStore.getState().totalPoints).toBe(0);
     expect(useUserStore.getState().completedChallenges).toHaveLength(0);
+  });
+});
+
+describe('migrateUserStore', () => {
+  it('migrates v0 state with missing fields to v1 defaults', () => {
+    const result = migrateUserStore({}, 0);
+    expect(result).toEqual({ totalPoints: 0, completedChallenges: [] });
+  });
+
+  it('migrates v0 state preserving existing data', () => {
+    const result = migrateUserStore({ totalPoints: 100, completedChallenges: ['t-1'] }, 0);
+    expect(result).toEqual({ totalPoints: 100, completedChallenges: ['t-1'] });
+  });
+
+  it('returns state unchanged for current version', () => {
+    const state = { totalPoints: 50, completedChallenges: ['t-2'] };
+    const result = migrateUserStore(state, 1);
+    expect(result).toEqual(state);
   });
 });
