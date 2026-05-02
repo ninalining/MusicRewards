@@ -1,12 +1,13 @@
-// Register the playback service for react-native-track-player
-import { AppRegistry } from 'react-native';
+// Entry point for MusicRewards.
+// Must be the "main" field in package.json so this file is actually evaluated.
+//
+// expo-router/entry is imported first — it bootstraps Expo Router and registers
+// the root App component via AppRegistry internally.
+import 'expo-router/entry';
+
+// registerPlaybackService MUST be called at module level (never inside useEffect).
+// Placing it here guarantees it runs before any audio session starts.
 import TrackPlayer from 'react-native-track-player';
+import { playbackService } from './src/services/playbackService';
 
-// Expo Router manages the root App component — import via the standard entry point
-import { App } from 'expo-router/build/qualified-entry';
-
-// Register the main application
-AppRegistry.registerComponent('main', () => App);
-
-// Register the playback service
-TrackPlayer.registerPlaybackService(() => require('./src/services/playbackService').playbackService);
+TrackPlayer.registerPlaybackService(() => playbackService);

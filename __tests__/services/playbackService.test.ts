@@ -139,11 +139,20 @@ describe('RemoteDuck handler', () => {
   });
 
   describe('permanent interruption (event.permanent = true)', () => {
-    it('stops playback', async () => {
+    it('stops playback when permanent=true, paused=false', async () => {
       await fireEvent(Event.RemoteDuck, { paused: false, permanent: true });
 
       expect(TrackPlayer.stop).toHaveBeenCalledTimes(1);
       expect(TrackPlayer.play).not.toHaveBeenCalled();
+    });
+
+    it('stops playback when permanent=true, paused=true (real-world payload)', async () => {
+      // iOS often delivers permanent focus-loss with paused=true.
+      // The handler must check permanent first to avoid treating this as transient.
+      await fireEvent(Event.RemoteDuck, { paused: true, permanent: true });
+
+      expect(TrackPlayer.stop).toHaveBeenCalledTimes(1);
+      expect(TrackPlayer.pause).not.toHaveBeenCalled();
     });
 
     it('clears wasPlayingBeforeDuck so a subsequent resume event does not auto-play', async () => {
@@ -168,6 +177,17 @@ describe('RemotePause handler', () => {
   it('calls TrackPlayer.pause()', async () => {
     await fireEvent(Event.RemotePause);
     expect(TrackPlayer.pause).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears wasPlayingBeforeDuck so duck resume does not override a manual pause', async () => {
+    // Scenario: playing → ducked → user manually pauses during call → call ends
+    setPlaybackState(State.Playing);
+    await fireEvent(Event.RemoteDuck, { paused: true, permanent: false }); // duck starts, flag=true
+    await fireEvent(Event.RemotePause); // user pauses, flag=false
+    await fireEvent(Event.RemoteDuck, { paused: false, permanent: false }); // duck ends
+
+    // play() must NOT be called — user's manual pause intent must be respected
+    expect(TrackPlayer.play).not.toHaveBeenCalled();
   });
 });
 

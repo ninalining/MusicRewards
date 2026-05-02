@@ -17,6 +17,8 @@ export async function playbackService(): Promise<void> {
   // when the app is in the background
 
   TrackPlayer.addEventListener(Event.RemotePause, async () => {
+    // Manual pause must cancel any pending auto-resume from a prior duck event.
+    wasPlayingBeforeDuck = false;
     await TrackPlayer.pause();
   });
 
@@ -42,24 +44,30 @@ export async function playbackService(): Promise<void> {
   });
 
   // Playback error — stop silently; the UI reflects state via useProgress/PlaybackState
-  TrackPlayer.addEventListener(Event.PlaybackError, () => {
-    TrackPlayer.stop();
+  TrackPlayer.addEventListener(Event.PlaybackError, async () => {
+    try {
+      await TrackPlayer.stop();
+    } catch {
+      // Ignore secondary stop failures while already handling a playback error
+    }
   });
 
   // Handle audio interruptions (phone calls, other audio apps taking focus).
   // Uses the module-level wasPlayingBeforeDuck flag so that manual pauses are respected —
   // if the user paused before the interruption, we do NOT auto-resume after it ends.
   TrackPlayer.addEventListener(Event.RemoteDuck, async (event) => {
-    if (event.paused) {
+    // Check permanent FIRST — permanent events can also carry paused=true,
+    // so checking paused first would misclassify them as transient interruptions.
+    if (event.permanent) {
+      // Another audio app permanently took audio focus — do not auto-resume
+      wasPlayingBeforeDuck = false;
+      await TrackPlayer.stop();
+    } else if (event.paused) {
       // Transient interruption began (e.g. incoming call, notification sound).
       // Only record the flag as true if we were actually playing — preserves manual pauses.
       const { state } = await TrackPlayer.getPlaybackState();
       wasPlayingBeforeDuck = state === State.Playing;
       await TrackPlayer.pause();
-    } else if (event.permanent) {
-      // Another audio app permanently took audio focus — do not auto-resume
-      wasPlayingBeforeDuck = false;
-      await TrackPlayer.stop();
     } else {
       // Interruption ended — only resume if we were playing before the interruption
       if (wasPlayingBeforeDuck) {
