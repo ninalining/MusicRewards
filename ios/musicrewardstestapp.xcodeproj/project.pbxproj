@@ -22,7 +22,7 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = musicrewardstestapp/Info.plist; sourceTree = "<group>"; };
 		5D6EABDA4D758FC1CA7E39AC /* Pods-musicrewardstestapp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-musicrewardstestapp.release.xcconfig"; path = "Target Support Files/Pods-musicrewardstestapp/Pods-musicrewardstestapp.release.xcconfig"; sourceTree = "<group>"; };
 		627221C1062C59DCD0177FCF /* libPods-musicrewardstestapp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-musicrewardstestapp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		8072470789B942DC38C06370 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = musicrewardstestapp/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		8072470789B942DC38C06370 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = musicrewardstestapp/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = musicrewardstestapp/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		DA24A4A2A544BE5C3E89E3AB /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-musicrewardstestapp/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
@@ -119,7 +119,6 @@
 				EE6A29CC8C0E74E91704C165 /* Pods-musicrewardstestapp.debug.xcconfig */,
 				5D6EABDA4D758FC1CA7E39AC /* Pods-musicrewardstestapp.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -339,6 +338,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = musicrewardstestapp/musicrewardstestapp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 83WSAXFB62;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -357,7 +357,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.wallinex.musicrewards-test-app";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ninali.musicrewards-test-app";
 				PRODUCT_NAME = musicrewardstestapp;
 				SWIFT_OBJC_BRIDGING_HEADER = "musicrewardstestapp/musicrewardstestapp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -375,6 +375,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = musicrewardstestapp/musicrewardstestapp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 83WSAXFB62;
 				INFOPLIST_FILE = musicrewardstestapp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -388,7 +389,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.wallinex.musicrewards-test-app";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ninali.musicrewards-test-app";
 				PRODUCT_NAME = musicrewardstestapp;
 				SWIFT_OBJC_BRIDGING_HEADER = "musicrewardstestapp/musicrewardstestapp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
