@@ -59,14 +59,14 @@ describe('PlayerControls', () => {
 
   // --- Button label rendering ---
 
-  it('shows "▶️ Play" when not playing and not loading', () => {
+  it('shows "Play" when not playing and not loading', () => {
     render(<PlayerControls {...defaultProps} isPlaying={false} loading={false} />);
-    expect(screen.getByText('▶️ Play')).toBeOnTheScreen();
+    expect(screen.getByText('Play')).toBeOnTheScreen();
   });
 
-  it('shows "⏸️ Pause" when playing', () => {
+  it('shows "Pause" when playing', () => {
     render(<PlayerControls {...defaultProps} isPlaying={true} />);
-    expect(screen.getByText('⏸️ Pause')).toBeOnTheScreen();
+    expect(screen.getByText('Pause')).toBeOnTheScreen();
   });
 
   it('shows "..." when loading', () => {
@@ -76,29 +76,29 @@ describe('PlayerControls', () => {
 
   it('renders seek back and seek forward buttons', () => {
     render(<PlayerControls {...defaultProps} />);
-    expect(screen.getByText('⏪ -10s')).toBeOnTheScreen();
-    expect(screen.getByText('⏩ +10s')).toBeOnTheScreen();
+    expect(screen.getByText('-10s')).toBeOnTheScreen();
+    expect(screen.getByText('+10s')).toBeOnTheScreen();
   });
 
   // --- Play/Pause callbacks ---
 
   it('calls onResume when play button pressed and has track', () => {
     render(<PlayerControls {...defaultProps} isPlaying={false} hasTrack={true} />);
-    fireEvent.press(screen.getByText('▶️ Play'));
+    fireEvent.press(screen.getByText('Play'));
     expect(defaultProps.onResume).toHaveBeenCalledTimes(1);
     expect(defaultProps.onPause).not.toHaveBeenCalled();
   });
 
   it('calls onPause when pause button pressed', () => {
     render(<PlayerControls {...defaultProps} isPlaying={true} />);
-    fireEvent.press(screen.getByText('⏸️ Pause'));
+    fireEvent.press(screen.getByText('Pause'));
     expect(defaultProps.onPause).toHaveBeenCalledTimes(1);
     expect(defaultProps.onResume).not.toHaveBeenCalled();
   });
 
   it('does not call onResume when no track', () => {
     render(<PlayerControls {...defaultProps} isPlaying={false} hasTrack={false} />);
-    fireEvent.press(screen.getByText('▶️ Play'));
+    fireEvent.press(screen.getByText('Play'));
     expect(defaultProps.onResume).not.toHaveBeenCalled();
   });
 
@@ -110,7 +110,7 @@ describe('PlayerControls', () => {
     render(
       <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={100} duration={200} />,
     );
-    fireEvent.press(screen.getByText('⏪ -10s'));
+    fireEvent.press(screen.getByText('-10s'));
     expect(onSeekTo).toHaveBeenCalledTimes(1);
     expect(onSeekTo).toHaveBeenCalledWith(90);
   });
@@ -121,7 +121,7 @@ describe('PlayerControls', () => {
     render(
       <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={100} duration={200} />,
     );
-    fireEvent.press(screen.getByText('⏩ +10s'));
+    fireEvent.press(screen.getByText('+10s'));
     expect(onSeekTo).toHaveBeenCalledTimes(1);
     expect(onSeekTo).toHaveBeenCalledWith(110);
   });
@@ -132,7 +132,7 @@ describe('PlayerControls', () => {
     render(
       <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={5} duration={200} />,
     );
-    fireEvent.press(screen.getByText('⏪ -10s'));
+    fireEvent.press(screen.getByText('-10s'));
     expect(onSeekTo).toHaveBeenCalledWith(0);
   });
 
@@ -142,7 +142,7 @@ describe('PlayerControls', () => {
     render(
       <PlayerControls {...defaultProps} onSeekTo={onSeekTo} currentPosition={195} duration={200} />,
     );
-    fireEvent.press(screen.getByText('⏩ +10s'));
+    fireEvent.press(screen.getByText('+10s'));
     expect(onSeekTo).toHaveBeenCalledWith(200);
   });
 
@@ -151,8 +151,8 @@ describe('PlayerControls', () => {
   it('does not call onSeekTo when duration is 0', () => {
     const onSeekTo = jest.fn();
     render(<PlayerControls {...defaultProps} onSeekTo={onSeekTo} duration={0} />);
-    fireEvent.press(screen.getByText('⏪ -10s'));
-    fireEvent.press(screen.getByText('⏩ +10s'));
+    fireEvent.press(screen.getByText('-10s'));
+    fireEvent.press(screen.getByText('+10s'));
     expect(onSeekTo).not.toHaveBeenCalled();
   });
 

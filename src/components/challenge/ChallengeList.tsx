@@ -2,6 +2,7 @@
 // Pure presentational component; all data passed via props.
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Animated, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ChallengeCard } from './ChallengeCard';
 import { GlassCard } from '../ui/GlassCard';
 import { THEME } from '../../constants/theme';
@@ -106,11 +107,17 @@ export const ChallengeList = React.memo<ChallengeListProps>(
       return (
         <View style={styles.centeredContainer}>
           <GlassCard style={styles.emptyCard}>
+            <Ionicons
+              name="musical-notes-outline"
+              size={THEME.fonts.sizes.xl}
+              color={colors.textSecondary}
+              accessible={false}
+            />
             <Text
               style={[styles.emptyText, { color: colors.textSecondary }]}
               accessibilityRole="text"
             >
-              🎵 No challenges available yet
+              No challenges available yet
             </Text>
           </GlassCard>
         </View>
