@@ -17,11 +17,15 @@ describe('haptics utilities', () => {
     it('calls Haptics.impactAsync with Light style', () => {
       hapticLight();
 
-      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Light);
+      expect(Haptics.impactAsync).toHaveBeenCalledWith(
+        Haptics.ImpactFeedbackStyle.Light,
+      );
     });
 
     it('does not throw when haptics fails', () => {
-      (Haptics.impactAsync as jest.Mock).mockRejectedValueOnce(new Error('Unsupported'));
+      (Haptics.impactAsync as jest.Mock).mockRejectedValueOnce(
+        new Error('Unsupported'),
+      );
 
       expect(() => hapticLight()).not.toThrow();
     });
@@ -37,7 +41,9 @@ describe('haptics utilities', () => {
     });
 
     it('does not throw when haptics fails', () => {
-      (Haptics.notificationAsync as jest.Mock).mockRejectedValueOnce(new Error('Unsupported'));
+      (Haptics.notificationAsync as jest.Mock).mockRejectedValueOnce(
+        new Error('Unsupported'),
+      );
 
       expect(() => hapticSuccess()).not.toThrow();
     });
