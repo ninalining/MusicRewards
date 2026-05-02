@@ -7,6 +7,7 @@ import { GlassCard } from '../../components/ui/GlassCard';
 import { GlassButton } from '../../components/ui/GlassButton';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { useMusicStore } from '../../stores/musicStore';
+import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
 import { formatDuration, getDifficultyColor } from '../../utils/challenge';
 
@@ -14,6 +15,7 @@ export default function ChallengeDetailModal(): React.ReactElement {
   const { challengeId } = useLocalSearchParams<{ challengeId: string }>();
   const challenge = useMusicStore((s) => s.challenges.find((c) => c.id === challengeId) ?? null);
   const { currentTrack, play, resume, loading } = useMusicPlayer();
+  const { colors } = useTheme();
 
   const isCurrentTrack = currentTrack?.id === challengeId;
 
@@ -34,9 +36,12 @@ export default function ChallengeDetailModal(): React.ReactElement {
 
   if (!challenge) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
         <GlassCard style={styles.fallbackCard}>
-          <Text style={styles.fallbackText} accessibilityRole="text">
+          <Text
+            style={[styles.fallbackText, { color: colors.textSecondary }]}
+            accessibilityRole="text"
+          >
             Challenge not found
           </Text>
         </GlassCard>
@@ -51,13 +56,15 @@ export default function ChallengeDetailModal(): React.ReactElement {
       : 'Play Challenge';
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
       <ScrollView contentContainerStyle={styles.content}>
         <GlassCard style={styles.headerCard}>
           <View style={styles.headerRow}>
             <View style={styles.titleSection}>
-              <Text style={styles.title}>{challenge.title}</Text>
-              <Text style={styles.artist}>{challenge.artist}</Text>
+              <Text style={[styles.title, { color: colors.textPrimary }]}>{challenge.title}</Text>
+              <Text style={[styles.artist, { color: colors.textSecondary }]}>
+                {challenge.artist}
+              </Text>
             </View>
             <View
               style={StyleSheet.flatten([
@@ -65,14 +72,19 @@ export default function ChallengeDetailModal(): React.ReactElement {
                 { backgroundColor: getDifficultyColor(challenge.difficulty) },
               ])}
             >
-              <Text style={styles.difficultyText} accessibilityRole="text">
+              <Text
+                style={[styles.difficultyText, { color: colors.textOnBrand }]}
+                accessibilityRole="text"
+              >
                 {challenge.difficulty.toUpperCase()}
               </Text>
             </View>
           </View>
         </GlassCard>
 
-        <Text style={styles.description}>{challenge.description}</Text>
+        <Text style={[styles.description, { color: colors.textTertiary }]}>
+          {challenge.description}
+        </Text>
 
         <GlassCard style={styles.statsCard}>
           <View style={styles.infoRow}>
@@ -81,40 +93,55 @@ export default function ChallengeDetailModal(): React.ReactElement {
               accessible
               accessibilityLabel={`Duration: ${formatDuration(challenge.duration)}`}
             >
-              <Text style={styles.infoLabel}>Duration</Text>
-              <Text style={styles.infoValue}>{formatDuration(challenge.duration)}</Text>
+              <Text style={[styles.infoLabel, { color: colors.textTertiary }]}>Duration</Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+                {formatDuration(challenge.duration)}
+              </Text>
             </View>
             <View
               style={styles.infoItem}
               accessible
               accessibilityLabel={`Points: ${challenge.points}`}
             >
-              <Text style={styles.infoLabel}>Points</Text>
-              <Text style={[styles.infoValue, styles.pointsValue]}>{challenge.points}</Text>
+              <Text style={[styles.infoLabel, { color: colors.textTertiary }]}>Points</Text>
+              <Text style={[styles.infoValue, styles.pointsValue, { color: colors.brandAccent }]}>
+                {challenge.points}
+              </Text>
             </View>
             <View
               style={styles.infoItem}
               accessible
               accessibilityLabel={`Progress: ${Math.round(challenge.progress)} percent`}
             >
-              <Text style={styles.infoLabel}>Progress</Text>
-              <Text style={styles.infoValue}>{Math.round(challenge.progress)}%</Text>
+              <Text style={[styles.infoLabel, { color: colors.textTertiary }]}>Progress</Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+                {Math.round(challenge.progress)}%
+              </Text>
             </View>
           </View>
         </GlassCard>
 
         {challenge.progress > 0 && (
           <View style={styles.progressContainer}>
-            <View style={styles.progressTrack}>
+            <View style={[styles.progressTrack, { backgroundColor: colors.surfaceGlass }]}>
               <View
-                style={[styles.progressFill, { width: `${Math.min(challenge.progress, 100)}%` }]}
+                style={[
+                  styles.progressFill,
+                  {
+                    width: `${Math.min(challenge.progress, 100)}%`,
+                    backgroundColor: colors.brandAccent,
+                  },
+                ]}
               />
             </View>
           </View>
         )}
 
         {challenge.completed && (
-          <Text style={styles.completedText} accessibilityRole="text">
+          <Text
+            style={[styles.completedText, { color: colors.brandSecondary }]}
+            accessibilityRole="text"
+          >
             ✓ Challenge Completed
           </Text>
         )}
@@ -140,7 +167,6 @@ export default function ChallengeDetailModal(): React.ReactElement {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.colors.background,
   },
   content: {
     padding: THEME.spacing.lg,
@@ -160,12 +186,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: THEME.fonts.sizes.xxl,
     fontWeight: 'bold',
-    color: THEME.colors.text.primary,
     marginBottom: THEME.spacing.xs,
   },
   artist: {
     fontSize: THEME.fonts.sizes.md,
-    color: THEME.colors.text.secondary,
   },
   difficultyBadge: {
     paddingHorizontal: THEME.spacing.sm,
@@ -175,11 +199,9 @@ const styles = StyleSheet.create({
   difficultyText: {
     fontSize: THEME.fonts.sizes.xs,
     fontWeight: 'bold',
-    color: THEME.colors.background,
   },
   description: {
     fontSize: THEME.fonts.sizes.md,
-    color: THEME.colors.text.tertiary,
     lineHeight: THEME.fonts.sizes.md * 1.4,
     marginBottom: THEME.spacing.lg,
   },
@@ -195,35 +217,30 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: THEME.fonts.sizes.xs,
-    color: THEME.colors.text.tertiary,
     marginBottom: THEME.spacing.xs,
   },
   infoValue: {
     fontSize: THEME.fonts.sizes.lg,
     fontWeight: '600',
-    color: THEME.colors.text.primary,
   },
   pointsValue: {
-    color: THEME.colors.accent,
+    // color applied dynamically
   },
   progressContainer: {
     marginBottom: THEME.spacing.md,
   },
   progressTrack: {
     height: THEME.spacing.xs,
-    backgroundColor: THEME.colors.glass,
     borderRadius: THEME.spacing.xs,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: THEME.colors.accent,
     borderRadius: THEME.spacing.xs,
   },
   completedText: {
     fontSize: THEME.fonts.sizes.lg,
     fontWeight: 'bold',
-    color: THEME.colors.secondary,
     textAlign: 'center',
     marginBottom: THEME.spacing.md,
   },
@@ -236,7 +253,6 @@ const styles = StyleSheet.create({
   },
   fallbackText: {
     fontSize: THEME.fonts.sizes.lg,
-    color: THEME.colors.text.secondary,
     textAlign: 'center',
   },
 });

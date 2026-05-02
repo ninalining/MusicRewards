@@ -10,9 +10,11 @@ import { PlayerControls } from '../../components/challenge/PlayerControls';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { usePointsCounter } from '../../hooks/usePointsCounter';
+import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
 
 export default function PlayerModal(): React.ReactElement {
+  const { colors } = useTheme();
   const {
     currentTrack,
     isPlaying,
@@ -113,11 +115,13 @@ export default function PlayerModal(): React.ReactElement {
 
   if (!currentTrack) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
         <ErrorBoundary>
           <GlassCard style={styles.noTrackCard}>
-            <Text style={styles.noTrackText}>No track selected</Text>
-            <Text style={styles.noTrackSubtext}>
+            <Text style={[styles.noTrackText, { color: colors.textPrimary }]}>
+              No track selected
+            </Text>
+            <Text style={[styles.noTrackSubtext, { color: colors.textSecondary }]}>
               Go back and select a challenge to start playing music
             </Text>
           </GlassCard>
@@ -127,20 +131,31 @@ export default function PlayerModal(): React.ReactElement {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
       <ErrorBoundary>
         <View style={styles.content}>
           {/* Track Info */}
           <GlassCard style={styles.trackInfoCard}>
-            <Text style={styles.trackTitle}>{currentTrack.title}</Text>
-            <Text style={styles.trackArtist}>{currentTrack.artist}</Text>
-            <Text style={styles.trackDescription}>{currentTrack.description}</Text>
+            <Text style={[styles.trackTitle, { color: colors.textPrimary }]}>
+              {currentTrack.title}
+            </Text>
+            <Text style={[styles.trackArtist, { color: colors.textSecondary }]}>
+              {currentTrack.artist}
+            </Text>
+            <Text style={[styles.trackDescription, { color: colors.textTertiary }]}>
+              {currentTrack.description}
+            </Text>
 
             <View style={styles.pointsContainer}>
-              <Text style={styles.pointsLabel}>Points Earned</Text>
+              <Text style={[styles.pointsLabel, { color: colors.textSecondary }]}>
+                Points Earned
+              </Text>
               <View style={styles.pointsRow}>
                 <PointsCounter points={currentPoints} style={styles.pointsCounter} />
-                <Text style={styles.pointsTotal}> / {currentTrack.points} pts</Text>
+                <Text style={[styles.pointsTotal, { color: colors.textSecondary }]}>
+                  {' '}
+                  / {currentTrack.points} pts
+                </Text>
               </View>
             </View>
           </GlassCard>
@@ -148,7 +163,7 @@ export default function PlayerModal(): React.ReactElement {
           {/* Error Banner */}
           {error && (
             <GlassCard style={styles.errorBanner}>
-              <Text style={styles.errorText}>{error}</Text>
+              <Text style={[styles.errorText, { color: colors.brandAccent }]}>{error}</Text>
               <GlassButton
                 title="Retry"
                 onPress={handleRetry}
@@ -184,17 +199,19 @@ export default function PlayerModal(): React.ReactElement {
 
           {/* Challenge Status */}
           <GlassCard style={styles.challengeCard}>
-            <Text style={styles.challengeLabel}>Challenge Status</Text>
+            <Text style={[styles.challengeLabel, { color: colors.textPrimary }]}>
+              Challenge Status
+            </Text>
             <View style={styles.challengeInfo}>
               <Text
                 style={[
                   styles.challengeStatus,
-                  { color: currentTrack.completed ? THEME.colors.secondary : THEME.colors.accent },
+                  { color: currentTrack.completed ? colors.brandSecondary : colors.brandAccent },
                 ]}
               >
                 {currentTrack.completed ? '✅ Completed' : '🎧 In Progress'}
               </Text>
-              <Text style={styles.challengeProgress}>
+              <Text style={[styles.challengeProgress, { color: colors.textSecondary }]}>
                 {Math.round(liveProgress)}% of challenge complete
               </Text>
             </View>
@@ -208,7 +225,6 @@ export default function PlayerModal(): React.ReactElement {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.colors.background,
   },
   content: {
     flex: 1,
@@ -222,12 +238,10 @@ const styles = StyleSheet.create({
   noTrackText: {
     fontSize: THEME.fonts.sizes.xl,
     fontWeight: 'bold',
-    color: THEME.colors.text.primary,
     marginBottom: THEME.spacing.sm,
   },
   noTrackSubtext: {
     fontSize: THEME.fonts.sizes.md,
-    color: THEME.colors.text.secondary,
     textAlign: 'center',
   },
   trackInfoCard: {
@@ -236,18 +250,15 @@ const styles = StyleSheet.create({
   trackTitle: {
     fontSize: THEME.fonts.sizes.xxl,
     fontWeight: 'bold',
-    color: THEME.colors.text.primary,
     textAlign: 'center',
     marginBottom: THEME.spacing.xs,
   },
   trackArtist: {
     fontSize: THEME.fonts.sizes.lg,
-    color: THEME.colors.text.secondary,
     marginBottom: THEME.spacing.md,
   },
   trackDescription: {
     fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.tertiary,
     textAlign: 'center',
     marginBottom: THEME.spacing.lg,
   },
@@ -256,7 +267,6 @@ const styles = StyleSheet.create({
   },
   pointsLabel: {
     fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
   },
   pointsRow: {
     flexDirection: 'row',
@@ -267,7 +277,6 @@ const styles = StyleSheet.create({
   },
   pointsTotal: {
     fontSize: THEME.fonts.sizes.lg,
-    color: THEME.colors.text.secondary,
   },
   challengeCard: {
     // Card styling handled by GlassCard
@@ -275,7 +284,6 @@ const styles = StyleSheet.create({
   challengeLabel: {
     fontSize: THEME.fonts.sizes.md,
     fontWeight: '600',
-    color: THEME.colors.text.primary,
     textAlign: 'center',
     marginBottom: THEME.spacing.md,
   },
@@ -289,7 +297,6 @@ const styles = StyleSheet.create({
   },
   challengeProgress: {
     fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
   },
   errorBanner: {
     marginHorizontal: THEME.spacing.md,
@@ -298,7 +305,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    color: THEME.colors.accent,
     fontSize: THEME.fonts.sizes.sm,
     textAlign: 'center',
     marginBottom: THEME.spacing.sm,
