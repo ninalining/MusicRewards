@@ -1,5 +1,5 @@
 // GlassButton component - Glass-styled button with loading state
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Text,
   TouchableOpacity,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { GlassCard } from './GlassCard';
 import { THEME } from '../../constants/theme';
+import { hapticLight } from '../../utils/haptics';
 
 interface GlassButtonProps {
   title: string;
@@ -37,9 +38,14 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       ? THEME.glass.gradientColors.primary
       : THEME.glass.gradientColors.secondary;
 
+  const handlePress = useCallback((): void => {
+    hapticLight();
+    onPress();
+  }, [onPress]);
+
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       disabled={disabled || loading}
       activeOpacity={0.7}
       accessibilityRole="button"
