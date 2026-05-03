@@ -26,6 +26,8 @@ npm-debug.log*
 # Build output
 dist/
 build/
+android/
+ios/Pods/
 
 # Docs
 docs/

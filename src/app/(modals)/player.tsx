@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Text, StyleSheet, View } from 'react-native';
+import { Text, StyleSheet, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { GlassButton } from '../../components/ui/GlassButton';
@@ -40,6 +40,7 @@ export default function PlayerModal(): React.ReactElement {
 
   const currentTrackId = currentTrack?.id;
   const currentTrackPoints = currentTrack?.points;
+  const currentTrackSavedProgress = currentTrack?.progress ?? 0;
 
   const activeSessionRef = useRef<string | null>(null);
 
@@ -55,6 +56,8 @@ export default function PlayerModal(): React.ReactElement {
           totalPoints: currentTrackPoints,
           durationSeconds: duration,
           challengeId: currentTrackId,
+          // Seed the baseline so previously-earned points are not re-awarded.
+          initialProgressPercent: currentTrackSavedProgress,
         });
       } else {
         resumeCounting();
@@ -66,6 +69,7 @@ export default function PlayerModal(): React.ReactElement {
     isPlaying,
     currentTrackId,
     currentTrackPoints,
+    currentTrackSavedProgress,
     duration,
     startCounting,
     stopCounting,
@@ -102,6 +106,12 @@ export default function PlayerModal(): React.ReactElement {
     }
   }, [currentTrack, play]);
 
+  // Unified progress value: use max(liveProgress, position-based) so seeks while
+  // paused update immediately. Both PlayerProgress and ChallengeStatusCard read
+  // this same value to stay in sync.
+  const displayProgress =
+    duration > 0 ? Math.max(liveProgress, (currentPosition / duration) * 100) : liveProgress;
+
   if (!currentTrack) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
@@ -122,7 +132,12 @@ export default function PlayerModal(): React.ReactElement {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
       <ErrorBoundary>
-        <View style={styles.content}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           <TrackInfoCard track={currentTrack} currentPoints={currentPoints} />
 
           {error && (
@@ -139,13 +154,8 @@ export default function PlayerModal(): React.ReactElement {
           )}
 
           <View style={styles.bottomSection}>
-            {/* Progress — use max(liveProgress, positionBased) so seek while paused is instant */}
             <PlayerProgress
-              liveProgress={
-                duration > 0
-                  ? Math.max(liveProgress, (currentPosition / duration) * 100)
-                  : liveProgress
-              }
+              liveProgress={displayProgress}
               currentPosition={currentPosition}
               duration={duration}
               onSeek={handleSeek}
@@ -166,10 +176,10 @@ export default function PlayerModal(): React.ReactElement {
 
             <ChallengeStatusCard
               completed={currentTrack.completed}
-              progressPercent={liveProgress}
+              progressPercent={displayProgress}
             />
           </View>
-        </View>
+        </ScrollView>
       </ErrorBoundary>
     </SafeAreaView>
   );
@@ -179,9 +189,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  scroll: {
     flex: 1,
+  },
+  content: {
     paddingTop: THEME.spacing.md,
+    paddingBottom: THEME.spacing.xl,
+    flexGrow: 1,
     justifyContent: 'space-between',
   },
   bottomSection: {

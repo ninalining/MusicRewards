@@ -99,6 +99,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
           <TouchableOpacity
             onPress={handlePlayPause}
             activeOpacity={0.8}
+            disabled={loading}
             accessibilityRole="button"
             accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
             accessibilityHint={isPlaying ? 'Double tap to pause' : 'Double tap to play'}

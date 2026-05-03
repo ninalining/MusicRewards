@@ -106,6 +106,8 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
 
         // Restore saved progress so the user resumes where they left off.
         // Skip if < 1% (rounding noise) or ≥ 90% (completed — replay from start).
+        // Points baseline is passed to startCounting() via initialProgressPercent
+        // so previously-earned points are not re-awarded on resume.
         const savedProgress = track.progress ?? 0;
         if (savedProgress > 1 && savedProgress < 90 && track.duration > 0) {
           await TrackPlayer.seekTo((savedProgress / 100) * track.duration);

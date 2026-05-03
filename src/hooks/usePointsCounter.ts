@@ -58,13 +58,22 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
 
   const startCounting = useCallback(
     (config: PointsCounterConfig): void => {
-      // Reset before starting so Math.max on setProgress doesn't carry stale values.
       stopCounting();
       configRef.current = config;
-      resetProgress();
+
+      // Seed the baseline from a previously saved progress so that re-opening a
+      // partially-listened track does not re-award points the user already earned.
+      const baseline =
+        config.initialProgressPercent != null && config.initialProgressPercent > 0
+          ? Math.floor((config.initialProgressPercent / 100) * config.totalPoints)
+          : 0;
+      prevAwardedRef.current = baseline;
+      setCurrentPoints(baseline);
+      setProgress(config.initialProgressPercent ?? 0);
+
       setIsActive(true);
     },
-    [stopCounting, resetProgress],
+    [stopCounting],
   );
 
   // Cleanup on unmount — useProgress() is managed by RNTP internally.

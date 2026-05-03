@@ -17,6 +17,9 @@ export interface PointsCounterConfig {
   totalPoints: number;
   durationSeconds: number;
   challengeId: string;
+  /** Progress % (0-100) already earned in a previous session.
+   * Used to seed prevAwardedRef so points are not re-awarded on resume. */
+  initialProgressPercent?: number;
 }
 
 export interface UseMusicPlayerReturn {
