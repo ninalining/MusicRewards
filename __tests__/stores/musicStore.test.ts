@@ -49,12 +49,18 @@ describe('musicStore', () => {
     expect(other?.progress).toBe(0);
   });
 
-  it('resets challenges via loadChallenges', () => {
+  it('does not overwrite existing challenges via loadChallenges', () => {
     const challengeId = SAMPLE_CHALLENGES[0].id;
     useMusicStore.getState().updateProgress(challengeId, 75);
     useMusicStore.getState().loadChallenges();
-    const reset = useMusicStore.getState().challenges.find((c) => c.id === challengeId);
-    expect(reset?.progress).toBe(0);
+    const challenge = useMusicStore.getState().challenges.find((c) => c.id === challengeId);
+    expect(challenge?.progress).toBe(75);
+  });
+
+  it('loads default challenges when store is empty', () => {
+    useMusicStore.setState({ challenges: [] });
+    useMusicStore.getState().loadChallenges();
+    expect(useMusicStore.getState().challenges.length).toBe(SAMPLE_CHALLENGES.length);
   });
 
   it('sets currentTrack', () => {
