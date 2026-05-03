@@ -28,7 +28,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>musicrewards-test-app</string>
-				<string>com.wallinex.musicrewards-test-app</string>
+				<string>com.ninali.musicrewards-test-app</string>
 			</array>
 		</dict>
 	</array>

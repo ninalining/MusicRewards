@@ -9,7 +9,7 @@
 | Layer | Technology | Version |
 |-------|-----------|---------|
 | Framework | React Native + Expo | ~54, SDK 54 |
-| Navigation | Expo Router (file-based) | 3.5 |
+| Navigation | Expo Router (file-based) | 6.0 |
 | Language | TypeScript (strict mode) | ~5.9 |
 | State | Zustand + AsyncStorage persistence | v5 |
 | Audio | react-native-track-player | ^4.1 |
