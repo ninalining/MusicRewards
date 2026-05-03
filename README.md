@@ -64,7 +64,7 @@ src/
 | Layer | Technology |
 |-------|-----------|
 | Framework | React Native + Expo ~54 |
-| Navigation | Expo Router 3.5 |
+| Navigation | Expo Router 6 |
 | State | Zustand v5 + AsyncStorage |
 | Audio | react-native-track-player ^4.1 |
 | Testing | Jest + @testing-library/react-native |
