@@ -1,53 +1,71 @@
-// Home screen - Challenge list (Expo Router)
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import { ChallengeCard } from '../../components/challenge/ChallengeCard';
+import { ChallengeList } from '../../components/challenge/ChallengeList';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
-import { useMusicStore, selectChallenges, selectCurrentTrack, selectIsPlaying } from '../../stores/musicStore';
+import { useChallenges } from '../../hooks/useChallenges';
+import { useMusicStore } from '../../stores/musicStore';
+import { useToastStore } from '../../stores/toastStore';
+import { useShallow } from 'zustand/react/shallow';
+import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
 import type { MusicChallenge } from '../../types';
 
 export default function HomeScreen() {
-  const challenges = useMusicStore(selectChallenges);
-  const currentTrack = useMusicStore(selectCurrentTrack);
-  const isPlaying = useMusicStore(selectIsPlaying);
-  const { play } = useMusicPlayer();
+  const { challenges, loading } = useChallenges();
+  const { currentTrack, isPlaying } = useMusicStore(
+    useShallow((s) => ({
+      currentTrack: s.currentTrack,
+      isPlaying: s.isPlaying,
+    })),
+  );
+  const { play, resume } = useMusicPlayer();
+  const { colors } = useTheme();
+  const showToast = useToastStore((s) => s.showToast);
 
-  const handlePlayChallenge = async (challenge: MusicChallenge) => {
-    try {
-      await play(challenge);
-      // Navigate to player modal after starting playback
-      router.push('/(modals)/player');
-    } catch (error) {
-      console.error('Failed to play challenge:', error);
-      const message = error instanceof Error ? error.message : 'Failed to start playback';
-      Alert.alert('Playback Error', message);
-    }
-  };
+  const currentTrackId = currentTrack?.id;
 
-  const renderChallenge = ({ item }: { item: MusicChallenge }) => (
-    <ChallengeCard
-      challenge={item}
-      onPlay={handlePlayChallenge}
-      isCurrentTrack={currentTrack?.id === item.id}
-      isPlaying={isPlaying}
-    />
+  const handlePressChallenge = useCallback((challenge: MusicChallenge): void => {
+    router.push(`/(modals)/challenge-detail?challengeId=${encodeURIComponent(challenge.id)}`);
+  }, []);
+
+  const handlePlayChallenge = useCallback(
+    async (challenge: MusicChallenge): Promise<void> => {
+      try {
+        if (currentTrackId === challenge.id) {
+          await resume();
+        } else {
+          await play(challenge);
+        }
+        router.push('/(modals)/player');
+      } catch (error) {
+        const message =
+          __DEV__ && error instanceof Error ? error.message : 'Failed to start playback';
+        showToast(message, 'error');
+      }
+    },
+    [play, resume, currentTrackId, showToast],
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Music Challenges</Text>
-      <Text style={styles.subtitle}>
+    <View style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
+      <Text style={[styles.header, { color: colors.textPrimary }]}>Music Challenges</Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
         Complete listening challenges to earn points and unlock achievements
       </Text>
-      <FlatList
-        data={challenges}
-        renderItem={renderChallenge}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-      />
+      <ErrorBoundary>
+        <View style={styles.listWrapper}>
+          <ChallengeList
+            challenges={challenges}
+            loading={loading}
+            onPlay={handlePlayChallenge}
+            onPressChallenge={handlePressChallenge}
+            currentTrackId={currentTrackId}
+            isPlaying={isPlaying}
+          />
+        </View>
+      </ErrorBoundary>
     </View>
   );
 }
@@ -55,24 +73,21 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.colors.background,
     paddingHorizontal: THEME.spacing.md,
     paddingTop: THEME.spacing.lg,
   },
   header: {
     fontSize: THEME.fonts.sizes.xxl,
     fontWeight: 'bold',
-    color: THEME.colors.text.primary,
     marginBottom: THEME.spacing.sm,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
     textAlign: 'center',
     marginBottom: THEME.spacing.lg,
   },
-  listContainer: {
-    paddingBottom: THEME.spacing.xl,
+  listWrapper: {
+    flex: 1,
   },
 });

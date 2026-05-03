@@ -1,5 +1,3 @@
-// TypeScript type definitions for MusicRewards app
-
 export interface MusicChallenge {
   id: string;
   title: string;
@@ -19,6 +17,9 @@ export interface PointsCounterConfig {
   totalPoints: number;
   durationSeconds: number;
   challengeId: string;
+  /** Progress % (0-100) already earned in a previous session.
+   * Used to seed prevAwardedRef so points are not re-awarded on resume. */
+  initialProgressPercent?: number;
 }
 
 export interface UseMusicPlayerReturn {
@@ -26,21 +27,23 @@ export interface UseMusicPlayerReturn {
   currentTrack: MusicChallenge | null;
   currentPosition: number;
   duration: number;
+  playbackRate: number;
   play: (track: MusicChallenge) => Promise<void>;
-  pause: () => void;
-  resume: () => void;
-  seekTo: (seconds: number) => void;
+  pause: () => Promise<void>;
+  resume: () => Promise<void>;
+  seekTo: (seconds: number) => Promise<void>;
+  setPlaybackRate: (rate: number) => Promise<void>;
   loading: boolean;
   error: string | null;
 }
 
 export interface UsePointsCounterReturn {
   currentPoints: number;
-  pointsEarned: number;
   progress: number; // 0-100
   isActive: boolean;
   startCounting: (config: PointsCounterConfig) => void;
   stopCounting: () => void;
+  resumeCounting: () => void;
   resetProgress: () => void;
 }
 

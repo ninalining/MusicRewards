@@ -1,175 +1,186 @@
-// Player modal - Full-screen audio player (Expo Router modal)
-import React, { useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native';
-import { GlassCard, GlassButton } from '../../components/ui/GlassCard';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { Text, StyleSheet, View, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { GlassCard } from '../../components/ui/GlassCard';
+import { GlassButton } from '../../components/ui/GlassButton';
+import { PlayerProgress } from '../../components/challenge/PlayerProgress';
+import { PlayerControls } from '../../components/challenge/PlayerControls';
+import { TrackInfoCard } from '../../components/challenge/TrackInfoCard';
+import { ChallengeStatusCard } from '../../components/challenge/ChallengeStatusCard';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
+import { usePointsCounter } from '../../hooks/usePointsCounter';
+import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
 
-export default function PlayerModal() {
-  const { 
-    currentTrack, 
-    isPlaying, 
-    currentPosition, 
-    duration, 
-    play, 
-    pause, 
-    resume, 
+export default function PlayerModal(): React.ReactElement {
+  const { colors } = useTheme();
+  const {
+    currentTrack,
+    isPlaying,
+    currentPosition,
+    duration,
+    playbackRate,
+    play,
+    pause,
+    resume,
     seekTo,
+    setPlaybackRate,
     loading,
-    error 
+    error,
   } = useMusicPlayer();
 
-  // Captures the rendered pixel width of the progress bar container via onLayout.
-  // Cannot use nativeEvent.width from a press event — that field doesn't exist on TouchableOpacity.
-  const progressBarWidth = useRef<number>(0);
+  const {
+    currentPoints,
+    progress: liveProgress,
+    startCounting,
+    stopCounting,
+    resumeCounting,
+  } = usePointsCounter();
 
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
-  };
+  const currentTrackId = currentTrack?.id;
+  const currentTrackPoints = currentTrack?.points;
+  const currentTrackSavedProgress = currentTrack?.progress ?? 0;
 
-  const getProgress = (): number => {
-    if (!duration || duration === 0) return 0;
-    return (currentPosition / duration) * 100;
-  };
+  const activeSessionRef = useRef<string | null>(null);
 
-  const handleSeek = (percentage: number) => {
-    if (duration) {
-      const newPosition = (percentage / 100) * duration;
-      seekTo(newPosition);
-    }
-  };
+  useEffect(() => {
+    if (!currentTrackId || currentTrackPoints == null || !duration || duration <= 0) return;
 
-  const handlePlayPause = async () => {
     if (isPlaying) {
-      pause();
-    } else {
-      if (currentTrack) {
-        resume();
+      // startCounting resets progress — only call when the track changes.
+      // resumeCounting re-activates without resetting.
+      if (activeSessionRef.current !== currentTrackId) {
+        activeSessionRef.current = currentTrackId;
+        startCounting({
+          totalPoints: currentTrackPoints,
+          durationSeconds: duration,
+          challengeId: currentTrackId,
+          // Seed the baseline so previously-earned points are not re-awarded.
+          initialProgressPercent: currentTrackSavedProgress,
+        });
+      } else {
+        resumeCounting();
       }
+    } else {
+      stopCounting();
     }
-  };
+  }, [
+    isPlaying,
+    currentTrackId,
+    currentTrackPoints,
+    currentTrackSavedProgress,
+    duration,
+    startCounting,
+    stopCounting,
+    resumeCounting,
+  ]);
+
+  const pauseRef = useRef(pause);
+  pauseRef.current = pause;
+  const stopCountingRef = useRef(stopCounting);
+  stopCountingRef.current = stopCounting;
+
+  useEffect(() => {
+    return () => {
+      pauseRef.current();
+      stopCountingRef.current();
+    };
+  }, []);
+
+  const handleSeek = useCallback(
+    (percentage: number): void => {
+      if (duration) {
+        seekTo((percentage / 100) * duration);
+      }
+    },
+    [duration, seekTo],
+  );
+
+  const handleRetry = useCallback(async (): Promise<void> => {
+    if (!currentTrack) return;
+    try {
+      await play(currentTrack);
+    } catch {
+      // play() sets error state internally; catch prevents unhandled rejection.
+    }
+  }, [currentTrack, play]);
+
+  // Unified progress value: use max(liveProgress, position-based) so seeks while
+  // paused update immediately. Both PlayerProgress and ChallengeStatusCard read
+  // this same value to stay in sync.
+  const displayProgress =
+    duration > 0 ? Math.max(liveProgress, (currentPosition / duration) * 100) : liveProgress;
 
   if (!currentTrack) {
     return (
-      <SafeAreaView style={styles.container}>
-        <GlassCard style={styles.noTrackCard}>
-          <Text style={styles.noTrackText}>No track selected</Text>
-          <Text style={styles.noTrackSubtext}>
-            Go back and select a challenge to start playing music
-          </Text>
-        </GlassCard>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
+        <ErrorBoundary>
+          <GlassCard style={styles.noTrackCard}>
+            <Text style={[styles.noTrackText, { color: colors.textPrimary }]}>
+              No track selected
+            </Text>
+            <Text style={[styles.noTrackSubtext, { color: colors.textSecondary }]}>
+              Go back and select a challenge to start playing music
+            </Text>
+          </GlassCard>
+        </ErrorBoundary>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Track Info */}
-        <GlassCard style={styles.trackInfoCard}>
-          <Text style={styles.trackTitle}>{currentTrack.title}</Text>
-          <Text style={styles.trackArtist}>{currentTrack.artist}</Text>
-          <Text style={styles.trackDescription}>{currentTrack.description}</Text>
-          
-          <View style={styles.pointsContainer}>
-            <Text style={styles.pointsLabel}>Challenge Points</Text>
-            <Text style={styles.pointsValue}>{currentTrack.points}</Text>
-          </View>
-        </GlassCard>
-
-        {/* Progress Section */}
-        <GlassCard style={styles.progressCard}>
-          <Text style={styles.progressLabel}>Listening Progress</Text>
-          
-          {/* Progress Bar */}
-          <TouchableOpacity 
-            style={styles.progressTrack}
-            onLayout={(e) => {
-              progressBarWidth.current = e.nativeEvent.layout.width;
-            }}
-            onPress={(event) => {
-              if (progressBarWidth.current === 0) return;
-              const percentage = (event.nativeEvent.locationX / progressBarWidth.current) * 100;
-              handleSeek(percentage);
-            }}
-          >
-            <View style={styles.progressBackground}>
-              <View 
-                style={[
-                  styles.progressFill,
-                  { width: `${getProgress()}%` }
-                ]} 
-              />
-            </View>
-          </TouchableOpacity>
-
-          {/* Time Display */}
-          <View style={styles.timeContainer}>
-            <Text style={styles.timeText}>{formatTime(currentPosition)}</Text>
-            <Text style={styles.timeText}>{formatTime(duration)}</Text>
-          </View>
-
-          {/* Progress Percentage */}
-          <Text style={styles.progressPercentage}>
-            {Math.round(getProgress())}% Complete
-          </Text>
-        </GlassCard>
-
-        {/* Controls */}
-        <GlassCard style={styles.controlsCard}>
-          <View style={styles.controlsRow}>
-            <GlassButton
-              title="⏪ -10s"
-              onPress={() => handleSeek(Math.max(0, getProgress() - (10 / duration) * 100))}
-              variant="secondary"
-              style={styles.controlButton}
-            />
-            
-            <GlassButton
-              title={loading ? "..." : isPlaying ? "⏸️ Pause" : "▶️ Play"}
-              onPress={handlePlayPause}
-              variant="primary"
-              style={styles.mainControlButton}
-              loading={loading}
-            />
-            
-            <GlassButton
-              title="⏩ +10s"
-              onPress={() => handleSeek(Math.min(100, getProgress() + (10 / duration) * 100))}
-              variant="secondary"
-              style={styles.controlButton}
-            />
-          </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
+      <ErrorBoundary>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <TrackInfoCard track={currentTrack} currentPoints={currentPoints} />
 
           {error && (
-            <Text style={styles.errorText}>{error}</Text>
+            <GlassCard style={styles.errorBanner}>
+              <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
+              <GlassButton
+                title="Retry"
+                onPress={handleRetry}
+                variant="secondary"
+                style={styles.retryButton}
+                accessibilityHint="Double tap to retry playback"
+              />
+            </GlassCard>
           )}
-        </GlassCard>
 
-        {/* Challenge Progress */}
-        <GlassCard style={styles.challengeCard}>
-          <Text style={styles.challengeLabel}>Challenge Status</Text>
-          <View style={styles.challengeInfo}>
-            <Text style={[
-              styles.challengeStatus,
-              { color: currentTrack.completed ? THEME.colors.secondary : THEME.colors.accent }
-            ]}>
-              {currentTrack.completed ? '✅ Completed' : '🎧 In Progress'}
-            </Text>
-            <Text style={styles.challengeProgress}>
-              {Math.round(currentTrack.progress)}% of challenge complete
-            </Text>
+          <View style={styles.bottomSection}>
+            <PlayerProgress
+              liveProgress={displayProgress}
+              currentPosition={currentPosition}
+              duration={duration}
+              onSeek={handleSeek}
+            />
+
+            <PlayerControls
+              isPlaying={isPlaying}
+              loading={loading}
+              hasTrack={true}
+              currentPosition={currentPosition}
+              duration={duration}
+              playbackRate={playbackRate}
+              onSeekTo={seekTo}
+              onPause={pause}
+              onResume={resume}
+              onPlaybackRateChange={setPlaybackRate}
+            />
+
+            <ChallengeStatusCard
+              completed={currentTrack.completed}
+              progressPercent={displayProgress}
+            />
           </View>
-        </GlassCard>
-      </View>
+        </ScrollView>
+      </ErrorBoundary>
     </SafeAreaView>
   );
 }
@@ -177,12 +188,20 @@ export default function PlayerModal() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.colors.background,
+  },
+  scroll: {
+    flex: 1,
   },
   content: {
-    flex: 1,
-    padding: THEME.spacing.lg,
+    paddingTop: THEME.spacing.md,
+    paddingBottom: THEME.spacing.xl,
+    flexGrow: 1,
     justifyContent: 'space-between',
+  },
+  bottomSection: {
+    gap: THEME.spacing.md,
+    paddingHorizontal: 0,
+    paddingBottom: THEME.spacing.lg,
   },
   noTrackCard: {
     margin: THEME.spacing.xl,
@@ -191,128 +210,24 @@ const styles = StyleSheet.create({
   noTrackText: {
     fontSize: THEME.fonts.sizes.xl,
     fontWeight: 'bold',
-    color: THEME.colors.text.primary,
     marginBottom: THEME.spacing.sm,
   },
   noTrackSubtext: {
     fontSize: THEME.fonts.sizes.md,
-    color: THEME.colors.text.secondary,
     textAlign: 'center',
   },
-  trackInfoCard: {
+  errorBanner: {
+    marginHorizontal: THEME.spacing.md,
+    marginTop: THEME.spacing.sm,
+    padding: THEME.spacing.md,
     alignItems: 'center',
-  },
-  trackTitle: {
-    fontSize: THEME.fonts.sizes.xxl,
-    fontWeight: 'bold',
-    color: THEME.colors.text.primary,
-    textAlign: 'center',
-    marginBottom: THEME.spacing.xs,
-  },
-  trackArtist: {
-    fontSize: THEME.fonts.sizes.lg,
-    color: THEME.colors.text.secondary,
-    marginBottom: THEME.spacing.md,
-  },
-  trackDescription: {
-    fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.tertiary,
-    textAlign: 'center',
-    marginBottom: THEME.spacing.lg,
-  },
-  pointsContainer: {
-    alignItems: 'center',
-  },
-  pointsLabel: {
-    fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
-  },
-  pointsValue: {
-    fontSize: THEME.fonts.sizes.xl,
-    fontWeight: 'bold',
-    color: THEME.colors.accent,
-  },
-  progressCard: {
-    // Card styling handled by GlassCard
-  },
-  progressLabel: {
-    fontSize: THEME.fonts.sizes.md,
-    fontWeight: '600',
-    color: THEME.colors.text.primary,
-    textAlign: 'center',
-    marginBottom: THEME.spacing.md,
-  },
-  progressTrack: {
-    marginBottom: THEME.spacing.md,
-  },
-  progressBackground: {
-    height: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: THEME.colors.accent,
-    borderRadius: 4,
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: THEME.spacing.sm,
-  },
-  timeText: {
-    fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
-  },
-  progressPercentage: {
-    fontSize: THEME.fonts.sizes.lg,
-    fontWeight: 'bold',
-    color: THEME.colors.accent,
-    textAlign: 'center',
-  },
-  controlsCard: {
-    // Card styling handled by GlassCard
-  },
-  controlsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  controlButton: {
-    flex: 0.25,
-    marginHorizontal: THEME.spacing.xs,
-  },
-  mainControlButton: {
-    flex: 0.4,
-    marginHorizontal: THEME.spacing.xs,
   },
   errorText: {
-    color: '#FF6B6B',
     fontSize: THEME.fonts.sizes.sm,
     textAlign: 'center',
-    marginTop: THEME.spacing.md,
+    marginBottom: THEME.spacing.sm,
   },
-  challengeCard: {
-    // Card styling handled by GlassCard
-  },
-  challengeLabel: {
-    fontSize: THEME.fonts.sizes.md,
-    fontWeight: '600',
-    color: THEME.colors.text.primary,
-    textAlign: 'center',
-    marginBottom: THEME.spacing.md,
-  },
-  challengeInfo: {
-    alignItems: 'center',
-  },
-  challengeStatus: {
-    fontSize: THEME.fonts.sizes.lg,
-    fontWeight: 'bold',
-    marginBottom: THEME.spacing.xs,
-  },
-  challengeProgress: {
-    fontSize: THEME.fonts.sizes.sm,
-    color: THEME.colors.text.secondary,
+  retryButton: {
+    minWidth: 120,
   },
 });

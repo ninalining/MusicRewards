@@ -18,14 +18,17 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.wallinex.musicrewards-test-app"
+      "bundleIdentifier": "com.ninali.musicrewards-test-app",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.wallinex.musicrewardstestapp"
+      "package": "com.ninali.musicrewardstestapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"

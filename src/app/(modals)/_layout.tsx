@@ -1,15 +1,16 @@
-// Modal layout for player and other modals
 import { Stack } from 'expo-router';
-import { THEME } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function ModalLayout() {
+  const { colors } = useTheme();
+
   return (
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: THEME.colors.background,
+          backgroundColor: colors.surfacePrimary,
         },
-        headerTintColor: THEME.colors.text.primary,
+        headerTintColor: colors.textPrimary,
         presentation: 'modal',
       }}
     >
@@ -17,6 +18,13 @@ export default function ModalLayout() {
         name="player"
         options={{
           title: 'Now Playing',
+          headerBackTitle: 'Close',
+        }}
+      />
+      <Stack.Screen
+        name="challenge-detail"
+        options={{
+          title: 'Challenge Details',
           headerBackTitle: 'Close',
         }}
       />

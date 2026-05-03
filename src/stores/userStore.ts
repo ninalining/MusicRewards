@@ -1,27 +1,35 @@
-// Zustand store for user data and points
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface UserStore {
-  // State
+type UserState = {
   totalPoints: number;
   completedChallenges: string[];
-  
-  // Actions
+};
+
+type UserStore = UserState & {
   addPoints: (points: number) => void;
   completeChallenge: (challengeId: string) => void;
   resetProgress: () => void;
-}
+};
+
+export const migrateUserStore = (persistedState: unknown, version: number): UserState => {
+  const state = persistedState as Partial<UserState>;
+  if (version === 0) {
+    return {
+      totalPoints: state.totalPoints ?? 0,
+      completedChallenges: state.completedChallenges ?? [],
+    };
+  }
+  return state as UserState;
+};
 
 export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
-      // Initial state
       totalPoints: 0,
       completedChallenges: [],
 
-      // Actions
       addPoints: (points: number) => {
         set((state) => ({
           totalPoints: state.totalPoints + points,
@@ -45,11 +53,12 @@ export const useUserStore = create<UserStore>()(
     }),
     {
       name: 'user-store',
+      version: 1,
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+      migrate: migrateUserStore,
+    },
+  ),
 );
 
-// Selector functions
-export const selectTotalPoints = (state: UserStore) => state.totalPoints;
-export const selectCompletedChallenges = (state: UserStore) => state.completedChallenges;
+export const selectTotalPoints = (state: UserState) => state.totalPoints;
+export const selectCompletedChallenges = (state: UserState) => state.completedChallenges;
