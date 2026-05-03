@@ -89,6 +89,22 @@ export const THEME = {
     skeletonTitleHeight: 16,
     skeletonSubtitleHeight: 12,
     skeletonChipWidth: 60,
+    /** Large circular play button diameter */
+    playButton: 72,
+    /** Seek / speed icon button hit area */
+    iconButton: 56,
+    /** Vertical offset of the "10" label inside the seek arc icon */
+    seekLabelOffset: 26,
+    /** Scrubber thumb diameter on the progress bar */
+    progressThumb: 14,
+    /** Progress bar track height */
+    progressTrackHeight: 4,
+    /** Progress bar track border radius */
+    progressTrackRadius: 2,
+  },
+  shadow: {
+    /** Standard drop-shadow color — black works for both light and dark modes */
+    color: '#000000',
   },
   borderRadius: {
     sm: 8,

@@ -42,43 +42,22 @@ describe('PlayerProgress', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the "Listening Progress" label', () => {
+  it('renders the seek button with correct accessibility label', () => {
     render(<PlayerProgress {...defaultProps} />);
-    expect(screen.getByText('Listening Progress')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Seek playback position' })).toBeOnTheScreen();
   });
 
-  it('displays formatted current position and duration', () => {
+  it('displays formatted current position and remaining time', () => {
     render(<PlayerProgress {...defaultProps} currentPosition={90} duration={200} />);
-    // 90s = 1:30, 200s = 3:20
+    // 90s = 1:30 elapsed, remaining = 200-90 = 110s = -1:50
     expect(screen.getByText('1:30')).toBeOnTheScreen();
-    expect(screen.getByText('3:20')).toBeOnTheScreen();
+    expect(screen.getByText('-1:50')).toBeOnTheScreen();
   });
 
-  it('formats zero seconds as 0:00', () => {
+  it('formats zero seconds as 0:00 and remaining as -0:00', () => {
     render(<PlayerProgress {...defaultProps} currentPosition={0} duration={0} />);
-    const zeros = screen.getAllByText('0:00');
-    expect(zeros).toHaveLength(2);
-  });
-
-  it('displays rounded progress percentage', () => {
-    render(<PlayerProgress {...defaultProps} liveProgress={45.7} />);
-    expect(screen.getByText('46% Complete')).toBeOnTheScreen();
-  });
-
-  it('displays 0% Complete when liveProgress is 0', () => {
-    render(<PlayerProgress {...defaultProps} liveProgress={0} />);
-    expect(screen.getByText('0% Complete')).toBeOnTheScreen();
-  });
-
-  it('displays 100% Complete when liveProgress is 100', () => {
-    render(<PlayerProgress {...defaultProps} liveProgress={100} />);
-    expect(screen.getByText('100% Complete')).toBeOnTheScreen();
-  });
-
-  it('has a seek button with correct accessibility attributes', () => {
-    render(<PlayerProgress {...defaultProps} />);
-    const seekButton = screen.getByRole('button', { name: 'Seek playback position' });
-    expect(seekButton).toBeOnTheScreen();
+    expect(screen.getByText('0:00')).toBeOnTheScreen();
+    expect(screen.getByText('-0:00')).toBeOnTheScreen();
   });
 
   it('calls onSeek with percentage when progress bar is pressed after layout', () => {

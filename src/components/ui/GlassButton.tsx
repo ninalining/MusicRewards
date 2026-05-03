@@ -7,6 +7,7 @@ import {
   TextStyle,
   StyleSheet,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { GlassCard } from './GlassCard';
 import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
@@ -21,6 +22,8 @@ interface GlassButtonProps {
   textStyle?: TextStyle;
   variant?: 'primary' | 'secondary';
   accessibilityHint?: string;
+  icon?: React.ComponentProps<typeof Ionicons>['name'];
+  iconSize?: number;
 }
 
 export const GlassButton: React.FC<GlassButtonProps> = ({
@@ -32,6 +35,8 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   textStyle,
   variant = 'primary',
   accessibilityHint,
+  icon,
+  iconSize = 24,
 }) => {
   const { colors } = useTheme();
   const gradientColors = variant === 'primary' ? colors.glassPrimary : colors.glassSecondary;
@@ -59,6 +64,8 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
             accessibilityRole="progressbar"
             accessibilityLabel={`Loading ${title}`}
           />
+        ) : icon ? (
+          <Ionicons name={icon} size={iconSize} color={colors.textPrimary} accessible={false} />
         ) : (
           <Text style={[styles.buttonText, { color: colors.textPrimary }, textStyle]}>{title}</Text>
         )}

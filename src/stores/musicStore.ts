@@ -63,13 +63,18 @@ export const useMusicStore = create<MusicStore>()(
       },
 
       updateProgress: (challengeId: string, progress: number) => {
-        set((state) => ({
-          challenges: state.challenges.map((challenge) =>
-            challenge.id === challengeId
-              ? { ...challenge, progress: Math.min(progress, 100) }
-              : challenge,
-          ),
-        }));
+        set((state) => {
+          const updated = Math.min(progress, 100);
+          const challenges = state.challenges.map((challenge) =>
+            challenge.id === challengeId ? { ...challenge, progress: updated } : challenge,
+          );
+          // Keep currentTrack in sync so retry always uses the latest saved progress.
+          const currentTrack =
+            state.currentTrack?.id === challengeId
+              ? { ...state.currentTrack, progress: updated }
+              : state.currentTrack;
+          return { challenges, currentTrack };
+        });
       },
 
       markChallengeComplete: (challengeId: string) => {
