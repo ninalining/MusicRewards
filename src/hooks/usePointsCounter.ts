@@ -38,8 +38,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     }
 
     const newProgress = (position / durationSeconds) * 100;
-    // Math.max prevents progress bar from going backwards on seek.
-    setProgress((prev) => Math.max(prev, Math.min(newProgress, 100)));
+    setProgress(Math.min(newProgress, 100));
   }, [trackProgress.position, isActive, addPoints]);
 
   const stopCounting = useCallback((): void => {

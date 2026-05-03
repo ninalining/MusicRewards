@@ -42,7 +42,6 @@ const defaultProps = {
   isPlaying: false,
   loading: false,
   hasTrack: true,
-  error: null,
   currentPosition: 100,
   duration: 200,
   playbackRate: 1,
@@ -154,18 +153,6 @@ describe('PlayerControls', () => {
     fireEvent.press(screen.getByText('-10s'));
     fireEvent.press(screen.getByText('+10s'));
     expect(onSeekTo).not.toHaveBeenCalled();
-  });
-
-  // --- Error display ---
-
-  it('displays error message when error is provided', () => {
-    render(<PlayerControls {...defaultProps} error="Something went wrong" />);
-    expect(screen.getByText('Something went wrong')).toBeOnTheScreen();
-  });
-
-  it('does not display error text when error is null', () => {
-    render(<PlayerControls {...defaultProps} error={null} />);
-    expect(screen.queryByText('Something went wrong')).toBeNull();
   });
 
   // --- Playback speed ---

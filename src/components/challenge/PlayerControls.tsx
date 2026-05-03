@@ -1,15 +1,13 @@
 import React, { useCallback, useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
 import { GlassButton } from '../ui/GlassButton';
-import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
 
 interface PlayerControlsProps {
   isPlaying: boolean;
   loading: boolean;
   hasTrack: boolean;
-  error: string | null;
   currentPosition: number;
   duration: number;
   playbackRate: number;
@@ -31,7 +29,6 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
     isPlaying,
     loading,
     hasTrack,
-    error,
     currentPosition,
     duration,
     playbackRate,
@@ -40,8 +37,6 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
     onResume,
     onPlaybackRateChange,
   }) => {
-    const { colors } = useTheme();
-
     // Ref avoids recreating seek callbacks every 250ms as position updates.
     const positionRef = useRef(currentPosition);
     positionRef.current = currentPosition;
@@ -97,8 +92,6 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
           />
         </View>
 
-        {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
-
         <View style={styles.speedRow}>
           <GlassButton
             title={`${playbackRate}x`}
@@ -130,11 +123,6 @@ const styles = StyleSheet.create({
   mainControlButton: {
     flex: 0.4,
     marginHorizontal: THEME.spacing.xs,
-  },
-  errorText: {
-    fontSize: THEME.fonts.sizes.sm,
-    textAlign: 'center',
-    marginTop: THEME.spacing.md,
   },
   speedRow: {
     flexDirection: 'row',

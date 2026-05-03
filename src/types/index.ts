@@ -26,9 +26,9 @@ export interface UseMusicPlayerReturn {
   duration: number;
   playbackRate: number;
   play: (track: MusicChallenge) => Promise<void>;
-  pause: () => void;
-  resume: () => void;
-  seekTo: (seconds: number) => void;
+  pause: () => Promise<void>;
+  resume: () => Promise<void>;
+  seekTo: (seconds: number) => Promise<void>;
   setPlaybackRate: (rate: number) => Promise<void>;
   loading: boolean;
   error: string | null;
