@@ -9,24 +9,16 @@ jest.mock('../../../src/hooks/useTheme', () => ({
       textPrimary: '#ffffff',
       textSecondary: '#aaaaaa',
       textTertiary: '#666666',
+      surfaceGlass: 'rgba(255,255,255,0.1)',
+      brandAccent: '#FCBE25',
     },
     resolvedTheme: 'dark',
   }),
 }));
 
-jest.mock('../../../src/components/ui/GlassCard', () => {
-  // require() is necessary inside jest.mock factories — they are hoisted before ES imports.
-  /* eslint-disable @typescript-eslint/no-require-imports */
-  const React = require('react');
-  const { View } = require('react-native');
-  /* eslint-enable @typescript-eslint/no-require-imports */
-
-  function MockGlassCard({ children }: { children: React.ReactNode }) {
-    return React.createElement(View, null, children);
-  }
-
-  return { GlassCard: MockGlassCard };
-});
+jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
+  default: () => ({ width: 375, height: 812 }),
+}));
 
 jest.mock('../../../src/components/ui/PointsCounter', () => {
   /* eslint-disable @typescript-eslint/no-require-imports */
@@ -55,12 +47,12 @@ const mockTrack: MusicChallenge = {
 };
 
 describe('TrackInfoCard', () => {
-  it('renders the track title, artist, and description', () => {
+  it('renders the track title and artist', () => {
     render(<TrackInfoCard track={mockTrack} currentPoints={0} />);
 
     expect(screen.getByText('Test Song')).toBeOnTheScreen();
     expect(screen.getByText('Test Artist')).toBeOnTheScreen();
-    expect(screen.getByText('A test track for unit tests')).toBeOnTheScreen();
+    expect(screen.queryByText('A test track for unit tests')).toBeNull();
   });
 
   it('renders the current points and total points', () => {
