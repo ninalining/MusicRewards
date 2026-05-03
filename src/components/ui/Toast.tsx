@@ -1,4 +1,3 @@
-// Toast notification component — animated, theme-aware, accessible
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,7 +32,6 @@ export const Toast = React.memo(function Toast(): React.ReactElement | null {
 
   useEffect(() => {
     if (visible && toast) {
-      // Slide in
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: 0,
@@ -47,7 +45,6 @@ export const Toast = React.memo(function Toast(): React.ReactElement | null {
         }),
       ]).start();
     } else if (!visible && toast) {
-      // Slide out
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: SLIDE_OFFSET,

@@ -1,4 +1,3 @@
-// Player modal - Full-screen audio player (Expo Router modal)
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,21 +38,19 @@ export default function PlayerModal(): React.ReactElement {
     resumeCounting,
   } = usePointsCounter();
 
-  // Start / stop counting based on playback state and track (T008)
   // Depend on primitives (id, points) to avoid restarting when store creates new object refs.
   const currentTrackId = currentTrack?.id;
   const currentTrackPoints = currentTrack?.points;
 
-  // Track which challengeId is actively counting — distinguishes start vs resume.
+  // Distinguishes start vs resume for the same track.
   const activeSessionRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!currentTrackId || currentTrackPoints == null || !duration || duration <= 0) return;
 
     if (isPlaying) {
-      // Only call startCounting (which resets progress) when the track changes.
-      // On resume of the same track, call resumeCounting() which re-activates
-      // without resetting accumulated progress.
+      // startCounting resets progress — only call when the track changes.
+      // resumeCounting re-activates without resetting.
       if (activeSessionRef.current !== currentTrackId) {
         activeSessionRef.current = currentTrackId;
         startCounting({
@@ -77,17 +74,14 @@ export default function PlayerModal(): React.ReactElement {
     resumeCounting,
   ]);
 
-  // Refs capture latest callbacks so the unmount cleanup always calls the
-  // current version — avoids stale closure and effect churn if identities change.
+  // Refs capture latest callbacks so unmount cleanup avoids stale closures.
   const pauseRef = useRef(pause);
   pauseRef.current = pause;
   const stopCountingRef = useRef(stopCounting);
   stopCountingRef.current = stopCounting;
 
-  // Pause playback and stop counting on unmount — prevents music playing
+  // Pause playback and stop counting on unmount so music doesn't play
   // without earning points after the modal is dismissed.
-  // Resources released: TrackPlayer paused (not reset — Constitution Rule #3 exception),
-  // points counter deactivated (no more delta awards).
   useEffect(() => {
     return () => {
       pauseRef.current();
@@ -109,8 +103,7 @@ export default function PlayerModal(): React.ReactElement {
     try {
       await play(currentTrack);
     } catch {
-      // play() already sets error state internally; catch here to prevent
-      // an unhandled promise rejection from the retry button.
+      // play() sets error state internally; catch prevents unhandled rejection.
     }
   }, [currentTrack, play]);
 

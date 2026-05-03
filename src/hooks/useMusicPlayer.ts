@@ -1,4 +1,3 @@
-// useMusicPlayer hook - Integrates react-native-track-player with Zustand
 import { useCallback, useEffect, useRef, useState } from 'react';
 import TrackPlayer, {
   State,
@@ -14,21 +13,17 @@ import { hapticSuccess } from '../utils/haptics';
 import type { MusicChallenge, UseMusicPlayerReturn } from '../types';
 
 export const useMusicPlayer = (): UseMusicPlayerReturn => {
-  // TrackPlayer hooks
   const playbackState = usePlaybackState();
   const progress = useProgress(250);
 
-  // Local state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [playbackRate, setPlaybackRateState] = useState(1);
 
-  // Tracks which challenge IDs have had completion fired in this session.
   // useRef (not useState) so updates don't trigger re-renders and are
-  // immune to stale Zustand closures between render cycles.
+  // immune to stale closures between render cycles.
   const completedInSession = useRef<Set<string>>(new Set());
 
-  // Zustand store selectors
   const currentTrack = useMusicStore(selectCurrentTrack);
   const isPlaying = useMusicStore(selectIsPlaying);
   const setCurrentTrack = useMusicStore((state) => state.setCurrentTrack);
@@ -36,30 +31,25 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
   const setCurrentPosition = useMusicStore((state) => state.setCurrentPosition);
   const updateProgress = useMusicStore((state) => state.updateProgress);
   const markChallengeComplete = useMusicStore((state) => state.markChallengeComplete);
-  // completeChallenge marks the challenge in userStore. Points are handled
-  // separately by usePointsCounter (proportional accumulation, Constitution Rule #5).
+  // Points handled separately by usePointsCounter (proportional accumulation).
   const completeChallenge = useUserStore((state) => state.completeChallenge);
 
-  // Track playback state changes
   useEffect(() => {
     // usePlaybackState() returns PlaybackState | { state: undefined } depending on RNTP version.
-    // Narrow without casting to any — extract .state if present, otherwise use value directly.
     const state =
       typeof playbackState === 'object' && playbackState !== null && 'state' in playbackState
         ? playbackState.state
         : playbackState;
     const isCurrentlyPlaying = state === State.Playing;
-    // Read current store value directly to avoid including isPlaying in deps,
-    // which would create a write→re-render→read→write loop.
+    // Read store directly to avoid including isPlaying in deps (write→re-render loop).
     if (isCurrentlyPlaying !== useMusicStore.getState().isPlaying) {
       setIsPlaying(isCurrentlyPlaying);
     }
   }, [playbackState, setIsPlaying]);
 
-  // Extract primitives from currentTrack to avoid re-firing when store creates new object refs.
+  // Extract primitives to avoid re-firing when store creates new object refs.
   const trackId = currentTrack?.id;
 
-  // Update position and calculate progress/points
   useEffect(() => {
     if (
       trackId &&
@@ -69,14 +59,11 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     ) {
       setCurrentPosition(progress.position);
 
-      // Calculate progress percentage — duration guard above prevents Infinity/NaN
       const progressPercentage = Math.min((progress.position / progress.duration) * 100, 100);
       updateProgress(trackId, progressPercentage);
 
-      // Mark challenge complete at 90% threshold.
-      // Points are NOT awarded here — usePointsCounter accumulates them
-      // proportionally on each progress tick (Constitution Rule #5).
-      // useRef guard prevents duplicate completion calls across progress ticks.
+      // Mark complete at 90%. Points are NOT awarded here — usePointsCounter
+      // accumulates them proportionally. useRef guard prevents duplicates.
       if (progressPercentage >= 90 && !completedInSession.current.has(trackId)) {
         completedInSession.current.add(trackId);
         markChallengeComplete(trackId);
@@ -102,24 +89,19 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     }
   });
 
-  // Constitution Rule #3 exception: TrackPlayer.reset() is NOT called on unmount.
-  // This hook is shared by HomeScreen + PlayerModal. Unmounting one screen must not
-  // destroy playback state for the other. Playback is paused on modal dismiss instead.
-  // See constitution.md Rule #3 for the documented exception.
+  // TrackPlayer.reset() is NOT called on unmount. This hook is shared by
+  // HomeScreen + PlayerModal — unmounting one must not destroy the other's state.
 
   const play = useCallback(
     async (track: MusicChallenge) => {
-      // Clear the session guard for this track so the completion logic
-      // can fire once in this new play session (while guarding against duplicates).
+      // Clear session guard so completion can fire once in this new session.
       completedInSession.current.delete(track.id);
       try {
         setLoading(true);
         setError(null);
 
-        // Ensure player is initialized before use
         await setupTrackPlayer();
 
-        // Reset and add new track
         await TrackPlayer.reset();
         await TrackPlayer.add({
           id: track.id,
@@ -129,7 +111,6 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
           duration: track.duration,
         });
 
-        // Start playback
         await TrackPlayer.play();
         setCurrentTrack(track);
       } catch (err) {
@@ -177,8 +158,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     }
   }, []);
 
-  // isPlaying is sourced from the Zustand selector (selectIsPlaying) which is kept
-  // in sync by the playbackState useEffect above — no need to re-derive here.
+  // isPlaying kept in sync by the playbackState effect above.
   return {
     isPlaying,
     currentTrack,

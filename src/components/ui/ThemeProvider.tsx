@@ -1,4 +1,3 @@
-// ThemeProvider — resolves palette from preference + system and distributes via Context
 import React, { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import { ThemeContext } from '../../hooks/useTheme';

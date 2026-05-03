@@ -1,7 +1,5 @@
-// Accessibility utilities — WCAG 2.1 Level AA compliance helpers
-
 /**
- * Minimum touch target size in points (WCAG 2.1 Success Criterion 2.5.5).
+ * Minimum touch target size in points (WCAG 2.1 SC 2.5.5).
  * Interactive elements smaller than this should use hitSlop to extend the
  * touchable area.
  */

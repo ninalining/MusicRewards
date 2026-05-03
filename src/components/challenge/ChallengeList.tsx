@@ -1,5 +1,3 @@
-// ChallengeList — FlatList wrapper with loading and empty states
-// Pure presentational component; all data passed via props.
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Animated, FlatList, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -131,8 +129,8 @@ export const ChallengeList = React.memo<ChallengeListProps>(
         keyExtractor={keyExtractor}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
-        // getItemLayout omitted — ChallengeCard height varies due to conditional
-        // progress bar rendering. List size (≤5 items) makes the cost negligible.
+        // getItemLayout omitted — card height varies with conditional progress bar.
+        // List size (≤5 items) makes the cost negligible.
       />
     );
   },

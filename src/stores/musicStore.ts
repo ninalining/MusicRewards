@@ -1,4 +1,3 @@
-// Zustand store for music playback and challenges
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,12 +16,10 @@ type PersistedMusicState = Pick<MusicState, 'challenges'>;
 /** Current schema version for the music store. */
 const MUSIC_STORE_VERSION = 1;
 
-/** Exported for testing — handles store schema migrations. */
 export const migrateMusicStore = (
   persistedState: unknown,
   version: number,
 ): PersistedMusicState => {
-  // Guard against null, primitives, or corrupted payloads
   if (persistedState == null || typeof persistedState !== 'object') {
     return { challenges: SAMPLE_CHALLENGES };
   }
@@ -30,11 +27,9 @@ export const migrateMusicStore = (
   const state = persistedState as Partial<PersistedMusicState>;
 
   if (version === 0) {
-    // v0 → v1: ensure challenges array exists with defaults
     return { challenges: state.challenges ?? SAMPLE_CHALLENGES };
   }
 
-  // Reject unknown future versions — reset to safe defaults
   if (version > MUSIC_STORE_VERSION) {
     return { challenges: SAMPLE_CHALLENGES };
   }
@@ -54,13 +49,11 @@ type MusicStore = MusicState & {
 export const useMusicStore = create<MusicStore>()(
   persist(
     (set, get) => ({
-      // Initial state
       challenges: SAMPLE_CHALLENGES,
       currentTrack: null,
       isPlaying: false,
       currentPosition: 0,
 
-      // Actions
       loadChallenges: () => {
         set({ challenges: SAMPLE_CHALLENGES });
       },
@@ -106,7 +99,7 @@ export const useMusicStore = create<MusicStore>()(
       name: 'music-store',
       version: 1,
       storage: createJSONStorage(() => AsyncStorage),
-      // Only persist challenges, not playback state
+      // Only persist challenges, not transient playback state.
       partialize: (state) => ({
         challenges: state.challenges,
       }),
@@ -115,7 +108,6 @@ export const useMusicStore = create<MusicStore>()(
   ),
 );
 
-// Selector functions for performance
 export const selectCurrentTrack = (state: MusicState) => state.currentTrack;
 export const selectIsPlaying = (state: MusicState) => state.isPlaying;
 export const selectChallenges = (state: MusicState) => state.challenges;

@@ -1,4 +1,3 @@
-// Profile screen - User progress and stats
 import React, { useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Animated, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

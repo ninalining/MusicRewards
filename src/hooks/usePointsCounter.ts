@@ -1,4 +1,3 @@
-// usePointsCounter hook — proportional live points accumulation during playback
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useProgress } from 'react-native-track-player';
 import { useUserStore } from '../stores/userStore';
@@ -10,16 +9,15 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
   const [currentPoints, setCurrentPoints] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  // Stable ref for the current session config — avoids stale closure in effect
+  // Stable ref — avoids stale closure in the progress-tick effect.
   const configRef = useRef<PointsCounterConfig | null>(null);
-  // Tracks cumulative amount already passed to addPoints — used to compute delta
+  // Cumulative amount already passed to addPoints — used to compute delta.
   const prevAwardedRef = useRef<number>(0);
 
   const addPoints = useUserStore((s) => s.addPoints);
 
   const trackProgress = useProgress(PROGRESS_POLL_INTERVAL_MS);
 
-  // Run on every progress tick — calculate and award delta points
   useEffect(() => {
     if (!isActive || !configRef.current) return;
 
@@ -27,8 +25,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) return;
 
     const position = trackProgress.position;
-    // When position is ≥99% of duration, award full points — trackProgress.position
-    // rarely equals durationSeconds exactly, so Math.floor would cap at totalPoints-1.
+    // Award full points at ≥99% — position rarely equals duration exactly.
     const ratio = position / durationSeconds;
     const newEarned = ratio >= NEAR_COMPLETE_RATIO ? totalPoints : Math.floor(ratio * totalPoints);
     const clamped = Math.min(newEarned, totalPoints);
@@ -41,7 +38,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     }
 
     const newProgress = (position / durationSeconds) * 100;
-    // Use Math.max to prevent progress bar from going backwards on seek
+    // Math.max prevents progress bar from going backwards on seek.
     setProgress((prev) => Math.max(prev, Math.min(newProgress, 100)));
   }, [trackProgress.position, isActive, addPoints]);
 
@@ -49,7 +46,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     setIsActive(false);
   }, []);
 
-  // Resume without resetting progress/points — used when resuming the same track after pause.
+  // Resume without resetting progress — for resuming the same track after pause.
   const resumeCounting = useCallback((): void => {
     setIsActive(true);
   }, []);
@@ -62,8 +59,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
 
   const startCounting = useCallback(
     (config: PointsCounterConfig): void => {
-      // Stop any existing session and reset local state before starting new session.
-      // resetProgress must be called so Math.max on setProgress doesn't carry over stale values.
+      // Reset before starting so Math.max on setProgress doesn't carry stale values.
       stopCounting();
       configRef.current = config;
       resetProgress();
@@ -72,9 +68,7 @@ export const usePointsCounter = (): UsePointsCounterReturn => {
     [stopCounting, resetProgress],
   );
 
-  // Cleanup on unmount — stops the counting session so the progress-tick effect
-  // (which depends on isActive) no longer awards points or updates state.
-  // No explicit timer/interval to clear — useProgress() is managed by RNTP internally.
+  // Cleanup on unmount — useProgress() is managed by RNTP internally.
   useEffect(() => {
     return () => {
       stopCounting();

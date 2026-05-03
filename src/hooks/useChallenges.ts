@@ -1,4 +1,3 @@
-// useChallenges hook — orchestrates challenge data from musicStore + userStore
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMusicStore, selectChallenges } from '../stores/musicStore';
 import { useUserStore, selectCompletedChallenges } from '../stores/userStore';
@@ -34,9 +33,7 @@ export const useChallenges = (): UseChallengesReturn => {
   useEffect(() => {
     isMounted.current = true;
     refreshChallenges();
-    // Cleanup: mark unmounted so in-flight refreshChallenges() calls skip
-    // setState — prevents "Can't perform a React state update on an unmounted
-    // component" warnings and stale data writes.
+    // Mark unmounted so in-flight refreshChallenges() calls skip setState.
     return () => {
       isMounted.current = false;
     };

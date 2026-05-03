@@ -1,4 +1,3 @@
-// PlayerControls — play/pause and seek buttons for the player modal
 import React, { useCallback, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
@@ -24,7 +23,6 @@ const PLAYBACK_RATES = [1, 1.25, 1.5, 2, 0.5] as const;
 
 const getNextRate = (current: number): number => {
   const index = PLAYBACK_RATES.findIndex((r) => r === current);
-  // Falls back to 1x (index 0) if current rate is unrecognized
   return PLAYBACK_RATES[(index + 1) % PLAYBACK_RATES.length];
 };
 
@@ -44,7 +42,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
   }) => {
     const { colors } = useTheme();
 
-    // Use ref to avoid recreating seek callbacks every 250ms as position updates
+    // Ref avoids recreating seek callbacks every 250ms as position updates.
     const positionRef = useRef(currentPosition);
     positionRef.current = currentPosition;
 
@@ -119,9 +117,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
 PlayerControls.displayName = 'PlayerControls';
 
 const styles = StyleSheet.create({
-  controlsCard: {
-    // Card styling handled by GlassCard
-  },
+  controlsCard: {},
   controlsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
