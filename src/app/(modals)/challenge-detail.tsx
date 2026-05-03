@@ -31,7 +31,9 @@ export default function ChallengeDetailModal(): React.ReactElement {
       router.replace('/(modals)/player');
     } catch (error) {
       const message =
-        __DEV__ && error instanceof Error ? error.message : 'Failed to start playback';
+        __DEV__ && error instanceof Error
+          ? error.message
+          : 'Unable to play this track. Please try again.';
       showToast(message, 'error');
     }
   }, [challenge, isCurrentTrack, play, resume, loading, showToast]);
