@@ -70,8 +70,8 @@ export const ChallengeList = React.memo<ChallengeListProps>(
           challenge={item}
           onPlay={onPlay}
           onPress={onPressChallenge}
-          isCurrentTrack={currentTrackId === item.id}
-          isPlaying={isPlaying}
+          isCurrentTrack={currentTrackId === item.id || (item.progress > 0 && !item.completed)}
+          isPlaying={isPlaying && currentTrackId === item.id}
         />
       ),
       [onPlay, onPressChallenge, currentTrackId, isPlaying],

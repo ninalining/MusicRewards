@@ -55,7 +55,10 @@ export const useMusicStore = create<MusicStore>()(
       currentPosition: 0,
 
       loadChallenges: () => {
-        set({ challenges: SAMPLE_CHALLENGES });
+        const current = get().challenges;
+        if (current.length === 0) {
+          set({ challenges: SAMPLE_CHALLENGES });
+        }
       },
 
       setCurrentTrack: (track: MusicChallenge) => {
