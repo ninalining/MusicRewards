@@ -1,23 +1,14 @@
-// Playback service for react-native-track-player
-// This file handles background playback events
 import TrackPlayer, { Event, State } from 'react-native-track-player';
 
-// Module-level flag: tracks whether playback was active before an audio interruption.
-// Persists across event firings for the process lifetime — no React/Zustand access here.
-// Only set to true when the player was actually in State.Playing at the moment of interruption,
-// so that a manual pause before a call is not overwritten by the duck handler.
+// Tracks whether playback was active before an audio interruption.
+// Only true when State.Playing at the moment of interruption, so manual pauses are preserved.
 let wasPlayingBeforeDuck = false;
 
 export async function playbackService(): Promise<void> {
-  // Reset interruption flag on service start — ensures a clean state if the
-  // service is restarted (and gives tests a deterministic baseline each run).
   wasPlayingBeforeDuck = false;
 
-  // This service needs to be registered in order for the TrackPlayer to work
-  // when the app is in the background
-
   TrackPlayer.addEventListener(Event.RemotePause, async () => {
-    // Manual pause must cancel any pending auto-resume from a prior duck event.
+    // Cancel any pending auto-resume from a prior duck event.
     wasPlayingBeforeDuck = false;
     await TrackPlayer.pause();
   });
@@ -38,38 +29,30 @@ export async function playbackService(): Promise<void> {
     await TrackPlayer.seekTo(event.position);
   });
 
-  // Queue ended — no action needed; progress tracking handles challenge completion
-  TrackPlayer.addEventListener(Event.PlaybackQueueEnded, () => {
-    // intentionally empty
-  });
+  TrackPlayer.addEventListener(Event.PlaybackQueueEnded, () => {});
 
-  // Playback error — stop silently; the UI reflects state via useProgress/PlaybackState
   TrackPlayer.addEventListener(Event.PlaybackError, async () => {
     try {
       await TrackPlayer.stop();
     } catch {
-      // Ignore secondary stop failures while already handling a playback error
+      // Ignore secondary stop failures during error handling.
     }
   });
 
-  // Handle audio interruptions (phone calls, other audio apps taking focus).
-  // Uses the module-level wasPlayingBeforeDuck flag so that manual pauses are respected —
-  // if the user paused before the interruption, we do NOT auto-resume after it ends.
+  // Audio interruptions (phone calls, other apps taking focus).
+  // Manual pauses are respected via the wasPlayingBeforeDuck flag.
   TrackPlayer.addEventListener(Event.RemoteDuck, async (event) => {
-    // Check permanent FIRST — permanent events can also carry paused=true,
-    // so checking paused first would misclassify them as transient interruptions.
+    // Check permanent FIRST — permanent events can also carry paused=true.
     if (event.permanent) {
-      // Another audio app permanently took audio focus — do not auto-resume
       wasPlayingBeforeDuck = false;
       await TrackPlayer.stop();
     } else if (event.paused) {
-      // Transient interruption began (e.g. incoming call, notification sound).
-      // Only record the flag as true if we were actually playing — preserves manual pauses.
+      // Only record flag if actually playing — preserves manual pauses.
       const { state } = await TrackPlayer.getPlaybackState();
       wasPlayingBeforeDuck = state === State.Playing;
       await TrackPlayer.pause();
     } else {
-      // Interruption ended — only resume if we were playing before the interruption
+      // Interruption ended — resume only if we were playing before.
       if (wasPlayingBeforeDuck) {
         wasPlayingBeforeDuck = false;
         await TrackPlayer.play();

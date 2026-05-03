@@ -1,5 +1,3 @@
-// TypeScript type definitions for MusicRewards app
-
 export interface MusicChallenge {
   id: string;
   title: string;

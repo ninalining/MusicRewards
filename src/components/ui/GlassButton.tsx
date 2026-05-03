@@ -1,4 +1,3 @@
-// GlassButton component - Glass-styled button with loading state
 import React, { useCallback } from 'react';
 import {
   Text,

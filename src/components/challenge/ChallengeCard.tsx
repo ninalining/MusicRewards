@@ -1,4 +1,3 @@
-// ChallengeCard component - Individual challenge display
 import React, { useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';

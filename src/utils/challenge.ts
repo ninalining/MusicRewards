@@ -1,5 +1,3 @@
-// Shared utility functions for challenge display
-
 import { BRAND } from '../constants/theme';
 import type { MusicChallenge } from '../types';
 

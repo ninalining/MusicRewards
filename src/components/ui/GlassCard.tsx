@@ -1,4 +1,3 @@
-// Glass Card component - Belong's signature UI
 import React from 'react';
 import { View, ViewStyle, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
@@ -6,7 +5,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
 
-// Glass Card Component
 interface GlassCardProps {
   children: React.ReactNode;
   blurIntensity?: number;
@@ -33,7 +31,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         tint={resolvedTheme === 'dark' ? 'dark' : 'light'}
       />
 
-      {/* Cast required: LinearGradient expects mutable array; tuple length is guaranteed by prop type */}
+      {/* LinearGradient expects mutable array; tuple length guaranteed by prop type */}
       <LinearGradient
         colors={effectiveGradient as [string, string]}
         style={StyleSheet.absoluteFillObject}

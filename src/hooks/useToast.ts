@@ -1,4 +1,3 @@
-// Convenience hook for showing toast notifications
 import { useCallback } from 'react';
 import { useToastStore } from '../stores/toastStore';
 import type { ToastType } from '../types/toast';
@@ -8,7 +7,6 @@ interface UseToastReturn {
   hideToast: () => void;
 }
 
-/** Convenience hook wrapping the toast store actions. */
 export const useToast = (): UseToastReturn => {
   const showToast = useToastStore((state) => state.showToast);
   const hideToast = useToastStore((state) => state.hideToast);

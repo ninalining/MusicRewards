@@ -1,4 +1,3 @@
-// Modal layout for player and other modals
 import { Stack } from 'expo-router';
 import { useTheme } from '../../hooks/useTheme';
 

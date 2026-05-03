@@ -1,7 +1,5 @@
-// Belong design tokens and theme constants
 import type { ColorPalette } from '../types/theme';
 
-// Brand colors — constant across themes
 export const BRAND = {
   primary: '#7553DB', // Belong purple
   secondary: '#34CB76', // Belong green
@@ -49,7 +47,7 @@ export const lightPalette: ColorPalette = {
 };
 
 export const THEME = {
-  /** @deprecated Use `darkPalette` / `lightPalette` via `useTheme()` hook instead. */
+  /** @deprecated Use `darkPalette` / `lightPalette` via `useTheme()` instead. */
   colors: {
     primary: '#7553DB', // Belong purple
     secondary: '#34CB76', // Belong green
@@ -107,13 +105,11 @@ export const THEME = {
   },
 };
 
-// Audio playback constants
 export const PROGRESS_POLL_INTERVAL_MS = 250;
 
 /** Ratio threshold (0–1) at which near-complete playback awards full points. */
 export const NEAR_COMPLETE_RATIO = 0.99;
 
-// Sample challenge data with actual Belong tracks
 export const SAMPLE_CHALLENGES = [
   {
     id: 'challenge-1',

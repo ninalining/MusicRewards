@@ -1,4 +1,3 @@
-// PlayerProgress — progress bar, time display, and percentage for the player modal
 import React, { useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
@@ -6,7 +5,7 @@ import { THEME } from '../../constants/theme';
 import { useTheme } from '../../hooks/useTheme';
 import { calculateHitSlop } from '../../utils/accessibility';
 
-// Pure utility — no component state dependency, defined at module scope to avoid recreation.
+// Defined at module scope to avoid recreation on each render.
 const formatTime = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
@@ -101,9 +100,7 @@ export const PlayerProgress = React.memo<PlayerProgressProps>(
 PlayerProgress.displayName = 'PlayerProgress';
 
 const styles = StyleSheet.create({
-  progressCard: {
-    // Card styling handled by GlassCard
-  },
+  progressCard: {},
   progressLabel: {
     fontSize: THEME.fonts.sizes.md,
     fontWeight: '600',

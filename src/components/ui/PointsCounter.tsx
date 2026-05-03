@@ -1,5 +1,3 @@
-// PointsCounter — animated live-points display
-// Pure presentational component; no store access.
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text } from 'react-native';
 import type { ViewStyle } from 'react-native';
@@ -27,7 +25,6 @@ export const PointsCounter = React.memo<PointsCounterProps>(
     const scaleAnim = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
-      // Cancel any in-progress animation
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
@@ -35,14 +32,14 @@ export const PointsCounter = React.memo<PointsCounterProps>(
 
       const target = Number.isFinite(points) ? Math.round(points) : 0;
 
-      // Snap immediately when animation disabled or points decrease
+      // Snap when animation disabled or points decrease
       if (!animated || target <= displayRef.current) {
         displayRef.current = target;
         setDisplayValue(target);
         return;
       }
 
-      // Scale pulse on increase — runs on UI thread
+      // Scale pulse on increase
       Animated.sequence([
         Animated.timing(scaleAnim, {
           toValue: 1.15,
@@ -56,7 +53,7 @@ export const PointsCounter = React.memo<PointsCounterProps>(
         }),
       ]).start();
 
-      // Count-up loop via requestAnimationFrame
+      // Count-up via requestAnimationFrame
       const start = displayRef.current;
       const end = target;
       const startTime = Date.now();

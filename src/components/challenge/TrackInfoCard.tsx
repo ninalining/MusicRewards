@@ -1,4 +1,3 @@
-// TrackInfoCard — displays track metadata and points earned in the player modal
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
