@@ -162,7 +162,6 @@ export default function PlayerModal(): React.ReactElement {
             isPlaying={isPlaying}
             loading={loading}
             hasTrack={true}
-            error={null}
             currentPosition={currentPosition}
             duration={duration}
             playbackRate={playbackRate}
