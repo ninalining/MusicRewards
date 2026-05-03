@@ -24,6 +24,7 @@ export const darkPalette: ColorPalette = {
   glassPrimary: ['rgba(117, 83, 219, 0.3)', 'rgba(117, 83, 219, 0.1)'],
   glassSecondary: ['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)'],
   glassCard: ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)'],
+  androidGlassFallback: 'rgba(40, 40, 50, 0.95)',
 };
 
 /** Light mode color palette */
@@ -44,6 +45,7 @@ export const lightPalette: ColorPalette = {
   glassPrimary: ['rgba(117, 83, 219, 0.2)', 'rgba(117, 83, 219, 0.08)'],
   glassSecondary: ['rgba(0, 0, 0, 0.06)', 'rgba(0, 0, 0, 0.03)'],
   glassCard: ['rgba(0, 0, 0, 0.08)', 'rgba(0, 0, 0, 0.03)'],
+  androidGlassFallback: 'rgba(255, 255, 255, 0.92)',
 };
 
 export const THEME = {

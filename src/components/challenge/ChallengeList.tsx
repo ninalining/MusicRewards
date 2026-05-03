@@ -8,25 +8,18 @@ import { useTheme } from '../../hooks/useTheme';
 import type { MusicChallenge } from '../../types';
 
 interface ChallengeListProps {
-  /** Array of challenge items to render. */
   challenges: MusicChallenge[];
-  /** When true, shows ActivityIndicator and hides list. Default: false. */
   loading?: boolean;
-  /** Invoked with the full challenge when play is tapped. */
   onPlay: (challenge: MusicChallenge) => void;
-  /** Invoked with the full challenge when the card body is tapped. */
   onPressChallenge?: (challenge: MusicChallenge) => void;
-  /** ID of the currently active track — used for ChallengeCard visual state. */
   currentTrackId?: string;
-  /** Whether the active track is currently playing. */
   isPlaying?: boolean;
 }
 
-const keyExtractor = (item: MusicChallenge): string => item.id;
-
 const SKELETON_COUNT = 3;
 
-/** Pulsing placeholder card shown while challenges load. */
+const keyExtractor = (item: MusicChallenge): string => item.id;
+
 const SkeletonCard = React.memo((): React.ReactElement => {
   const { colors } = useTheme();
   const opacity = useRef(new Animated.Value(0.3)).current;
@@ -34,16 +27,8 @@ const SkeletonCard = React.memo((): React.ReactElement => {
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 0.3,
-          duration: 800,
-          useNativeDriver: true,
-        }),
+        Animated.timing(opacity, { toValue: 1, duration: 800, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 800, useNativeDriver: true }),
       ]),
     );
     animation.start();
@@ -78,6 +63,7 @@ export const ChallengeList = React.memo<ChallengeListProps>(
     isPlaying = false,
   }): React.ReactElement => {
     const { colors } = useTheme();
+
     const renderItem = useCallback(
       ({ item }: { item: MusicChallenge }): React.ReactElement => (
         <ChallengeCard
@@ -93,7 +79,7 @@ export const ChallengeList = React.memo<ChallengeListProps>(
 
     if (loading) {
       return (
-        <View style={styles.listContainer}>
+        <View style={styles.container}>
           {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
             <SkeletonCard key={`skeleton-${i}`} />
           ))}
@@ -103,7 +89,7 @@ export const ChallengeList = React.memo<ChallengeListProps>(
 
     if (challenges.length === 0) {
       return (
-        <View style={styles.centeredContainer}>
+        <View style={styles.centered}>
           <GlassCard style={styles.emptyCard}>
             <Ionicons
               name="musical-notes-outline"
@@ -127,10 +113,11 @@ export const ChallengeList = React.memo<ChallengeListProps>(
         data={challenges}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        // getItemLayout omitted — card height varies with conditional progress bar.
-        // List size (≤5 items) makes the cost negligible.
+        initialNumToRender={5}
+        maxToRenderPerBatch={10}
+        windowSize={5}
       />
     );
   },
@@ -139,7 +126,13 @@ export const ChallengeList = React.memo<ChallengeListProps>(
 ChallengeList.displayName = 'ChallengeList';
 
 const styles = StyleSheet.create({
-  centeredContainer: {
+  content: {
+    paddingBottom: THEME.spacing.xxl + THEME.spacing.xl,
+  },
+  container: {
+    flex: 1,
+  },
+  centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -151,9 +144,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: THEME.fonts.sizes.md,
     textAlign: 'center',
-  },
-  listContainer: {
-    paddingBottom: THEME.spacing.xxl + THEME.spacing.xl,
   },
 });
 
