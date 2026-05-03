@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ViewStyle, StyleSheet } from 'react-native';
+import { Platform, View, ViewStyle, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../hooks/useTheme';
@@ -25,11 +25,17 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 
   return (
     <View style={StyleSheet.flatten([{ borderRadius, overflow: 'hidden' }, style])}>
-      <BlurView
-        intensity={blurIntensity}
-        style={StyleSheet.absoluteFillObject}
-        tint={resolvedTheme === 'dark' ? 'dark' : 'light'}
-      />
+      {Platform.OS === 'android' ? (
+        <View
+          style={[StyleSheet.absoluteFillObject, { backgroundColor: colors.androidGlassFallback }]}
+        />
+      ) : (
+        <BlurView
+          intensity={blurIntensity}
+          style={StyleSheet.absoluteFillObject}
+          tint={resolvedTheme === 'dark' ? 'dark' : 'light'}
+        />
+      )}
 
       {/* LinearGradient expects mutable array; tuple length guaranteed by prop type */}
       <LinearGradient

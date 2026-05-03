@@ -32,6 +32,9 @@ export interface ColorPalette {
   glassPrimary: readonly [string, string];
   glassSecondary: readonly [string, string];
   glassCard: readonly [string, string];
+
+  // Platform fallbacks
+  androidGlassFallback: string;
 }
 
 export type ThemeState = {
