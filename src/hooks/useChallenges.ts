@@ -21,7 +21,11 @@ export const useChallenges = (): UseChallengesReturn => {
       useMusicStore.getState().loadChallenges();
     } catch (err) {
       if (isMounted.current) {
-        setError(err instanceof Error ? err.message : 'Failed to refresh challenges');
+        const message =
+          __DEV__ && err instanceof Error
+            ? err.message
+            : 'Unable to load challenges. Please try again.';
+        setError(message);
       }
     } finally {
       if (isMounted.current) {
@@ -44,7 +48,8 @@ export const useChallenges = (): UseChallengesReturn => {
       useMusicStore.getState().markChallengeComplete(challengeId);
       useUserStore.getState().completeChallenge(challengeId);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to complete challenge';
+      const message =
+        __DEV__ && err instanceof Error ? err.message : 'Something went wrong. Please try again.';
       setError(message);
     }
   }, []);

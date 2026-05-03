@@ -37,7 +37,6 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
         ? playbackState.state
         : playbackState;
     const isCurrentlyPlaying = state === State.Playing;
-    // Read store directly to avoid including isPlaying in deps (write→re-render loop).
     if (isCurrentlyPlaying !== useMusicStore.getState().isPlaying) {
       setIsPlaying(isCurrentlyPlaying);
     }
@@ -57,8 +56,6 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
       const progressPercentage = Math.min((progress.position / progress.duration) * 100, 100);
       updateProgress(trackId, progressPercentage);
 
-      // Mark complete at 90%. Points are NOT awarded here — usePointsCounter
-      // accumulates them proportionally. useRef guard prevents duplicates.
       if (progressPercentage >= 90 && !completedInSession.current.has(trackId)) {
         completedInSession.current.add(trackId);
         markChallengeComplete(trackId);
@@ -78,13 +75,12 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
 
   useTrackPlayerEvents([Event.PlaybackError], (event) => {
     if (event.type === Event.PlaybackError) {
-      setError(`Playback error: ${event.message}`);
+      const message =
+        event.message ?? 'Unable to play this track. Please check your connection and try again.';
+      setError(message);
       setLoading(false);
     }
   });
-
-  // TrackPlayer.reset() is NOT called on unmount. This hook is shared by
-  // HomeScreen + PlayerModal — unmounting one must not destroy the other's state.
 
   const play = useCallback(
     async (track: MusicChallenge) => {
@@ -104,10 +100,6 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
           duration: track.duration,
         });
 
-        // Restore saved progress so the user resumes where they left off.
-        // Skip if < 1% (rounding noise) or ≥ 90% (completed — replay from start).
-        // Points baseline is passed to startCounting() via initialProgressPercent
-        // so previously-earned points are not re-awarded on resume.
         const savedProgress = track.progress ?? 0;
         if (savedProgress > 1 && savedProgress < 90 && track.duration > 0) {
           await TrackPlayer.seekTo((savedProgress / 100) * track.duration);
@@ -116,7 +108,10 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
         await TrackPlayer.play();
         setCurrentTrack(track);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Playback failed';
+        const errorMessage =
+          __DEV__ && err instanceof Error
+            ? err.message
+            : 'Unable to play this track. Please check your connection and try again.';
         setError(errorMessage);
         if (__DEV__) console.error('TrackPlayer error:', err);
         throw err;
