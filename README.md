@@ -124,7 +124,7 @@ npm test -- --coverage
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | `command not found: expo` | Expo CLI not globally installed | Use `npx expo run:android` (with npx prefix) |
-| Kotlin error: `Bundle? vs Bundle` | RNTP 4.1.2 incompatible with Kotlin 2.x | Run `npm install` — `patch-package` auto-applies the fix |
+| Kotlin error: `Bundle? vs Bundle` | RNTP 4.1.2 incompatible with Kotlin 2.x | Run `npm install` — `patch-package` auto-applies the fix. Version pinned to `4.1.2`; remove patch when upgrading |
 | `Reanimated requires new architecture` | Leftover dependency | Ensure `react-native-reanimated` is not in `package.json` |
 | iOS pods out of sync | Native dependency changed | `cd ios && pod install && cd ..` then rebuild |
 
@@ -142,6 +142,6 @@ npm test -- --coverage
 |---------|-------|-----|
 | `Port 8081 already in use` | Another Metro instance running | `lsof -ti:8081 \| xargs kill -9` then retry |
 | `registerPlaybackService` error | Called inside component or useEffect | Must be at module level in `index.js` |
-| Audio doesn't play | TrackPlayer not initialized | Check `_layout.tsx` — `setupPlayer()` runs on mount |
+| Audio doesn't play | TrackPlayer not initialized | Check `_layout.tsx` — `setupTrackPlayer()` runs on mount |
 
 ---
