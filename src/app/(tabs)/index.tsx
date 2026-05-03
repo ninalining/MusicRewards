@@ -50,19 +50,21 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
+      <Text style={[styles.header, { color: colors.textPrimary }]}>Music Challenges</Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        Complete listening challenges to earn points and unlock achievements
+      </Text>
       <ErrorBoundary>
-        <Text style={[styles.header, { color: colors.textPrimary }]}>Music Challenges</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Complete listening challenges to earn points and unlock achievements
-        </Text>
-        <ChallengeList
-          challenges={challenges}
-          loading={loading}
-          onPlay={handlePlayChallenge}
-          onPressChallenge={handlePressChallenge}
-          currentTrackId={currentTrack?.id}
-          isPlaying={isPlaying}
-        />
+        <View style={styles.listWrapper}>
+          <ChallengeList
+            challenges={challenges}
+            loading={loading}
+            onPlay={handlePlayChallenge}
+            onPressChallenge={handlePressChallenge}
+            currentTrackId={currentTrackId}
+            isPlaying={isPlaying}
+          />
+        </View>
       </ErrorBoundary>
     </View>
   );
@@ -84,5 +86,8 @@ const styles = StyleSheet.create({
     fontSize: THEME.fonts.sizes.sm,
     textAlign: 'center',
     marginBottom: THEME.spacing.lg,
+  },
+  listWrapper: {
+    flex: 1,
   },
 });
