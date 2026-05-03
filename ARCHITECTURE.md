@@ -24,7 +24,7 @@
 ```
 index.js                      # Entry point — registers playback service at module level
 src/
-├── app/                      # Expo Router file-based screens
+├── app/
 │   ├── _layout.tsx           # Root Stack — TrackPlayer init + cleanup
 │   ├── (tabs)/
 │   │   ├── _layout.tsx       # Tab bar (Challenges + Profile)
@@ -33,35 +33,47 @@ src/
 │   └── (modals)/
 │       ├── _layout.tsx       # Modal stack
 │       ├── player.tsx        # Full-screen audio player + live points
-│       └── challenge-detail.tsx  # Challenge info + progress + play CTA
+│       └── challenge-detail.tsx
 ├── components/
-│   ├── ui/                   # Shared design system primitives
-│   │   ├── GlassCard.tsx     # BlurView + LinearGradient card
-│   │   ├── GlassButton.tsx   # Primary/secondary button with loading state
-│   │   ├── PointsCounter.tsx # Animated points display (scale pulse + count)
-│   │   └── ErrorBoundary.tsx # React error boundary for screens
-│   └── challenge/            # Domain-specific components
-│       ├── ChallengeCard.tsx  # Single challenge row (React.memo)
-│       ├── ChallengeList.tsx  # FlatList wrapper with loading/empty states
-│       ├── PlayerControls.tsx # Play/pause + ±10s skip buttons
-│       └── PlayerProgress.tsx # Touchable progress bar with Animated fill
-├── hooks/                    # Business logic hooks
-│   ├── useMusicPlayer.ts     # TrackPlayer integration — play, pause, seek, resume
-│   ├── usePointsCounter.ts   # Proportional live points accumulation
-│   └── useChallenges.ts      # Orchestrates musicStore + userStore
-├── stores/                   # Zustand state management
-│   ├── musicStore.ts         # Challenges, current track, playback state
-│   └── userStore.ts          # Points, completed challenges
-├── services/                 # Native service integrations
-│   ├── audioService.ts       # TrackPlayer setup (singleton pattern)
-│   └── playbackService.ts    # Background event handlers (RemoteDuck, etc.)
+│   ├── ui/
+│   │   ├── GlassCard.tsx
+│   │   ├── GlassButton.tsx
+│   │   ├── IconButton.tsx
+│   │   ├── PointsCounter.tsx
+│   │   ├── ThemeProvider.tsx
+│   │   ├── Toast.tsx
+│   │   └── ErrorBoundary.tsx
+│   └── challenge/
+│       ├── ChallengeCard.tsx
+│       ├── ChallengeList.tsx
+│       ├── ChallengeStatusCard.tsx
+│       ├── PlayerControls.tsx
+│       ├── PlayerProgress.tsx
+│       └── TrackInfoCard.tsx
+├── hooks/
+│   ├── useMusicPlayer.ts
+│   ├── usePointsCounter.ts
+│   ├── useChallenges.ts
+│   ├── useTheme.ts
+│   └── useToast.ts
+├── stores/
+│   ├── musicStore.ts
+│   ├── userStore.ts
+│   ├── themeStore.ts
+│   └── toastStore.ts
+├── services/
+│   ├── audioService.ts
+│   └── playbackService.ts
 ├── constants/
-│   └── theme.ts              # THEME tokens + SAMPLE_CHALLENGES + audio constants
+│   └── theme.ts
 ├── types/
-│   └── index.ts              # Shared TypeScript interfaces
+│   ├── index.ts
+│   ├── theme.ts
+│   └── toast.ts
 └── utils/
-    ├── accessibility.ts      # WCAG hit-slop calculator
-    └── challenge.ts          # formatDuration, getDifficultyColor
+    ├── accessibility.ts
+    ├── challenge.ts
+    └── haptics.ts
 ```
 
 ---
@@ -86,11 +98,15 @@ src/
 **Stores** are the single source of truth:
 - `musicStore` — challenge data, current track, playback state
 - `userStore` — total points, completed challenge IDs
+- `themeStore` — user theme preference (dark/light/system)
+- `toastStore` — toast message queue
 
 **Hooks** coordinate between stores and native APIs:
 - `useMusicPlayer` — wraps TrackPlayer, syncs playback state to musicStore, fires completion at 90%
 - `usePointsCounter` — awards points proportionally on each progress tick (delta-based)
 - `useChallenges` — reads from both stores, provides refresh and complete actions
+- `useTheme` — combines themeStore preference + system colorScheme, returns colors and resolvedTheme
+- `useToast` — exposes `showToast(message, type)` for in-app notifications
 
 ---
 
@@ -110,6 +126,7 @@ type MusicStore = MusicState & { loadChallenges: () => void; ... };
 Both stores persist to AsyncStorage via `zustand/middleware`:
 - `musicStore` uses `partialize` — only persists `challenges`, not playback state
 - `userStore` persists everything (`totalPoints`, `completedChallenges`)
+- `themeStore` persists theme preference
 
 ### Selector Rules
 
@@ -168,9 +185,12 @@ All UI components use the `THEME` token system — no magic numbers or hardcoded
 
 | Component | Purpose | Key Features |
 |-----------|---------|-------------|
-| `GlassCard` | Container with blur effect | `BlurView` + `LinearGradient` + configurable props |
+| `GlassCard` | Container with blur effect | `BlurView` (iOS) / solid fallback (Android) + `LinearGradient` |
 | `GlassButton` | Interactive button | Primary/secondary variants, loading spinner, disabled state |
+| `IconButton` | Reusable icon button | Unified 56pt hit area, haptic feedback |
 | `PointsCounter` | Animated points display | `Animated.timing` scale pulse + `requestAnimationFrame` count |
+| `ThemeProvider` | Theme context provider | Wraps app, provides colors + resolvedTheme |
+| `Toast` | In-app notification | Top slide-in animation, auto-dismiss, success/error/info types |
 | `ErrorBoundary` | Crash recovery | Class component wrapping screens |
 
 ### Performance Patterns
@@ -206,7 +226,7 @@ Tabs (permanent)                Modals (overlay)
 
 ## Testing Strategy
 
-14 test suites, 111 tests. All files in `__tests__/` mirroring `src/` structure.
+23 test suites, 151 tests. All files in `__tests__/` mirroring `src/` structure.
 
 | Layer | Approach |
 |-------|----------|
@@ -231,6 +251,13 @@ External dependencies (TrackPlayer, AsyncStorage, navigation) are always mocked.
 
 5. **Module-level playback service** — `registerPlaybackService()` is called in `index.js` at module evaluation time, never inside `useEffect`, ensuring background event handlers are registered before any audio session.
 
+6. **Android compatibility** — Removed `react-native-reanimated` and `react-native-worklets` (conflict with RNTP on old architecture). RNTP 4.1.2 pinned with `patch-package` fixing Kotlin nullability (`originalItem!!`). `postinstall` auto-applies the patch.
+
+7. **Theme system** — Dark/Light/System modes via `themeStore`. `useTheme` combines user preference with system `colorScheme`. All colors flow through `ColorPalette` type including platform-specific tokens (`androidGlassFallback`).
+
+8. **Toast notifications** — Custom Toast system replacing system alerts. `toastStore` manages a message queue; `Toast` component animates top slide-in/out with auto-dismiss.
+
+9. **Haptic feedback** — `expo-haptics` on key interactions (button press, challenge completion) via `utils/haptics.ts`.
+
 ---
 
-*Last updated: May 2, 2026*
