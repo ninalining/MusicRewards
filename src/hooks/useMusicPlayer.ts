@@ -20,8 +20,6 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
   const [error, setError] = useState<string | null>(null);
   const [playbackRate, setPlaybackRateState] = useState(1);
 
-  // useRef (not useState) so updates don't trigger re-renders and are
-  // immune to stale closures between render cycles.
   const completedInSession = useRef<Set<string>>(new Set());
 
   const currentTrack = useMusicStore(selectCurrentTrack);
@@ -31,11 +29,9 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
   const setCurrentPosition = useMusicStore((state) => state.setCurrentPosition);
   const updateProgress = useMusicStore((state) => state.updateProgress);
   const markChallengeComplete = useMusicStore((state) => state.markChallengeComplete);
-  // Points handled separately by usePointsCounter (proportional accumulation).
   const completeChallenge = useUserStore((state) => state.completeChallenge);
 
   useEffect(() => {
-    // usePlaybackState() returns PlaybackState | { state: undefined } depending on RNTP version.
     const state =
       typeof playbackState === 'object' && playbackState !== null && 'state' in playbackState
         ? playbackState.state
@@ -47,7 +43,6 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     }
   }, [playbackState, setIsPlaying]);
 
-  // Extract primitives to avoid re-firing when store creates new object refs.
   const trackId = currentTrack?.id;
 
   useEffect(() => {
@@ -81,7 +76,6 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     completeChallenge,
   ]);
 
-  // Handle track player events
   useTrackPlayerEvents([Event.PlaybackError], (event) => {
     if (event.type === Event.PlaybackError) {
       setError(`Playback error: ${event.message}`);
@@ -94,7 +88,6 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
 
   const play = useCallback(
     async (track: MusicChallenge) => {
-      // Clear session guard so completion can fire once in this new session.
       completedInSession.current.delete(track.id);
       try {
         setLoading(true);
@@ -110,6 +103,13 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
           artist: track.artist,
           duration: track.duration,
         });
+
+        // Restore saved progress so the user resumes where they left off.
+        // Skip if < 1% (rounding noise) or ≥ 90% (completed — replay from start).
+        const savedProgress = track.progress ?? 0;
+        if (savedProgress > 1 && savedProgress < 90 && track.duration > 0) {
+          await TrackPlayer.seekTo((savedProgress / 100) * track.duration);
+        }
 
         await TrackPlayer.play();
         setCurrentTrack(track);
@@ -158,7 +158,6 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     }
   }, []);
 
-  // isPlaying kept in sync by the playbackState effect above.
   return {
     isPlaying,
     currentTrack,

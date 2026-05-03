@@ -1,8 +1,9 @@
 import React, { useCallback, useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { GlassCard } from '../ui/GlassCard';
-import { GlassButton } from '../ui/GlassButton';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../hooks/useTheme';
 import { THEME } from '../../constants/theme';
+import { IconButton } from '../ui/IconButton';
 
 interface PlayerControlsProps {
   isPlaying: boolean;
@@ -37,7 +38,7 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
     onResume,
     onPlaybackRateChange,
   }) => {
-    // Ref avoids recreating seek callbacks every 250ms as position updates.
+    const { colors } = useTheme();
     const positionRef = useRef(currentPosition);
     positionRef.current = currentPosition;
 
@@ -64,45 +65,81 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
     }, [onPlaybackRateChange, playbackRate]);
 
     return (
-      <GlassCard style={styles.controlsCard}>
+      <View style={styles.container}>
         <View style={styles.controlsRow}>
-          <GlassButton
-            title="-10s"
-            onPress={handleSeekBack}
-            variant="secondary"
-            style={styles.controlButton}
-            accessibilityHint="Double tap to seek back 10 seconds"
-          />
-
-          <GlassButton
-            title={loading ? '...' : isPlaying ? 'Pause' : 'Play'}
-            onPress={handlePlayPause}
-            variant="primary"
-            style={styles.mainControlButton}
-            loading={loading}
-            accessibilityHint={isPlaying ? 'Double tap to pause' : 'Double tap to play'}
-          />
-
-          <GlassButton
-            title="+10s"
-            onPress={handleSeekForward}
-            variant="secondary"
-            style={styles.controlButton}
-            accessibilityHint="Double tap to seek forward 10 seconds"
-          />
-        </View>
-
-        <View style={styles.speedRow}>
-          <GlassButton
-            title={`${playbackRate}x`}
+          <IconButton
             onPress={handleSpeedChange}
-            disabled={loading || !hasTrack}
-            variant="secondary"
-            style={styles.speedButton}
+            accessibilityLabel={`${playbackRate}x`}
             accessibilityHint={`Current speed ${playbackRate}x. Double tap to change playback speed`}
-          />
+            disabled={loading || !hasTrack}
+          >
+            <Text style={[styles.speedText, { color: colors.textSecondary }]}>{playbackRate}x</Text>
+          </IconButton>
+
+          <IconButton
+            onPress={handleSeekBack}
+            accessibilityLabel="Seek back 10 seconds"
+            accessibilityHint="Double tap to seek back 10 seconds"
+          >
+            <View style={[styles.seekButtonInner, styles.seekBackMirror]}>
+              <Ionicons
+                name="refresh-outline"
+                size={44}
+                color={colors.textPrimary}
+                accessible={false}
+              />
+              <Text
+                style={[styles.seekLabel, styles.seekLabelMirror, { color: colors.textPrimary }]}
+              >
+                10
+              </Text>
+            </View>
+          </IconButton>
+
+          <TouchableOpacity
+            onPress={handlePlayPause}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
+            accessibilityHint={isPlaying ? 'Double tap to pause' : 'Double tap to play'}
+            style={[styles.playButton, { backgroundColor: colors.textPrimary }]}
+          >
+            {loading ? (
+              <ActivityIndicator
+                color={colors.surfacePrimary}
+                size="small"
+                accessibilityRole="progressbar"
+                accessibilityLabel="Loading playback"
+              />
+            ) : (
+              <Ionicons
+                name={isPlaying ? 'pause' : 'play'}
+                size={32}
+                color={colors.surfacePrimary}
+                accessible={false}
+              />
+            )}
+          </TouchableOpacity>
+
+          <IconButton
+            onPress={handleSeekForward}
+            accessibilityLabel="Seek forward 10 seconds"
+            accessibilityHint="Double tap to seek forward 10 seconds"
+          >
+            <View style={styles.seekButtonInner}>
+              <Ionicons
+                name="refresh-outline"
+                size={44}
+                color={colors.textPrimary}
+                accessible={false}
+              />
+              <Text style={[styles.seekLabel, { color: colors.textPrimary }]}>10</Text>
+            </View>
+          </IconButton>
+
+          <View style={styles.controlsSpacer} accessible={false} />
         </View>
-      </GlassCard>
+      </View>
     );
   },
 );
@@ -110,26 +147,52 @@ export const PlayerControls = React.memo<PlayerControlsProps>(
 PlayerControls.displayName = 'PlayerControls';
 
 const styles = StyleSheet.create({
-  controlsCard: {},
+  container: {
+    paddingHorizontal: THEME.spacing.lg,
+  },
   controlsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
   },
-  controlButton: {
-    flex: 0.25,
-    marginHorizontal: THEME.spacing.xs,
-  },
-  mainControlButton: {
-    flex: 0.4,
-    marginHorizontal: THEME.spacing.xs,
-  },
-  speedRow: {
-    flexDirection: 'row',
+  playButton: {
+    width: THEME.sizing.playButton,
+    height: THEME.sizing.playButton,
+    borderRadius: THEME.sizing.playButton / 2,
     justifyContent: 'center',
-    marginTop: THEME.spacing.sm,
+    alignItems: 'center',
+    // Shadow values are intentional visual constants — no spacing token maps to depth/blur.
+    shadowColor: THEME.shadow.color,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  speedButton: {
-    minWidth: THEME.spacing.xxl * 2,
+  controlsSpacer: {
+    width: THEME.sizing.iconButton,
+    height: THEME.sizing.iconButton,
+  },
+  seekButtonInner: {
+    width: THEME.sizing.iconButton,
+    height: THEME.sizing.iconButton,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  seekBackMirror: {
+    transform: [{ scaleX: -1 }],
+  },
+  seekLabel: {
+    position: 'absolute',
+    fontSize: THEME.fonts.sizes.xs,
+    fontWeight: '700',
+    top: THEME.sizing.seekLabelOffset,
+  },
+  seekLabelMirror: {
+    transform: [{ scaleX: -1 }],
+  },
+  speedText: {
+    fontSize: THEME.fonts.sizes.lg,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });

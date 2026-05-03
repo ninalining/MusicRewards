@@ -1,15 +1,21 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import { GlassCard } from '../ui/GlassCard';
 import { THEME } from '../../constants/theme';
 import { useTheme } from '../../hooks/useTheme';
 import { calculateHitSlop } from '../../utils/accessibility';
 
-// Defined at module scope to avoid recreation on each render.
 const formatTime = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
+};
+
+const formatRemaining = (remaining: number): string => {
+  if (!Number.isFinite(remaining)) return '-0:00';
+  const r = Math.max(0, remaining);
+  const minutes = Math.floor(r / 60);
+  const secs = Math.floor(r % 60);
+  return `-${minutes}:${secs.toString().padStart(2, '0')}`;
 };
 
 interface PlayerProgressProps {
@@ -49,17 +55,13 @@ export const PlayerProgress = React.memo<PlayerProgressProps>(
     }, []);
 
     return (
-      <GlassCard style={styles.progressCard}>
-        <Text style={[styles.progressLabel, { color: colors.textPrimary }]}>
-          Listening Progress
-        </Text>
-
+      <View style={styles.container}>
         <TouchableOpacity
           style={styles.progressTrack}
           accessibilityRole="button"
           accessibilityLabel="Seek playback position"
           accessibilityHint="Double tap to seek to this position"
-          hitSlop={calculateHitSlop(THEME.spacing.sm)}
+          hitSlop={calculateHitSlop(THEME.spacing.md)}
           onLayout={handleLayout}
           onPress={handleProgressBarPress}
         >
@@ -78,6 +80,21 @@ export const PlayerProgress = React.memo<PlayerProgressProps>(
               ]}
             />
           </View>
+
+          <Animated.View
+            style={[
+              styles.thumb,
+              { backgroundColor: colors.brandAccent },
+              {
+                left: progressAnim.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ['0%', '100%'],
+                  extrapolate: 'clamp',
+                }),
+              },
+            ]}
+            accessible={false}
+          />
         </TouchableOpacity>
 
         <View style={styles.timeContainer}>
@@ -85,51 +102,55 @@ export const PlayerProgress = React.memo<PlayerProgressProps>(
             {formatTime(currentPosition)}
           </Text>
           <Text style={[styles.timeText, { color: colors.textSecondary }]}>
-            {formatTime(duration)}
+            {formatRemaining(duration - currentPosition)}
           </Text>
         </View>
-
-        <Text style={[styles.progressPercentage, { color: colors.brandAccent }]}>
-          {Math.round(liveProgress)}% Complete
-        </Text>
-      </GlassCard>
+      </View>
     );
   },
 );
 
 PlayerProgress.displayName = 'PlayerProgress';
 
+const THUMB_SIZE = THEME.sizing.progressThumb;
+
 const styles = StyleSheet.create({
-  progressCard: {},
-  progressLabel: {
-    fontSize: THEME.fonts.sizes.md,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: THEME.spacing.md,
+  container: {
+    paddingHorizontal: THEME.spacing.lg,
   },
   progressTrack: {
-    marginBottom: THEME.spacing.md,
+    marginBottom: THEME.spacing.sm,
+    paddingVertical: THUMB_SIZE / 2,
+    justifyContent: 'center',
   },
   progressBackground: {
-    height: THEME.spacing.sm,
-    borderRadius: THEME.spacing.xs,
+    height: THEME.sizing.progressTrackHeight,
+    borderRadius: THEME.sizing.progressTrackRadius,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: THEME.spacing.xs,
+    borderRadius: THEME.sizing.progressTrackRadius,
+  },
+  thumb: {
+    position: 'absolute',
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
+    borderRadius: THUMB_SIZE / 2,
+    marginTop: -THUMB_SIZE / 2 + 2,
+    marginLeft: -THUMB_SIZE / 2,
+    // Shadow values are intentional visual constants — no spacing token maps to depth/blur.
+    shadowColor: THEME.shadow.color,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    elevation: 3,
   },
   timeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: THEME.spacing.sm,
   },
   timeText: {
     fontSize: THEME.fonts.sizes.sm,
-  },
-  progressPercentage: {
-    fontSize: THEME.fonts.sizes.lg,
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
 });

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Text, StyleSheet, ScrollView } from 'react-native';
+import { Text, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { GlassButton } from '../../components/ui/GlassButton';
@@ -38,11 +38,9 @@ export default function PlayerModal(): React.ReactElement {
     resumeCounting,
   } = usePointsCounter();
 
-  // Depend on primitives (id, points) to avoid restarting when store creates new object refs.
   const currentTrackId = currentTrack?.id;
   const currentTrackPoints = currentTrack?.points;
 
-  // Distinguishes start vs resume for the same track.
   const activeSessionRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -74,14 +72,11 @@ export default function PlayerModal(): React.ReactElement {
     resumeCounting,
   ]);
 
-  // Refs capture latest callbacks so unmount cleanup avoids stale closures.
   const pauseRef = useRef(pause);
   pauseRef.current = pause;
   const stopCountingRef = useRef(stopCounting);
   stopCountingRef.current = stopCounting;
 
-  // Pause playback and stop counting on unmount so music doesn't play
-  // without earning points after the modal is dismissed.
   useEffect(() => {
     return () => {
       pauseRef.current();
@@ -127,15 +122,9 @@ export default function PlayerModal(): React.ReactElement {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.surfacePrimary }]}>
       <ErrorBoundary>
-        <ScrollView
-          style={styles.content}
-          contentContainerStyle={styles.contentContainer}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Track Info */}
+        <View style={styles.content}>
           <TrackInfoCard track={currentTrack} currentPoints={currentPoints} />
 
-          {/* Error Banner */}
           {error && (
             <GlassCard style={styles.errorBanner}>
               <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
@@ -149,31 +138,38 @@ export default function PlayerModal(): React.ReactElement {
             </GlassCard>
           )}
 
-          {/* Progress Section */}
-          <PlayerProgress
-            liveProgress={liveProgress}
-            currentPosition={currentPosition}
-            duration={duration}
-            onSeek={handleSeek}
-          />
+          <View style={styles.bottomSection}>
+            {/* Progress — use max(liveProgress, positionBased) so seek while paused is instant */}
+            <PlayerProgress
+              liveProgress={
+                duration > 0
+                  ? Math.max(liveProgress, (currentPosition / duration) * 100)
+                  : liveProgress
+              }
+              currentPosition={currentPosition}
+              duration={duration}
+              onSeek={handleSeek}
+            />
 
-          {/* Controls */}
-          <PlayerControls
-            isPlaying={isPlaying}
-            loading={loading}
-            hasTrack={true}
-            currentPosition={currentPosition}
-            duration={duration}
-            playbackRate={playbackRate}
-            onSeekTo={seekTo}
-            onPause={pause}
-            onResume={resume}
-            onPlaybackRateChange={setPlaybackRate}
-          />
+            <PlayerControls
+              isPlaying={isPlaying}
+              loading={loading}
+              hasTrack={true}
+              currentPosition={currentPosition}
+              duration={duration}
+              playbackRate={playbackRate}
+              onSeekTo={seekTo}
+              onPause={pause}
+              onResume={resume}
+              onPlaybackRateChange={setPlaybackRate}
+            />
 
-          {/* Challenge Status */}
-          <ChallengeStatusCard completed={currentTrack.completed} progressPercent={liveProgress} />
-        </ScrollView>
+            <ChallengeStatusCard
+              completed={currentTrack.completed}
+              progressPercent={liveProgress}
+            />
+          </View>
+        </View>
       </ErrorBoundary>
     </SafeAreaView>
   );
@@ -185,10 +181,12 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: THEME.spacing.lg,
+    paddingTop: THEME.spacing.md,
+    justifyContent: 'space-between',
   },
-  contentContainer: {
+  bottomSection: {
     gap: THEME.spacing.md,
+    paddingHorizontal: 0,
     paddingBottom: THEME.spacing.lg,
   },
   noTrackCard: {
