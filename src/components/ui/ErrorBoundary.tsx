@@ -1,6 +1,5 @@
-// ErrorBoundary — catches render-time errors and displays recovery UI.
 // Class component required: React's componentDidCatch API is class-only.
-// This is the sole class component in the project (documented exception).
+// Sole class component in the project (documented exception).
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GlassCard } from './GlassCard';
@@ -22,8 +21,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   static contextType = ThemeContext;
 
   private get themeColors() {
-    // Type assertion required: class component `contextType` typing doesn't
-    // narrow `this.context` automatically — this is a React/TS limitation.
+    // contextType typing doesn't narrow this.context — React/TS limitation.
     const ctx = this.context as React.ContextType<typeof ThemeContext>;
     return ctx?.colors;
   }
@@ -45,8 +43,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo): void {
-    // Always log for diagnostics; console.error is stripped in production builds.
-    console.error('ErrorBoundary caught:', error, info.componentStack);
+    if (__DEV__) {
+      console.error('ErrorBoundary caught:', error, info.componentStack);
+    }
   }
 
   private handleRetry = (): void => {

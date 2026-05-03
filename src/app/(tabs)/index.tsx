@@ -1,4 +1,3 @@
-// Home screen - Challenge list (Expo Router)
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
@@ -28,7 +27,7 @@ export default function HomeScreen() {
   const currentTrackId = currentTrack?.id;
 
   const handlePressChallenge = useCallback((challenge: MusicChallenge): void => {
-    router.push(`/(modals)/challenge-detail?challengeId=${challenge.id}`);
+    router.push(`/(modals)/challenge-detail?challengeId=${encodeURIComponent(challenge.id)}`);
   }, []);
 
   const handlePlayChallenge = useCallback(
@@ -41,7 +40,8 @@ export default function HomeScreen() {
         }
         router.push('/(modals)/player');
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to start playback';
+        const message =
+          __DEV__ && error instanceof Error ? error.message : 'Failed to start playback';
         showToast(message, 'error');
       }
     },

@@ -1,4 +1,3 @@
-// Challenge detail modal — full challenge information with Play/Resume CTA
 import React, { useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -31,7 +30,8 @@ export default function ChallengeDetailModal(): React.ReactElement {
       }
       router.replace('/(modals)/player');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to start playback';
+      const message =
+        __DEV__ && error instanceof Error ? error.message : 'Failed to start playback';
       showToast(message, 'error');
     }
   }, [challenge, isCurrentTrack, play, resume, loading, showToast]);
@@ -225,9 +225,7 @@ const styles = StyleSheet.create({
     fontSize: THEME.fonts.sizes.lg,
     fontWeight: '600',
   },
-  pointsValue: {
-    // color applied dynamically
-  },
+  pointsValue: {},
   progressContainer: {
     marginBottom: THEME.spacing.md,
   },
