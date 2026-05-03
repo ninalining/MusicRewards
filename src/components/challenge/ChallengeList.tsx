@@ -97,7 +97,10 @@ export const ChallengeList = React.memo<ChallengeListProps>(
               color={colors.textSecondary}
               accessible={false}
             />
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]} accessibilityRole="text">
+            <Text
+              style={[styles.emptyText, { color: colors.textSecondary }]}
+              accessibilityRole="text"
+            >
               No challenges available yet
             </Text>
           </GlassCard>
